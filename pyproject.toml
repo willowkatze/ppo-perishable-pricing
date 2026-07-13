@@ -1,0 +1,14 @@
+[project]
+name = "ppo-perishable-pricing"
+version = "0.1.0"
+description = "PPO-based dynamic markdown optimization for perishable products."
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = []
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+
+[tool.setuptools]
+packages = ["src"]
