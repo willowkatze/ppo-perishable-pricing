@@ -1,0 +1,2 @@
+phase_gate_status,test_split_used,ppo_training_run,dqn_training_run,final_model_locked,reason,next_allowed_action
+DYNAMIC_VALUE_REQUIRES_FULL_PAIRED_PLANNING_EVALUATION,False,False,False,False,"State-level planning diagnostic indicates possible value, but full paired episode-level planning evaluation is required before RL retraining.",Do not use test. Run full paired planning validation only if diagnostic suggests possible dynamic value.

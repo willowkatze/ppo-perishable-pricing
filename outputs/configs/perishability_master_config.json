@@ -1,0 +1,69 @@
+{
+  "action_levels": [
+    0.0,
+    0.05,
+    0.1,
+    0.2,
+    0.3,
+    0.4
+  ],
+  "shelf_life_assumptions": {
+    "short_shelf_life": {
+      "low": 2,
+      "base": 3,
+      "high": 5
+    },
+    "medium_shelf_life": {
+      "low": 5,
+      "base": 7,
+      "high": 10
+    },
+    "long_shelf_life": {
+      "low": 10,
+      "base": 14,
+      "high": 21
+    },
+    "source_type": "scenario_assumption"
+  },
+  "inventory_initialization_rules": "initial_inventory = expected_daily_demand * coverage_days, bounded by observed inventory/demand quantiles.",
+  "age_profiles": [
+    "fresh_heavy",
+    "uniform",
+    "near_expiry_heavy"
+  ],
+  "FEFO_rule": "Issue sales from I_1, then I_2, ... I_L before aging.",
+  "cost_scenarios": {
+    "procurement_cost_ratio": {
+      "low_margin": 0.7,
+      "medium_margin": 0.55,
+      "high_margin": 0.4
+    },
+    "disposal_cost_ratio": {
+      "zero": 0.0,
+      "moderate": 0.05,
+      "high": 0.1
+    }
+  },
+  "waste_definitions": "physical_waste_units are units expiring from I_1 after sales in each period.",
+  "financial_reward_equation": "sales_revenue_t - disposal_cost_t - initial_procurement_cost_if_first_period + terminal_salvage_if_terminal",
+  "sustainability_reward_equation": "normalized_financial_reward - lambda_waste * normalized_expired_units",
+  "terminal_inventory_rule": "default no salvage value; sensitivity may apply terminal value.",
+  "demand_model_references": {
+    "observed_response_model": "outputs\\models\\discount_response_observed.joblib",
+    "recovered_response_model": "outputs\\models\\discount_response_recovered.joblib",
+    "response_curves": "outputs\\tables\\discount_response_curves.csv"
+  },
+  "random_seed": 42,
+  "source_type_classification": "outputs\\tables\\perishability_variable_source_registry.csv",
+  "core_scenario_count": 18,
+  "limitations": [
+    "Shelf life is scenario-assumed, not observed.",
+    "Inventory age composition is simulated.",
+    "Realized waste is simulated.",
+    "Procurement and disposal costs are normalized assumptions.",
+    "Recovered demand is model-estimated.",
+    "Markdown response is observational and model-implied.",
+    "Results are suitable for controlled decision experiments.",
+    "Results are not direct estimates of retailer profit or waste."
+  ]
+}

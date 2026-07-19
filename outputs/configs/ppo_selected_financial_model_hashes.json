@@ -1,0 +1,56 @@
+{
+  "selected_observed_financial_ppo:model_path": {
+    "path": "outputs\\models\\ppo_operational\\observed_financial\\seed_42\\checkpoints\\pilot_observed_financial_22288_steps.zip",
+    "exists": true,
+    "sha256": "cfdc31e0862a1d49a6b68eec0ee5db7c9f86056836536fea28ab0151a68659c4",
+    "bytes": 571746
+  },
+  "selected_observed_financial_ppo:vecnormalize_path": {
+    "path": "outputs\\models\\ppo_operational\\observed_financial\\seed_42\\vecnormalize.pkl",
+    "exists": true,
+    "sha256": "8965810d6390994b3748e4c15f7c39c06522cec4e8fc888c47c569006a93b46e",
+    "bytes": 3563
+  },
+  "selected_observed_financial_ppo:training_config_path": {
+    "path": "outputs\\models\\ppo_operational\\observed_financial\\seed_42\\training_config.json",
+    "exists": true,
+    "sha256": "a39373004206010f2d92b5d90822400abbb24969879bfc890ffe1b60b5d66089",
+    "bytes": 1018
+  },
+  "selected_recovered_financial_ppo:model_path": {
+    "path": "outputs\\models\\ppo_operational\\recovered_financial\\seed_42\\checkpoints\\pilot_recovered_financial_22288_steps.zip",
+    "exists": true,
+    "sha256": "4da787b4407b794c2bb60c89bc730f04b7c493a01983ce6f3859851c6125ce2b",
+    "bytes": 571746
+  },
+  "selected_recovered_financial_ppo:vecnormalize_path": {
+    "path": "outputs\\models\\ppo_operational\\recovered_financial\\seed_42\\vecnormalize.pkl",
+    "exists": true,
+    "sha256": "8bf4e9c8fff2b8cde426101f5c6dc71f09d13bffbf3bc42b7ffa45d9b97505af",
+    "bytes": 3563
+  },
+  "selected_recovered_financial_ppo:training_config_path": {
+    "path": "outputs\\models\\ppo_operational\\recovered_financial\\seed_42\\training_config.json",
+    "exists": true,
+    "sha256": "02dfd238002fd86a4d65f7beb109bb1c67cccf5661780628b241b27b8f5f8e96",
+    "bytes": 1021
+  },
+  "environment_config": {
+    "path": "outputs\\configs\\pricing_env_operational_config.json",
+    "exists": true,
+    "sha256": "7a05a111a299425edb5c7a41456a70a68c05c94b8a38d5182871fa014c60691e",
+    "bytes": 4165
+  },
+  "selected_checkpoint_metadata": {
+    "path": "outputs\\tables\\ppo_checkpoint_model_selection.csv",
+    "exists": true,
+    "sha256": "68b58699ea142e1458517d39fa623e419fc47001fe337c0d6c8aa2f437ed23a7",
+    "bytes": 681
+  },
+  "validation_manifest": {
+    "path": "outputs\\configs\\ppo_validation_episode_manifest.csv",
+    "exists": true,
+    "sha256": "fafce61e190b065de2545cb9e77c4efe9e10267b601c13183fb23d3c7b4b6241",
+    "bytes": 1430
+  }
+}

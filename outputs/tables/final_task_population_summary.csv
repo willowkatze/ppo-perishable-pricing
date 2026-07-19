@@ -1,0 +1,3 @@
+population_id,calibration_mode,episode_count,policy_count_available,always_zero_profit,always_zero_waste_rate,always_zero_sell_through_rate
+REPRESENTATIVE_OPERATIONAL_POPULATION,recovered_calibration,48,9,0.2914437270985834,0.15100597419182524,0.8489940258081748
+HIGH_RISK_B,recovered_calibration,42,9,0.29420316458608586,0.14837793848944192,0.8516220615105581

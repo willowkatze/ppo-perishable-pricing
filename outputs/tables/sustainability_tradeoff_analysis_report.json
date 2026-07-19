@@ -1,0 +1,25 @@
+{
+  "status": "SUSTAINABILITY_TRADEOFF_ANALYSIS_COMPLETE",
+  "scenarios_evaluated": 6,
+  "policies_evaluated": 9,
+  "best_financial_policy": "always_0pct",
+  "lowest_waste_policy": "always_5pct",
+  "maximum_waste_reduction": 0.270259172551249,
+  "associated_normalized_profit_sacrifice": 0.06460003342650558,
+  "most_efficient_waste_reduction_policy": "always_5pct",
+  "calibration_transmission_classification": "MATERIAL_SUSTAINABILITY_CALIBRATION_CHANGE",
+  "no_test_split_used": true,
+  "ppo_training_performed": false,
+  "interpretation": "Empirical trade-off analysis over a finite evaluated policy set; not a complete mathematical Pareto frontier. Waste and shelf life are simulated, costs are normalized assumptions, PPO policies were trained for financial reward, no sustainability PPO was trained, and results support controlled decision analysis rather than direct retailer deployment.",
+  "files_created": [
+    "outputs/tables/sustainability_selected_tradeoff_scenarios.csv",
+    "outputs/tables/sustainability_tradeoff_episode_level.csv",
+    "outputs/tables/sustainability_tradeoff_vs_always_zero.csv",
+    "outputs/tables/sustainability_nondominated_policy_set.csv",
+    "outputs/tables/sustainability_waste_constrained_policy_selection.csv",
+    "outputs/tables/sustainability_waste_reduction_efficiency.csv",
+    "outputs/tables/sustainability_scenario_tradeoff_classification.csv",
+    "outputs/tables/sustainability_calibration_transmission.csv",
+    "outputs/tables/sustainability_managerial_policy_summary.csv"
+  ]
+}

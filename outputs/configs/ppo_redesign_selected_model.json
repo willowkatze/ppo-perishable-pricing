@@ -1,0 +1,90 @@
+{
+  "created_for": "controlled PPO redesign reporting correction",
+  "validation_split_only": true,
+  "test_split_used": false,
+  "no_retraining_performed": true,
+  "metric_classification": "LIMITED_ORACLE_VALUE_GAP",
+  "corrected_metric_name": "diagnostic_oracle_value_gap",
+  "selected_model": {
+    "policy_id": "BALANCED__checkpoint_20000",
+    "variant": "BALANCED",
+    "artifact_type": "checkpoint",
+    "checkpoint_timestep": 20000,
+    "model_path": "outputs\\models\\ppo_training_redesign\\balanced\\seed_123\\checkpoints\\redesign_balanced_20000_steps.zip",
+    "vecnormalize_path": "outputs\\models\\ppo_training_redesign\\balanced\\seed_123\\vecnormalize.pkl",
+    "training_metadata_path": "outputs\\models\\ppo_training_redesign\\balanced\\seed_123\\training_metadata.json",
+    "classification": "STATE_DEPENDENT_POLICY"
+  },
+  "duplicate_resolution": [
+    {
+      "policy_id": "recovered_financial__checkpoint_22288",
+      "variant": "ORIGINAL_RECOVERED_22288",
+      "artifact_type": "checkpoint",
+      "checkpoint_timestep": 22288,
+      "artifact_path": "outputs\\models\\ppo_operational\\recovered_financial\\seed_42\\checkpoints\\pilot_recovered_financial_22288_steps.zip",
+      "exists": true,
+      "bytes": 571746,
+      "sha256": "4da787b4407b794c2bb60c89bc730f04b7c493a01983ce6f3859851c6125ce2b",
+      "selected_best_policy": false,
+      "canonical_reference": false,
+      "resolution": "renamed final_model records; canonical selection fixed to BALANCED__checkpoint_20000",
+      "duplicate_hash_with_canonical": false
+    },
+    {
+      "policy_id": "BALANCED__checkpoint_20000",
+      "variant": "BALANCED",
+      "artifact_type": "checkpoint",
+      "checkpoint_timestep": 20000,
+      "artifact_path": "outputs\\models\\ppo_training_redesign\\balanced\\seed_123\\checkpoints\\redesign_balanced_20000_steps.zip",
+      "exists": true,
+      "bytes": 571695,
+      "sha256": "5ec6cd8cc16aad4c3ef4440dcf70d0d4eb3be4ea392495a078f5315b6019460a",
+      "selected_best_policy": true,
+      "canonical_reference": true,
+      "resolution": "renamed final_model records; canonical selection fixed to BALANCED__checkpoint_20000",
+      "duplicate_hash_with_canonical": false
+    },
+    {
+      "policy_id": "BALANCED__final_model_20000",
+      "variant": "BALANCED",
+      "artifact_type": "final_model",
+      "checkpoint_timestep": 20000,
+      "artifact_path": "outputs\\models\\ppo_training_redesign\\balanced\\seed_123\\final_model.zip",
+      "exists": true,
+      "bytes": 571696,
+      "sha256": "aeaecf76f9e02a7cafc6d407046b9c58e99a15fff1715cbff232e4caf3a1505d",
+      "selected_best_policy": false,
+      "canonical_reference": false,
+      "resolution": "renamed final_model records; canonical selection fixed to BALANCED__checkpoint_20000",
+      "duplicate_hash_with_canonical": false
+    },
+    {
+      "policy_id": "BALANCED_STABLE__checkpoint_20000",
+      "variant": "BALANCED_STABLE",
+      "artifact_type": "checkpoint",
+      "checkpoint_timestep": 20000,
+      "artifact_path": "outputs\\models\\ppo_training_redesign\\balanced_stable\\seed_123\\checkpoints\\redesign_balanced_stable_20000_steps.zip",
+      "exists": true,
+      "bytes": 571695,
+      "sha256": "7ad57d28b434c3db01b194abb0037289b22b0172f65db770c3b747088e924f00",
+      "selected_best_policy": false,
+      "canonical_reference": false,
+      "resolution": "renamed final_model records; canonical selection fixed to BALANCED__checkpoint_20000",
+      "duplicate_hash_with_canonical": false
+    },
+    {
+      "policy_id": "BALANCED_STABLE__final_model_20000",
+      "variant": "BALANCED_STABLE",
+      "artifact_type": "final_model",
+      "checkpoint_timestep": 20000,
+      "artifact_path": "outputs\\models\\ppo_training_redesign\\balanced_stable\\seed_123\\final_model.zip",
+      "exists": true,
+      "bytes": 571696,
+      "sha256": "2d0d5755ac007cc127a4f9a673a4e0bdde35920bc7fdeb6e5653d1ac6fa60630",
+      "selected_best_policy": false,
+      "canonical_reference": false,
+      "resolution": "renamed final_model records; canonical selection fixed to BALANCED__checkpoint_20000",
+      "duplicate_hash_with_canonical": false
+    }
+  ]
+}

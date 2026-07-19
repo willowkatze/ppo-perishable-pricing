@@ -1,0 +1,103 @@
+{
+  "observation_definition": [
+    "normalized_total_inventory",
+    "inventory_coverage",
+    "remaining_life_bucket_1",
+    "remaining_life_bucket_2",
+    "remaining_life_bucket_3",
+    "remaining_life_bucket_4",
+    "remaining_life_bucket_5",
+    "remaining_life_bucket_6",
+    "remaining_life_bucket_7",
+    "remaining_life_bucket_8",
+    "remaining_life_bucket_9",
+    "remaining_life_bucket_10",
+    "remaining_life_bucket_11",
+    "remaining_life_bucket_12",
+    "remaining_life_bucket_13",
+    "remaining_life_bucket_14",
+    "remaining_life_bucket_15",
+    "remaining_life_bucket_16",
+    "remaining_life_bucket_17",
+    "remaining_life_bucket_18",
+    "remaining_life_bucket_19",
+    "remaining_life_bucket_20",
+    "remaining_life_bucket_21",
+    "fraction_expiring_today",
+    "fraction_expiring_within_two_days",
+    "weighted_mean_remaining_life",
+    "predicted_zero_markdown_demand",
+    "lag_1_simulated_target",
+    "lag_7_simulated_target",
+    "rolling_7_simulated_mean",
+    "rolling_14_simulated_mean",
+    "simulated_demand_volatility",
+    "day_of_week",
+    "weekend_indicator",
+    "normalized_time_within_episode",
+    "normalized_temperature",
+    "previous_markdown_action",
+    "previous_stockout_indicator",
+    "calibration_mode_indicator",
+    "store_encoding",
+    "product_encoding"
+  ],
+  "action_mapping": {
+    "0": 0.0,
+    "1": 0.05,
+    "2": 0.1,
+    "3": 0.2,
+    "4": 0.3,
+    "5": 0.4
+  },
+  "calibration_modes": {
+    "observed_calibration": "observed target demand history and observed response model",
+    "recovered_calibration": "recovered target demand history and recovered response model",
+    "cross_pair_modes": [
+      "observed_demand_recovered_response",
+      "recovered_demand_observed_response"
+    ]
+  },
+  "reward_equations": {
+    "financial": "raw_financial_step / initial_inventory",
+    "sustainability": "normalized_financial_step - lambda_waste * expired_units / initial_inventory"
+  },
+  "scenario_references": {
+    "master_config": "outputs\\configs\\perishability_master_config.json",
+    "core_grid": "outputs\\tables\\perishability_core_scenario_grid.csv"
+  },
+  "model_artifact_references": {
+    "observed": "outputs\\models\\discount_response_observed.joblib",
+    "recovered": "outputs\\models\\discount_response_recovered.joblib"
+  },
+  "promotion_context_rule": {
+    "default": "derived_from_action",
+    "derived_from_action": "activity_flag = 1 if markdown_rate > 0 else 0",
+    "historical_exogenous": "uses current historical date's activity_flag for sensitivity only"
+  },
+  "dynamic_lag_update_rules": "pre-episode history initializes lags; post-reset lags use simulated outcomes only",
+  "prediction_clipping": {
+    "observed": "clip expm1(log prediction) to [0, 17.100000]",
+    "recovered": "clip expm1(log prediction) to [0, 17.318894]"
+  },
+  "residual_noise_calibration": "bootstrap train residuals not implemented by default; deterministic mode is default",
+  "episode_construction": "one store-product series, one split-contained start date, horizon=shelf_life_days",
+  "split_boundary_rules": "episodes never cross train/validation/test boundaries",
+  "seeding": "Gymnasium reset(seed=...) controls episode sampling and deterministic trajectories",
+  "terminal_rules": "terminate when inventory resolves or horizon reached; terminal salvage currently zero",
+  "accounting_equations": "profit = revenue - procurement_cost - disposal_cost + terminal_salvage",
+  "non_degeneracy_thresholds": {
+    "dominant_action_warning_share": 0.9
+  },
+  "limitations": [
+    "Shelf life and inventory age are simulated.",
+    "Realized waste is simulated.",
+    "Costs are normalized assumptions.",
+    "Recovered demand is model-estimated.",
+    "Markdown response is observational and model-implied.",
+    "Promotion-context mapping is an environment assumption.",
+    "Actual latent demand during stockouts remains unobserved.",
+    "This environment supports controlled decision experiments.",
+    "It does not estimate direct retailer profit or deployment performance."
+  ]
+}

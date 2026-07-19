@@ -1,0 +1,28 @@
+{
+  "protocol_status": "LOCKED_BEFORE_TEST",
+  "primary_endpoint": "paired normalized-profit gain = ensemble normalized profit - always_0pct normalized profit",
+  "primary_success_condition": "mean paired normalized-profit gain > 0",
+  "secondary_evidence": [
+    "paired median gain",
+    "episode-level bootstrap 95% CI",
+    "win/tie/loss shares",
+    "waste-rate difference",
+    "sell-through difference",
+    "average markdown difference",
+    "worst-decile gain",
+    "maximum episode loss",
+    "action entropy",
+    "zero-action share",
+    "positive-action share",
+    "accounting validity",
+    "numerical validity"
+  ],
+  "strict_secondary_robustness_diagnostic": "win_share >= 0.60",
+  "bootstrap": {
+    "sampling_unit": "test_episode_id",
+    "resamples": 10000,
+    "seed": 20260719
+  },
+  "test_split_accessed_before_protocol_lock": false,
+  "locked_utc": "2026-07-19T11:44:07.898779+00:00"
+}

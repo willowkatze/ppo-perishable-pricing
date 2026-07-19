@@ -1,0 +1,532 @@
+product_id,design,shelf_life_class,assignment_basis
+102,homogeneous_medium,medium_shelf_life,All products assigned the same neutral class.
+102,balanced_heterogeneous,short_shelf_life,"Reproducible hash-balanced experimental assignment, not factual classification."
+104,homogeneous_medium,medium_shelf_life,All products assigned the same neutral class.
+104,balanced_heterogeneous,long_shelf_life,"Reproducible hash-balanced experimental assignment, not factual classification."
+108,homogeneous_medium,medium_shelf_life,All products assigned the same neutral class.
+108,balanced_heterogeneous,short_shelf_life,"Reproducible hash-balanced experimental assignment, not factual classification."
+109,homogeneous_medium,medium_shelf_life,All products assigned the same neutral class.
+109,balanced_heterogeneous,medium_shelf_life,"Reproducible hash-balanced experimental assignment, not factual classification."
+11,homogeneous_medium,medium_shelf_life,All products assigned the same neutral class.
+11,balanced_heterogeneous,long_shelf_life,"Reproducible hash-balanced experimental assignment, not factual classification."
+116,homogeneous_medium,medium_shelf_life,All products assigned the same neutral class.
+116,balanced_heterogeneous,long_shelf_life,"Reproducible hash-balanced experimental assignment, not factual classification."
+117,homogeneous_medium,medium_shelf_life,All products assigned the same neutral class.
+117,balanced_heterogeneous,short_shelf_life,"Reproducible hash-balanced experimental assignment, not factual classification."
+118,homogeneous_medium,medium_shelf_life,All products assigned the same neutral class.
+118,balanced_heterogeneous,medium_shelf_life,"Reproducible hash-balanced experimental assignment, not factual classification."
+119,homogeneous_medium,medium_shelf_life,All products assigned the same neutral class.
+119,balanced_heterogeneous,long_shelf_life,"Reproducible hash-balanced experimental assignment, not factual classification."
+12,homogeneous_medium,medium_shelf_life,All products assigned the same neutral class.
+12,balanced_heterogeneous,short_shelf_life,"Reproducible hash-balanced experimental assignment, not factual classification."
+122,homogeneous_medium,medium_shelf_life,All products assigned the same neutral class.
+122,balanced_heterogeneous,long_shelf_life,"Reproducible hash-balanced experimental assignment, not factual classification."
+123,homogeneous_medium,medium_shelf_life,All products assigned the same neutral class.
+123,balanced_heterogeneous,short_shelf_life,"Reproducible hash-balanced experimental assignment, not factual classification."
+127,homogeneous_medium,medium_shelf_life,All products assigned the same neutral class.
+127,balanced_heterogeneous,medium_shelf_life,"Reproducible hash-balanced experimental assignment, not factual classification."
+129,homogeneous_medium,medium_shelf_life,All products assigned the same neutral class.
+129,balanced_heterogeneous,short_shelf_life,"Reproducible hash-balanced experimental assignment, not factual classification."
+132,homogeneous_medium,medium_shelf_life,All products assigned the same neutral class.
+132,balanced_heterogeneous,short_shelf_life,"Reproducible hash-balanced experimental assignment, not factual classification."
+133,homogeneous_medium,medium_shelf_life,All products assigned the same neutral class.
+133,balanced_heterogeneous,medium_shelf_life,"Reproducible hash-balanced experimental assignment, not factual classification."
+134,homogeneous_medium,medium_shelf_life,All products assigned the same neutral class.
+134,balanced_heterogeneous,long_shelf_life,"Reproducible hash-balanced experimental assignment, not factual classification."
+135,homogeneous_medium,medium_shelf_life,All products assigned the same neutral class.
+135,balanced_heterogeneous,short_shelf_life,"Reproducible hash-balanced experimental assignment, not factual classification."
+136,homogeneous_medium,medium_shelf_life,All products assigned the same neutral class.
+136,balanced_heterogeneous,medium_shelf_life,"Reproducible hash-balanced experimental assignment, not factual classification."
+138,homogeneous_medium,medium_shelf_life,All products assigned the same neutral class.
+138,balanced_heterogeneous,short_shelf_life,"Reproducible hash-balanced experimental assignment, not factual classification."
+140,homogeneous_medium,medium_shelf_life,All products assigned the same neutral class.
+140,balanced_heterogeneous,long_shelf_life,"Reproducible hash-balanced experimental assignment, not factual classification."
+145,homogeneous_medium,medium_shelf_life,All products assigned the same neutral class.
+145,balanced_heterogeneous,medium_shelf_life,"Reproducible hash-balanced experimental assignment, not factual classification."
+146,homogeneous_medium,medium_shelf_life,All products assigned the same neutral class.
+146,balanced_heterogeneous,long_shelf_life,"Reproducible hash-balanced experimental assignment, not factual classification."
+166,homogeneous_medium,medium_shelf_life,All products assigned the same neutral class.
+166,balanced_heterogeneous,medium_shelf_life,"Reproducible hash-balanced experimental assignment, not factual classification."
+176,homogeneous_medium,medium_shelf_life,All products assigned the same neutral class.
+176,balanced_heterogeneous,long_shelf_life,"Reproducible hash-balanced experimental assignment, not factual classification."
+18,homogeneous_medium,medium_shelf_life,All products assigned the same neutral class.
+18,balanced_heterogeneous,short_shelf_life,"Reproducible hash-balanced experimental assignment, not factual classification."
+19,homogeneous_medium,medium_shelf_life,All products assigned the same neutral class.
+19,balanced_heterogeneous,medium_shelf_life,"Reproducible hash-balanced experimental assignment, not factual classification."
+190,homogeneous_medium,medium_shelf_life,All products assigned the same neutral class.
+190,balanced_heterogeneous,medium_shelf_life,"Reproducible hash-balanced experimental assignment, not factual classification."
+193,homogeneous_medium,medium_shelf_life,All products assigned the same neutral class.
+193,balanced_heterogeneous,medium_shelf_life,"Reproducible hash-balanced experimental assignment, not factual classification."
+2,homogeneous_medium,medium_shelf_life,All products assigned the same neutral class.
+2,balanced_heterogeneous,long_shelf_life,"Reproducible hash-balanced experimental assignment, not factual classification."
+207,homogeneous_medium,medium_shelf_life,All products assigned the same neutral class.
+207,balanced_heterogeneous,short_shelf_life,"Reproducible hash-balanced experimental assignment, not factual classification."
+21,homogeneous_medium,medium_shelf_life,All products assigned the same neutral class.
+21,balanced_heterogeneous,short_shelf_life,"Reproducible hash-balanced experimental assignment, not factual classification."
+212,homogeneous_medium,medium_shelf_life,All products assigned the same neutral class.
+212,balanced_heterogeneous,long_shelf_life,"Reproducible hash-balanced experimental assignment, not factual classification."
+213,homogeneous_medium,medium_shelf_life,All products assigned the same neutral class.
+213,balanced_heterogeneous,short_shelf_life,"Reproducible hash-balanced experimental assignment, not factual classification."
+214,homogeneous_medium,medium_shelf_life,All products assigned the same neutral class.
+214,balanced_heterogeneous,medium_shelf_life,"Reproducible hash-balanced experimental assignment, not factual classification."
+215,homogeneous_medium,medium_shelf_life,All products assigned the same neutral class.
+215,balanced_heterogeneous,long_shelf_life,"Reproducible hash-balanced experimental assignment, not factual classification."
+216,homogeneous_medium,medium_shelf_life,All products assigned the same neutral class.
+216,balanced_heterogeneous,short_shelf_life,"Reproducible hash-balanced experimental assignment, not factual classification."
+217,homogeneous_medium,medium_shelf_life,All products assigned the same neutral class.
+217,balanced_heterogeneous,medium_shelf_life,"Reproducible hash-balanced experimental assignment, not factual classification."
+219,homogeneous_medium,medium_shelf_life,All products assigned the same neutral class.
+219,balanced_heterogeneous,short_shelf_life,"Reproducible hash-balanced experimental assignment, not factual classification."
+220,homogeneous_medium,medium_shelf_life,All products assigned the same neutral class.
+220,balanced_heterogeneous,medium_shelf_life,"Reproducible hash-balanced experimental assignment, not factual classification."
+222,homogeneous_medium,medium_shelf_life,All products assigned the same neutral class.
+222,balanced_heterogeneous,short_shelf_life,"Reproducible hash-balanced experimental assignment, not factual classification."
+223,homogeneous_medium,medium_shelf_life,All products assigned the same neutral class.
+223,balanced_heterogeneous,medium_shelf_life,"Reproducible hash-balanced experimental assignment, not factual classification."
+224,homogeneous_medium,medium_shelf_life,All products assigned the same neutral class.
+224,balanced_heterogeneous,long_shelf_life,"Reproducible hash-balanced experimental assignment, not factual classification."
+240,homogeneous_medium,medium_shelf_life,All products assigned the same neutral class.
+240,balanced_heterogeneous,short_shelf_life,"Reproducible hash-balanced experimental assignment, not factual classification."
+241,homogeneous_medium,medium_shelf_life,All products assigned the same neutral class.
+241,balanced_heterogeneous,medium_shelf_life,"Reproducible hash-balanced experimental assignment, not factual classification."
+250,homogeneous_medium,medium_shelf_life,All products assigned the same neutral class.
+250,balanced_heterogeneous,medium_shelf_life,"Reproducible hash-balanced experimental assignment, not factual classification."
+253,homogeneous_medium,medium_shelf_life,All products assigned the same neutral class.
+253,balanced_heterogeneous,medium_shelf_life,"Reproducible hash-balanced experimental assignment, not factual classification."
+257,homogeneous_medium,medium_shelf_life,All products assigned the same neutral class.
+257,balanced_heterogeneous,long_shelf_life,"Reproducible hash-balanced experimental assignment, not factual classification."
+259,homogeneous_medium,medium_shelf_life,All products assigned the same neutral class.
+259,balanced_heterogeneous,medium_shelf_life,"Reproducible hash-balanced experimental assignment, not factual classification."
+26,homogeneous_medium,medium_shelf_life,All products assigned the same neutral class.
+26,balanced_heterogeneous,long_shelf_life,"Reproducible hash-balanced experimental assignment, not factual classification."
+267,homogeneous_medium,medium_shelf_life,All products assigned the same neutral class.
+267,balanced_heterogeneous,short_shelf_life,"Reproducible hash-balanced experimental assignment, not factual classification."
+280,homogeneous_medium,medium_shelf_life,All products assigned the same neutral class.
+280,balanced_heterogeneous,medium_shelf_life,"Reproducible hash-balanced experimental assignment, not factual classification."
+290,homogeneous_medium,medium_shelf_life,All products assigned the same neutral class.
+290,balanced_heterogeneous,long_shelf_life,"Reproducible hash-balanced experimental assignment, not factual classification."
+291,homogeneous_medium,medium_shelf_life,All products assigned the same neutral class.
+291,balanced_heterogeneous,short_shelf_life,"Reproducible hash-balanced experimental assignment, not factual classification."
+292,homogeneous_medium,medium_shelf_life,All products assigned the same neutral class.
+292,balanced_heterogeneous,medium_shelf_life,"Reproducible hash-balanced experimental assignment, not factual classification."
+295,homogeneous_medium,medium_shelf_life,All products assigned the same neutral class.
+295,balanced_heterogeneous,medium_shelf_life,"Reproducible hash-balanced experimental assignment, not factual classification."
+296,homogeneous_medium,medium_shelf_life,All products assigned the same neutral class.
+296,balanced_heterogeneous,long_shelf_life,"Reproducible hash-balanced experimental assignment, not factual classification."
+300,homogeneous_medium,medium_shelf_life,All products assigned the same neutral class.
+300,balanced_heterogeneous,short_shelf_life,"Reproducible hash-balanced experimental assignment, not factual classification."
+310,homogeneous_medium,medium_shelf_life,All products assigned the same neutral class.
+310,balanced_heterogeneous,medium_shelf_life,"Reproducible hash-balanced experimental assignment, not factual classification."
+316,homogeneous_medium,medium_shelf_life,All products assigned the same neutral class.
+316,balanced_heterogeneous,medium_shelf_life,"Reproducible hash-balanced experimental assignment, not factual classification."
+317,homogeneous_medium,medium_shelf_life,All products assigned the same neutral class.
+317,balanced_heterogeneous,long_shelf_life,"Reproducible hash-balanced experimental assignment, not factual classification."
+320,homogeneous_medium,medium_shelf_life,All products assigned the same neutral class.
+320,balanced_heterogeneous,long_shelf_life,"Reproducible hash-balanced experimental assignment, not factual classification."
+321,homogeneous_medium,medium_shelf_life,All products assigned the same neutral class.
+321,balanced_heterogeneous,short_shelf_life,"Reproducible hash-balanced experimental assignment, not factual classification."
+335,homogeneous_medium,medium_shelf_life,All products assigned the same neutral class.
+335,balanced_heterogeneous,long_shelf_life,"Reproducible hash-balanced experimental assignment, not factual classification."
+345,homogeneous_medium,medium_shelf_life,All products assigned the same neutral class.
+345,balanced_heterogeneous,short_shelf_life,"Reproducible hash-balanced experimental assignment, not factual classification."
+351,homogeneous_medium,medium_shelf_life,All products assigned the same neutral class.
+351,balanced_heterogeneous,short_shelf_life,"Reproducible hash-balanced experimental assignment, not factual classification."
+363,homogeneous_medium,medium_shelf_life,All products assigned the same neutral class.
+363,balanced_heterogeneous,short_shelf_life,"Reproducible hash-balanced experimental assignment, not factual classification."
+37,homogeneous_medium,medium_shelf_life,All products assigned the same neutral class.
+37,balanced_heterogeneous,medium_shelf_life,"Reproducible hash-balanced experimental assignment, not factual classification."
+370,homogeneous_medium,medium_shelf_life,All products assigned the same neutral class.
+370,balanced_heterogeneous,medium_shelf_life,"Reproducible hash-balanced experimental assignment, not factual classification."
+381,homogeneous_medium,medium_shelf_life,All products assigned the same neutral class.
+381,balanced_heterogeneous,short_shelf_life,"Reproducible hash-balanced experimental assignment, not factual classification."
+386,homogeneous_medium,medium_shelf_life,All products assigned the same neutral class.
+386,balanced_heterogeneous,long_shelf_life,"Reproducible hash-balanced experimental assignment, not factual classification."
+387,homogeneous_medium,medium_shelf_life,All products assigned the same neutral class.
+387,balanced_heterogeneous,short_shelf_life,"Reproducible hash-balanced experimental assignment, not factual classification."
+396,homogeneous_medium,medium_shelf_life,All products assigned the same neutral class.
+396,balanced_heterogeneous,short_shelf_life,"Reproducible hash-balanced experimental assignment, not factual classification."
+4,homogeneous_medium,medium_shelf_life,All products assigned the same neutral class.
+4,balanced_heterogeneous,medium_shelf_life,"Reproducible hash-balanced experimental assignment, not factual classification."
+403,homogeneous_medium,medium_shelf_life,All products assigned the same neutral class.
+403,balanced_heterogeneous,medium_shelf_life,"Reproducible hash-balanced experimental assignment, not factual classification."
+404,homogeneous_medium,medium_shelf_life,All products assigned the same neutral class.
+404,balanced_heterogeneous,long_shelf_life,"Reproducible hash-balanced experimental assignment, not factual classification."
+41,homogeneous_medium,medium_shelf_life,All products assigned the same neutral class.
+41,balanced_heterogeneous,long_shelf_life,"Reproducible hash-balanced experimental assignment, not factual classification."
+411,homogeneous_medium,medium_shelf_life,All products assigned the same neutral class.
+411,balanced_heterogeneous,short_shelf_life,"Reproducible hash-balanced experimental assignment, not factual classification."
+416,homogeneous_medium,medium_shelf_life,All products assigned the same neutral class.
+416,balanced_heterogeneous,long_shelf_life,"Reproducible hash-balanced experimental assignment, not factual classification."
+422,homogeneous_medium,medium_shelf_life,All products assigned the same neutral class.
+422,balanced_heterogeneous,long_shelf_life,"Reproducible hash-balanced experimental assignment, not factual classification."
+425,homogeneous_medium,medium_shelf_life,All products assigned the same neutral class.
+425,balanced_heterogeneous,long_shelf_life,"Reproducible hash-balanced experimental assignment, not factual classification."
+426,homogeneous_medium,medium_shelf_life,All products assigned the same neutral class.
+426,balanced_heterogeneous,short_shelf_life,"Reproducible hash-balanced experimental assignment, not factual classification."
+429,homogeneous_medium,medium_shelf_life,All products assigned the same neutral class.
+429,balanced_heterogeneous,short_shelf_life,"Reproducible hash-balanced experimental assignment, not factual classification."
+441,homogeneous_medium,medium_shelf_life,All products assigned the same neutral class.
+441,balanced_heterogeneous,short_shelf_life,"Reproducible hash-balanced experimental assignment, not factual classification."
+452,homogeneous_medium,medium_shelf_life,All products assigned the same neutral class.
+452,balanced_heterogeneous,long_shelf_life,"Reproducible hash-balanced experimental assignment, not factual classification."
+467,homogeneous_medium,medium_shelf_life,All products assigned the same neutral class.
+467,balanced_heterogeneous,long_shelf_life,"Reproducible hash-balanced experimental assignment, not factual classification."
+470,homogeneous_medium,medium_shelf_life,All products assigned the same neutral class.
+470,balanced_heterogeneous,long_shelf_life,"Reproducible hash-balanced experimental assignment, not factual classification."
+473,homogeneous_medium,medium_shelf_life,All products assigned the same neutral class.
+473,balanced_heterogeneous,long_shelf_life,"Reproducible hash-balanced experimental assignment, not factual classification."
+476,homogeneous_medium,medium_shelf_life,All products assigned the same neutral class.
+476,balanced_heterogeneous,long_shelf_life,"Reproducible hash-balanced experimental assignment, not factual classification."
+481,homogeneous_medium,medium_shelf_life,All products assigned the same neutral class.
+481,balanced_heterogeneous,medium_shelf_life,"Reproducible hash-balanced experimental assignment, not factual classification."
+486,homogeneous_medium,medium_shelf_life,All products assigned the same neutral class.
+486,balanced_heterogeneous,short_shelf_life,"Reproducible hash-balanced experimental assignment, not factual classification."
+489,homogeneous_medium,medium_shelf_life,All products assigned the same neutral class.
+489,balanced_heterogeneous,short_shelf_life,"Reproducible hash-balanced experimental assignment, not factual classification."
+496,homogeneous_medium,medium_shelf_life,All products assigned the same neutral class.
+496,balanced_heterogeneous,medium_shelf_life,"Reproducible hash-balanced experimental assignment, not factual classification."
+50,homogeneous_medium,medium_shelf_life,All products assigned the same neutral class.
+50,balanced_heterogeneous,long_shelf_life,"Reproducible hash-balanced experimental assignment, not factual classification."
+500,homogeneous_medium,medium_shelf_life,All products assigned the same neutral class.
+500,balanced_heterogeneous,long_shelf_life,"Reproducible hash-balanced experimental assignment, not factual classification."
+507,homogeneous_medium,medium_shelf_life,All products assigned the same neutral class.
+507,balanced_heterogeneous,short_shelf_life,"Reproducible hash-balanced experimental assignment, not factual classification."
+515,homogeneous_medium,medium_shelf_life,All products assigned the same neutral class.
+515,balanced_heterogeneous,long_shelf_life,"Reproducible hash-balanced experimental assignment, not factual classification."
+521,homogeneous_medium,medium_shelf_life,All products assigned the same neutral class.
+521,balanced_heterogeneous,long_shelf_life,"Reproducible hash-balanced experimental assignment, not factual classification."
+522,homogeneous_medium,medium_shelf_life,All products assigned the same neutral class.
+522,balanced_heterogeneous,short_shelf_life,"Reproducible hash-balanced experimental assignment, not factual classification."
+531,homogeneous_medium,medium_shelf_life,All products assigned the same neutral class.
+531,balanced_heterogeneous,short_shelf_life,"Reproducible hash-balanced experimental assignment, not factual classification."
+535,homogeneous_medium,medium_shelf_life,All products assigned the same neutral class.
+535,balanced_heterogeneous,medium_shelf_life,"Reproducible hash-balanced experimental assignment, not factual classification."
+54,homogeneous_medium,medium_shelf_life,All products assigned the same neutral class.
+54,balanced_heterogeneous,short_shelf_life,"Reproducible hash-balanced experimental assignment, not factual classification."
+540,homogeneous_medium,medium_shelf_life,All products assigned the same neutral class.
+540,balanced_heterogeneous,short_shelf_life,"Reproducible hash-balanced experimental assignment, not factual classification."
+547,homogeneous_medium,medium_shelf_life,All products assigned the same neutral class.
+547,balanced_heterogeneous,medium_shelf_life,"Reproducible hash-balanced experimental assignment, not factual classification."
+548,homogeneous_medium,medium_shelf_life,All products assigned the same neutral class.
+548,balanced_heterogeneous,long_shelf_life,"Reproducible hash-balanced experimental assignment, not factual classification."
+549,homogeneous_medium,medium_shelf_life,All products assigned the same neutral class.
+549,balanced_heterogeneous,short_shelf_life,"Reproducible hash-balanced experimental assignment, not factual classification."
+554,homogeneous_medium,medium_shelf_life,All products assigned the same neutral class.
+554,balanced_heterogeneous,long_shelf_life,"Reproducible hash-balanced experimental assignment, not factual classification."
+569,homogeneous_medium,medium_shelf_life,All products assigned the same neutral class.
+569,balanced_heterogeneous,long_shelf_life,"Reproducible hash-balanced experimental assignment, not factual classification."
+578,homogeneous_medium,medium_shelf_life,All products assigned the same neutral class.
+578,balanced_heterogeneous,long_shelf_life,"Reproducible hash-balanced experimental assignment, not factual classification."
+580,homogeneous_medium,medium_shelf_life,All products assigned the same neutral class.
+580,balanced_heterogeneous,medium_shelf_life,"Reproducible hash-balanced experimental assignment, not factual classification."
+591,homogeneous_medium,medium_shelf_life,All products assigned the same neutral class.
+591,balanced_heterogeneous,short_shelf_life,"Reproducible hash-balanced experimental assignment, not factual classification."
+596,homogeneous_medium,medium_shelf_life,All products assigned the same neutral class.
+596,balanced_heterogeneous,long_shelf_life,"Reproducible hash-balanced experimental assignment, not factual classification."
+6,homogeneous_medium,medium_shelf_life,All products assigned the same neutral class.
+6,balanced_heterogeneous,short_shelf_life,"Reproducible hash-balanced experimental assignment, not factual classification."
+600,homogeneous_medium,medium_shelf_life,All products assigned the same neutral class.
+600,balanced_heterogeneous,short_shelf_life,"Reproducible hash-balanced experimental assignment, not factual classification."
+608,homogeneous_medium,medium_shelf_life,All products assigned the same neutral class.
+608,balanced_heterogeneous,long_shelf_life,"Reproducible hash-balanced experimental assignment, not factual classification."
+620,homogeneous_medium,medium_shelf_life,All products assigned the same neutral class.
+620,balanced_heterogeneous,long_shelf_life,"Reproducible hash-balanced experimental assignment, not factual classification."
+627,homogeneous_medium,medium_shelf_life,All products assigned the same neutral class.
+627,balanced_heterogeneous,short_shelf_life,"Reproducible hash-balanced experimental assignment, not factual classification."
+631,homogeneous_medium,medium_shelf_life,All products assigned the same neutral class.
+631,balanced_heterogeneous,medium_shelf_life,"Reproducible hash-balanced experimental assignment, not factual classification."
+633,homogeneous_medium,medium_shelf_life,All products assigned the same neutral class.
+633,balanced_heterogeneous,short_shelf_life,"Reproducible hash-balanced experimental assignment, not factual classification."
+634,homogeneous_medium,medium_shelf_life,All products assigned the same neutral class.
+634,balanced_heterogeneous,medium_shelf_life,"Reproducible hash-balanced experimental assignment, not factual classification."
+635,homogeneous_medium,medium_shelf_life,All products assigned the same neutral class.
+635,balanced_heterogeneous,long_shelf_life,"Reproducible hash-balanced experimental assignment, not factual classification."
+638,homogeneous_medium,medium_shelf_life,All products assigned the same neutral class.
+638,balanced_heterogeneous,long_shelf_life,"Reproducible hash-balanced experimental assignment, not factual classification."
+644,homogeneous_medium,medium_shelf_life,All products assigned the same neutral class.
+644,balanced_heterogeneous,long_shelf_life,"Reproducible hash-balanced experimental assignment, not factual classification."
+645,homogeneous_medium,medium_shelf_life,All products assigned the same neutral class.
+645,balanced_heterogeneous,short_shelf_life,"Reproducible hash-balanced experimental assignment, not factual classification."
+649,homogeneous_medium,medium_shelf_life,All products assigned the same neutral class.
+649,balanced_heterogeneous,medium_shelf_life,"Reproducible hash-balanced experimental assignment, not factual classification."
+650,homogeneous_medium,medium_shelf_life,All products assigned the same neutral class.
+650,balanced_heterogeneous,long_shelf_life,"Reproducible hash-balanced experimental assignment, not factual classification."
+666,homogeneous_medium,medium_shelf_life,All products assigned the same neutral class.
+666,balanced_heterogeneous,short_shelf_life,"Reproducible hash-balanced experimental assignment, not factual classification."
+677,homogeneous_medium,medium_shelf_life,All products assigned the same neutral class.
+677,balanced_heterogeneous,long_shelf_life,"Reproducible hash-balanced experimental assignment, not factual classification."
+678,homogeneous_medium,medium_shelf_life,All products assigned the same neutral class.
+678,balanced_heterogeneous,short_shelf_life,"Reproducible hash-balanced experimental assignment, not factual classification."
+682,homogeneous_medium,medium_shelf_life,All products assigned the same neutral class.
+682,balanced_heterogeneous,medium_shelf_life,"Reproducible hash-balanced experimental assignment, not factual classification."
+683,homogeneous_medium,medium_shelf_life,All products assigned the same neutral class.
+683,balanced_heterogeneous,long_shelf_life,"Reproducible hash-balanced experimental assignment, not factual classification."
+686,homogeneous_medium,medium_shelf_life,All products assigned the same neutral class.
+686,balanced_heterogeneous,long_shelf_life,"Reproducible hash-balanced experimental assignment, not factual classification."
+688,homogeneous_medium,medium_shelf_life,All products assigned the same neutral class.
+688,balanced_heterogeneous,medium_shelf_life,"Reproducible hash-balanced experimental assignment, not factual classification."
+691,homogeneous_medium,medium_shelf_life,All products assigned the same neutral class.
+691,balanced_heterogeneous,medium_shelf_life,"Reproducible hash-balanced experimental assignment, not factual classification."
+7,homogeneous_medium,medium_shelf_life,All products assigned the same neutral class.
+7,balanced_heterogeneous,medium_shelf_life,"Reproducible hash-balanced experimental assignment, not factual classification."
+70,homogeneous_medium,medium_shelf_life,All products assigned the same neutral class.
+70,balanced_heterogeneous,medium_shelf_life,"Reproducible hash-balanced experimental assignment, not factual classification."
+71,homogeneous_medium,medium_shelf_life,All products assigned the same neutral class.
+71,balanced_heterogeneous,long_shelf_life,"Reproducible hash-balanced experimental assignment, not factual classification."
+715,homogeneous_medium,medium_shelf_life,All products assigned the same neutral class.
+715,balanced_heterogeneous,medium_shelf_life,"Reproducible hash-balanced experimental assignment, not factual classification."
+717,homogeneous_medium,medium_shelf_life,All products assigned the same neutral class.
+717,balanced_heterogeneous,short_shelf_life,"Reproducible hash-balanced experimental assignment, not factual classification."
+719,homogeneous_medium,medium_shelf_life,All products assigned the same neutral class.
+719,balanced_heterogeneous,long_shelf_life,"Reproducible hash-balanced experimental assignment, not factual classification."
+729,homogeneous_medium,medium_shelf_life,All products assigned the same neutral class.
+729,balanced_heterogeneous,short_shelf_life,"Reproducible hash-balanced experimental assignment, not factual classification."
+73,homogeneous_medium,medium_shelf_life,All products assigned the same neutral class.
+73,balanced_heterogeneous,medium_shelf_life,"Reproducible hash-balanced experimental assignment, not factual classification."
+740,homogeneous_medium,medium_shelf_life,All products assigned the same neutral class.
+740,balanced_heterogeneous,long_shelf_life,"Reproducible hash-balanced experimental assignment, not factual classification."
+749,homogeneous_medium,medium_shelf_life,All products assigned the same neutral class.
+749,balanced_heterogeneous,long_shelf_life,"Reproducible hash-balanced experimental assignment, not factual classification."
+756,homogeneous_medium,medium_shelf_life,All products assigned the same neutral class.
+756,balanced_heterogeneous,short_shelf_life,"Reproducible hash-balanced experimental assignment, not factual classification."
+757,homogeneous_medium,medium_shelf_life,All products assigned the same neutral class.
+757,balanced_heterogeneous,medium_shelf_life,"Reproducible hash-balanced experimental assignment, not factual classification."
+758,homogeneous_medium,medium_shelf_life,All products assigned the same neutral class.
+758,balanced_heterogeneous,long_shelf_life,"Reproducible hash-balanced experimental assignment, not factual classification."
+76,homogeneous_medium,medium_shelf_life,All products assigned the same neutral class.
+76,balanced_heterogeneous,medium_shelf_life,"Reproducible hash-balanced experimental assignment, not factual classification."
+763,homogeneous_medium,medium_shelf_life,All products assigned the same neutral class.
+763,balanced_heterogeneous,medium_shelf_life,"Reproducible hash-balanced experimental assignment, not factual classification."
+764,homogeneous_medium,medium_shelf_life,All products assigned the same neutral class.
+764,balanced_heterogeneous,long_shelf_life,"Reproducible hash-balanced experimental assignment, not factual classification."
+765,homogeneous_medium,medium_shelf_life,All products assigned the same neutral class.
+765,balanced_heterogeneous,short_shelf_life,"Reproducible hash-balanced experimental assignment, not factual classification."
+768,homogeneous_medium,medium_shelf_life,All products assigned the same neutral class.
+768,balanced_heterogeneous,short_shelf_life,"Reproducible hash-balanced experimental assignment, not factual classification."
+769,homogeneous_medium,medium_shelf_life,All products assigned the same neutral class.
+769,balanced_heterogeneous,medium_shelf_life,"Reproducible hash-balanced experimental assignment, not factual classification."
+772,homogeneous_medium,medium_shelf_life,All products assigned the same neutral class.
+772,balanced_heterogeneous,medium_shelf_life,"Reproducible hash-balanced experimental assignment, not factual classification."
+774,homogeneous_medium,medium_shelf_life,All products assigned the same neutral class.
+774,balanced_heterogeneous,short_shelf_life,"Reproducible hash-balanced experimental assignment, not factual classification."
+775,homogeneous_medium,medium_shelf_life,All products assigned the same neutral class.
+775,balanced_heterogeneous,medium_shelf_life,"Reproducible hash-balanced experimental assignment, not factual classification."
+779,homogeneous_medium,medium_shelf_life,All products assigned the same neutral class.
+779,balanced_heterogeneous,long_shelf_life,"Reproducible hash-balanced experimental assignment, not factual classification."
+783,homogeneous_medium,medium_shelf_life,All products assigned the same neutral class.
+783,balanced_heterogeneous,short_shelf_life,"Reproducible hash-balanced experimental assignment, not factual classification."
+79,homogeneous_medium,medium_shelf_life,All products assigned the same neutral class.
+79,balanced_heterogeneous,medium_shelf_life,"Reproducible hash-balanced experimental assignment, not factual classification."
+793,homogeneous_medium,medium_shelf_life,All products assigned the same neutral class.
+793,balanced_heterogeneous,medium_shelf_life,"Reproducible hash-balanced experimental assignment, not factual classification."
+80,homogeneous_medium,medium_shelf_life,All products assigned the same neutral class.
+80,balanced_heterogeneous,long_shelf_life,"Reproducible hash-balanced experimental assignment, not factual classification."
+802,homogeneous_medium,medium_shelf_life,All products assigned the same neutral class.
+802,balanced_heterogeneous,medium_shelf_life,"Reproducible hash-balanced experimental assignment, not factual classification."
+804,homogeneous_medium,medium_shelf_life,All products assigned the same neutral class.
+804,balanced_heterogeneous,short_shelf_life,"Reproducible hash-balanced experimental assignment, not factual classification."
+810,homogeneous_medium,medium_shelf_life,All products assigned the same neutral class.
+810,balanced_heterogeneous,short_shelf_life,"Reproducible hash-balanced experimental assignment, not factual classification."
+825,homogeneous_medium,medium_shelf_life,All products assigned the same neutral class.
+825,balanced_heterogeneous,short_shelf_life,"Reproducible hash-balanced experimental assignment, not factual classification."
+834,homogeneous_medium,medium_shelf_life,All products assigned the same neutral class.
+834,balanced_heterogeneous,short_shelf_life,"Reproducible hash-balanced experimental assignment, not factual classification."
+835,homogeneous_medium,medium_shelf_life,All products assigned the same neutral class.
+835,balanced_heterogeneous,medium_shelf_life,"Reproducible hash-balanced experimental assignment, not factual classification."
+836,homogeneous_medium,medium_shelf_life,All products assigned the same neutral class.
+836,balanced_heterogeneous,long_shelf_life,"Reproducible hash-balanced experimental assignment, not factual classification."
+843,homogeneous_medium,medium_shelf_life,All products assigned the same neutral class.
+843,balanced_heterogeneous,short_shelf_life,"Reproducible hash-balanced experimental assignment, not factual classification."
+853,homogeneous_medium,medium_shelf_life,All products assigned the same neutral class.
+853,balanced_heterogeneous,medium_shelf_life,"Reproducible hash-balanced experimental assignment, not factual classification."
+855,homogeneous_medium,medium_shelf_life,All products assigned the same neutral class.
+855,balanced_heterogeneous,short_shelf_life,"Reproducible hash-balanced experimental assignment, not factual classification."
+860,homogeneous_medium,medium_shelf_life,All products assigned the same neutral class.
+860,balanced_heterogeneous,long_shelf_life,"Reproducible hash-balanced experimental assignment, not factual classification."
+88,homogeneous_medium,medium_shelf_life,All products assigned the same neutral class.
+88,balanced_heterogeneous,medium_shelf_life,"Reproducible hash-balanced experimental assignment, not factual classification."
+90,homogeneous_medium,medium_shelf_life,All products assigned the same neutral class.
+90,balanced_heterogeneous,short_shelf_life,"Reproducible hash-balanced experimental assignment, not factual classification."
+92,homogeneous_medium,medium_shelf_life,All products assigned the same neutral class.
+92,balanced_heterogeneous,long_shelf_life,"Reproducible hash-balanced experimental assignment, not factual classification."
+93,homogeneous_medium,medium_shelf_life,All products assigned the same neutral class.
+93,balanced_heterogeneous,short_shelf_life,"Reproducible hash-balanced experimental assignment, not factual classification."
+99,homogeneous_medium,medium_shelf_life,All products assigned the same neutral class.
+99,balanced_heterogeneous,short_shelf_life,"Reproducible hash-balanced experimental assignment, not factual classification."
+102,demand_informed_stress_test,short_shelf_life,Stress-test assignment using demand/volatility ranks; not factual perishability.
+104,demand_informed_stress_test,short_shelf_life,Stress-test assignment using demand/volatility ranks; not factual perishability.
+108,demand_informed_stress_test,short_shelf_life,Stress-test assignment using demand/volatility ranks; not factual perishability.
+109,demand_informed_stress_test,medium_shelf_life,Stress-test assignment using demand/volatility ranks; not factual perishability.
+11,demand_informed_stress_test,medium_shelf_life,Stress-test assignment using demand/volatility ranks; not factual perishability.
+116,demand_informed_stress_test,medium_shelf_life,Stress-test assignment using demand/volatility ranks; not factual perishability.
+117,demand_informed_stress_test,short_shelf_life,Stress-test assignment using demand/volatility ranks; not factual perishability.
+118,demand_informed_stress_test,short_shelf_life,Stress-test assignment using demand/volatility ranks; not factual perishability.
+119,demand_informed_stress_test,short_shelf_life,Stress-test assignment using demand/volatility ranks; not factual perishability.
+12,demand_informed_stress_test,long_shelf_life,Stress-test assignment using demand/volatility ranks; not factual perishability.
+122,demand_informed_stress_test,short_shelf_life,Stress-test assignment using demand/volatility ranks; not factual perishability.
+123,demand_informed_stress_test,short_shelf_life,Stress-test assignment using demand/volatility ranks; not factual perishability.
+127,demand_informed_stress_test,short_shelf_life,Stress-test assignment using demand/volatility ranks; not factual perishability.
+129,demand_informed_stress_test,short_shelf_life,Stress-test assignment using demand/volatility ranks; not factual perishability.
+132,demand_informed_stress_test,short_shelf_life,Stress-test assignment using demand/volatility ranks; not factual perishability.
+133,demand_informed_stress_test,short_shelf_life,Stress-test assignment using demand/volatility ranks; not factual perishability.
+134,demand_informed_stress_test,short_shelf_life,Stress-test assignment using demand/volatility ranks; not factual perishability.
+135,demand_informed_stress_test,medium_shelf_life,Stress-test assignment using demand/volatility ranks; not factual perishability.
+136,demand_informed_stress_test,short_shelf_life,Stress-test assignment using demand/volatility ranks; not factual perishability.
+138,demand_informed_stress_test,long_shelf_life,Stress-test assignment using demand/volatility ranks; not factual perishability.
+140,demand_informed_stress_test,medium_shelf_life,Stress-test assignment using demand/volatility ranks; not factual perishability.
+145,demand_informed_stress_test,long_shelf_life,Stress-test assignment using demand/volatility ranks; not factual perishability.
+146,demand_informed_stress_test,medium_shelf_life,Stress-test assignment using demand/volatility ranks; not factual perishability.
+166,demand_informed_stress_test,short_shelf_life,Stress-test assignment using demand/volatility ranks; not factual perishability.
+176,demand_informed_stress_test,medium_shelf_life,Stress-test assignment using demand/volatility ranks; not factual perishability.
+18,demand_informed_stress_test,medium_shelf_life,Stress-test assignment using demand/volatility ranks; not factual perishability.
+19,demand_informed_stress_test,short_shelf_life,Stress-test assignment using demand/volatility ranks; not factual perishability.
+190,demand_informed_stress_test,short_shelf_life,Stress-test assignment using demand/volatility ranks; not factual perishability.
+193,demand_informed_stress_test,short_shelf_life,Stress-test assignment using demand/volatility ranks; not factual perishability.
+2,demand_informed_stress_test,short_shelf_life,Stress-test assignment using demand/volatility ranks; not factual perishability.
+207,demand_informed_stress_test,short_shelf_life,Stress-test assignment using demand/volatility ranks; not factual perishability.
+21,demand_informed_stress_test,short_shelf_life,Stress-test assignment using demand/volatility ranks; not factual perishability.
+212,demand_informed_stress_test,medium_shelf_life,Stress-test assignment using demand/volatility ranks; not factual perishability.
+213,demand_informed_stress_test,medium_shelf_life,Stress-test assignment using demand/volatility ranks; not factual perishability.
+214,demand_informed_stress_test,medium_shelf_life,Stress-test assignment using demand/volatility ranks; not factual perishability.
+215,demand_informed_stress_test,short_shelf_life,Stress-test assignment using demand/volatility ranks; not factual perishability.
+216,demand_informed_stress_test,long_shelf_life,Stress-test assignment using demand/volatility ranks; not factual perishability.
+217,demand_informed_stress_test,long_shelf_life,Stress-test assignment using demand/volatility ranks; not factual perishability.
+219,demand_informed_stress_test,long_shelf_life,Stress-test assignment using demand/volatility ranks; not factual perishability.
+220,demand_informed_stress_test,long_shelf_life,Stress-test assignment using demand/volatility ranks; not factual perishability.
+222,demand_informed_stress_test,medium_shelf_life,Stress-test assignment using demand/volatility ranks; not factual perishability.
+223,demand_informed_stress_test,medium_shelf_life,Stress-test assignment using demand/volatility ranks; not factual perishability.
+224,demand_informed_stress_test,medium_shelf_life,Stress-test assignment using demand/volatility ranks; not factual perishability.
+240,demand_informed_stress_test,short_shelf_life,Stress-test assignment using demand/volatility ranks; not factual perishability.
+241,demand_informed_stress_test,medium_shelf_life,Stress-test assignment using demand/volatility ranks; not factual perishability.
+250,demand_informed_stress_test,medium_shelf_life,Stress-test assignment using demand/volatility ranks; not factual perishability.
+253,demand_informed_stress_test,long_shelf_life,Stress-test assignment using demand/volatility ranks; not factual perishability.
+257,demand_informed_stress_test,long_shelf_life,Stress-test assignment using demand/volatility ranks; not factual perishability.
+259,demand_informed_stress_test,medium_shelf_life,Stress-test assignment using demand/volatility ranks; not factual perishability.
+26,demand_informed_stress_test,medium_shelf_life,Stress-test assignment using demand/volatility ranks; not factual perishability.
+267,demand_informed_stress_test,short_shelf_life,Stress-test assignment using demand/volatility ranks; not factual perishability.
+280,demand_informed_stress_test,short_shelf_life,Stress-test assignment using demand/volatility ranks; not factual perishability.
+290,demand_informed_stress_test,short_shelf_life,Stress-test assignment using demand/volatility ranks; not factual perishability.
+291,demand_informed_stress_test,medium_shelf_life,Stress-test assignment using demand/volatility ranks; not factual perishability.
+292,demand_informed_stress_test,short_shelf_life,Stress-test assignment using demand/volatility ranks; not factual perishability.
+295,demand_informed_stress_test,medium_shelf_life,Stress-test assignment using demand/volatility ranks; not factual perishability.
+296,demand_informed_stress_test,short_shelf_life,Stress-test assignment using demand/volatility ranks; not factual perishability.
+300,demand_informed_stress_test,short_shelf_life,Stress-test assignment using demand/volatility ranks; not factual perishability.
+310,demand_informed_stress_test,long_shelf_life,Stress-test assignment using demand/volatility ranks; not factual perishability.
+316,demand_informed_stress_test,short_shelf_life,Stress-test assignment using demand/volatility ranks; not factual perishability.
+317,demand_informed_stress_test,short_shelf_life,Stress-test assignment using demand/volatility ranks; not factual perishability.
+320,demand_informed_stress_test,long_shelf_life,Stress-test assignment using demand/volatility ranks; not factual perishability.
+321,demand_informed_stress_test,long_shelf_life,Stress-test assignment using demand/volatility ranks; not factual perishability.
+335,demand_informed_stress_test,short_shelf_life,Stress-test assignment using demand/volatility ranks; not factual perishability.
+345,demand_informed_stress_test,medium_shelf_life,Stress-test assignment using demand/volatility ranks; not factual perishability.
+351,demand_informed_stress_test,short_shelf_life,Stress-test assignment using demand/volatility ranks; not factual perishability.
+363,demand_informed_stress_test,medium_shelf_life,Stress-test assignment using demand/volatility ranks; not factual perishability.
+37,demand_informed_stress_test,short_shelf_life,Stress-test assignment using demand/volatility ranks; not factual perishability.
+370,demand_informed_stress_test,medium_shelf_life,Stress-test assignment using demand/volatility ranks; not factual perishability.
+381,demand_informed_stress_test,short_shelf_life,Stress-test assignment using demand/volatility ranks; not factual perishability.
+386,demand_informed_stress_test,short_shelf_life,Stress-test assignment using demand/volatility ranks; not factual perishability.
+387,demand_informed_stress_test,medium_shelf_life,Stress-test assignment using demand/volatility ranks; not factual perishability.
+396,demand_informed_stress_test,short_shelf_life,Stress-test assignment using demand/volatility ranks; not factual perishability.
+4,demand_informed_stress_test,short_shelf_life,Stress-test assignment using demand/volatility ranks; not factual perishability.
+403,demand_informed_stress_test,medium_shelf_life,Stress-test assignment using demand/volatility ranks; not factual perishability.
+404,demand_informed_stress_test,medium_shelf_life,Stress-test assignment using demand/volatility ranks; not factual perishability.
+41,demand_informed_stress_test,short_shelf_life,Stress-test assignment using demand/volatility ranks; not factual perishability.
+411,demand_informed_stress_test,short_shelf_life,Stress-test assignment using demand/volatility ranks; not factual perishability.
+416,demand_informed_stress_test,long_shelf_life,Stress-test assignment using demand/volatility ranks; not factual perishability.
+422,demand_informed_stress_test,short_shelf_life,Stress-test assignment using demand/volatility ranks; not factual perishability.
+425,demand_informed_stress_test,medium_shelf_life,Stress-test assignment using demand/volatility ranks; not factual perishability.
+426,demand_informed_stress_test,short_shelf_life,Stress-test assignment using demand/volatility ranks; not factual perishability.
+429,demand_informed_stress_test,long_shelf_life,Stress-test assignment using demand/volatility ranks; not factual perishability.
+441,demand_informed_stress_test,short_shelf_life,Stress-test assignment using demand/volatility ranks; not factual perishability.
+452,demand_informed_stress_test,short_shelf_life,Stress-test assignment using demand/volatility ranks; not factual perishability.
+467,demand_informed_stress_test,short_shelf_life,Stress-test assignment using demand/volatility ranks; not factual perishability.
+470,demand_informed_stress_test,medium_shelf_life,Stress-test assignment using demand/volatility ranks; not factual perishability.
+473,demand_informed_stress_test,medium_shelf_life,Stress-test assignment using demand/volatility ranks; not factual perishability.
+476,demand_informed_stress_test,short_shelf_life,Stress-test assignment using demand/volatility ranks; not factual perishability.
+481,demand_informed_stress_test,short_shelf_life,Stress-test assignment using demand/volatility ranks; not factual perishability.
+486,demand_informed_stress_test,short_shelf_life,Stress-test assignment using demand/volatility ranks; not factual perishability.
+489,demand_informed_stress_test,medium_shelf_life,Stress-test assignment using demand/volatility ranks; not factual perishability.
+496,demand_informed_stress_test,long_shelf_life,Stress-test assignment using demand/volatility ranks; not factual perishability.
+50,demand_informed_stress_test,medium_shelf_life,Stress-test assignment using demand/volatility ranks; not factual perishability.
+500,demand_informed_stress_test,short_shelf_life,Stress-test assignment using demand/volatility ranks; not factual perishability.
+507,demand_informed_stress_test,medium_shelf_life,Stress-test assignment using demand/volatility ranks; not factual perishability.
+515,demand_informed_stress_test,medium_shelf_life,Stress-test assignment using demand/volatility ranks; not factual perishability.
+521,demand_informed_stress_test,short_shelf_life,Stress-test assignment using demand/volatility ranks; not factual perishability.
+522,demand_informed_stress_test,short_shelf_life,Stress-test assignment using demand/volatility ranks; not factual perishability.
+531,demand_informed_stress_test,medium_shelf_life,Stress-test assignment using demand/volatility ranks; not factual perishability.
+535,demand_informed_stress_test,medium_shelf_life,Stress-test assignment using demand/volatility ranks; not factual perishability.
+54,demand_informed_stress_test,long_shelf_life,Stress-test assignment using demand/volatility ranks; not factual perishability.
+540,demand_informed_stress_test,short_shelf_life,Stress-test assignment using demand/volatility ranks; not factual perishability.
+547,demand_informed_stress_test,medium_shelf_life,Stress-test assignment using demand/volatility ranks; not factual perishability.
+548,demand_informed_stress_test,medium_shelf_life,Stress-test assignment using demand/volatility ranks; not factual perishability.
+549,demand_informed_stress_test,short_shelf_life,Stress-test assignment using demand/volatility ranks; not factual perishability.
+554,demand_informed_stress_test,short_shelf_life,Stress-test assignment using demand/volatility ranks; not factual perishability.
+569,demand_informed_stress_test,medium_shelf_life,Stress-test assignment using demand/volatility ranks; not factual perishability.
+578,demand_informed_stress_test,short_shelf_life,Stress-test assignment using demand/volatility ranks; not factual perishability.
+580,demand_informed_stress_test,short_shelf_life,Stress-test assignment using demand/volatility ranks; not factual perishability.
+591,demand_informed_stress_test,short_shelf_life,Stress-test assignment using demand/volatility ranks; not factual perishability.
+596,demand_informed_stress_test,short_shelf_life,Stress-test assignment using demand/volatility ranks; not factual perishability.
+6,demand_informed_stress_test,short_shelf_life,Stress-test assignment using demand/volatility ranks; not factual perishability.
+600,demand_informed_stress_test,short_shelf_life,Stress-test assignment using demand/volatility ranks; not factual perishability.
+608,demand_informed_stress_test,short_shelf_life,Stress-test assignment using demand/volatility ranks; not factual perishability.
+620,demand_informed_stress_test,short_shelf_life,Stress-test assignment using demand/volatility ranks; not factual perishability.
+627,demand_informed_stress_test,short_shelf_life,Stress-test assignment using demand/volatility ranks; not factual perishability.
+631,demand_informed_stress_test,short_shelf_life,Stress-test assignment using demand/volatility ranks; not factual perishability.
+633,demand_informed_stress_test,long_shelf_life,Stress-test assignment using demand/volatility ranks; not factual perishability.
+634,demand_informed_stress_test,medium_shelf_life,Stress-test assignment using demand/volatility ranks; not factual perishability.
+635,demand_informed_stress_test,long_shelf_life,Stress-test assignment using demand/volatility ranks; not factual perishability.
+638,demand_informed_stress_test,medium_shelf_life,Stress-test assignment using demand/volatility ranks; not factual perishability.
+644,demand_informed_stress_test,short_shelf_life,Stress-test assignment using demand/volatility ranks; not factual perishability.
+645,demand_informed_stress_test,short_shelf_life,Stress-test assignment using demand/volatility ranks; not factual perishability.
+649,demand_informed_stress_test,medium_shelf_life,Stress-test assignment using demand/volatility ranks; not factual perishability.
+650,demand_informed_stress_test,short_shelf_life,Stress-test assignment using demand/volatility ranks; not factual perishability.
+666,demand_informed_stress_test,short_shelf_life,Stress-test assignment using demand/volatility ranks; not factual perishability.
+677,demand_informed_stress_test,medium_shelf_life,Stress-test assignment using demand/volatility ranks; not factual perishability.
+678,demand_informed_stress_test,long_shelf_life,Stress-test assignment using demand/volatility ranks; not factual perishability.
+682,demand_informed_stress_test,short_shelf_life,Stress-test assignment using demand/volatility ranks; not factual perishability.
+683,demand_informed_stress_test,short_shelf_life,Stress-test assignment using demand/volatility ranks; not factual perishability.
+686,demand_informed_stress_test,short_shelf_life,Stress-test assignment using demand/volatility ranks; not factual perishability.
+688,demand_informed_stress_test,medium_shelf_life,Stress-test assignment using demand/volatility ranks; not factual perishability.
+691,demand_informed_stress_test,short_shelf_life,Stress-test assignment using demand/volatility ranks; not factual perishability.
+7,demand_informed_stress_test,long_shelf_life,Stress-test assignment using demand/volatility ranks; not factual perishability.
+70,demand_informed_stress_test,short_shelf_life,Stress-test assignment using demand/volatility ranks; not factual perishability.
+71,demand_informed_stress_test,short_shelf_life,Stress-test assignment using demand/volatility ranks; not factual perishability.
+715,demand_informed_stress_test,medium_shelf_life,Stress-test assignment using demand/volatility ranks; not factual perishability.
+717,demand_informed_stress_test,medium_shelf_life,Stress-test assignment using demand/volatility ranks; not factual perishability.
+719,demand_informed_stress_test,long_shelf_life,Stress-test assignment using demand/volatility ranks; not factual perishability.
+729,demand_informed_stress_test,medium_shelf_life,Stress-test assignment using demand/volatility ranks; not factual perishability.
+73,demand_informed_stress_test,short_shelf_life,Stress-test assignment using demand/volatility ranks; not factual perishability.
+740,demand_informed_stress_test,medium_shelf_life,Stress-test assignment using demand/volatility ranks; not factual perishability.
+749,demand_informed_stress_test,short_shelf_life,Stress-test assignment using demand/volatility ranks; not factual perishability.
+756,demand_informed_stress_test,short_shelf_life,Stress-test assignment using demand/volatility ranks; not factual perishability.
+757,demand_informed_stress_test,short_shelf_life,Stress-test assignment using demand/volatility ranks; not factual perishability.
+758,demand_informed_stress_test,short_shelf_life,Stress-test assignment using demand/volatility ranks; not factual perishability.
+76,demand_informed_stress_test,short_shelf_life,Stress-test assignment using demand/volatility ranks; not factual perishability.
+763,demand_informed_stress_test,medium_shelf_life,Stress-test assignment using demand/volatility ranks; not factual perishability.
+764,demand_informed_stress_test,medium_shelf_life,Stress-test assignment using demand/volatility ranks; not factual perishability.
+765,demand_informed_stress_test,medium_shelf_life,Stress-test assignment using demand/volatility ranks; not factual perishability.
+768,demand_informed_stress_test,short_shelf_life,Stress-test assignment using demand/volatility ranks; not factual perishability.
+769,demand_informed_stress_test,medium_shelf_life,Stress-test assignment using demand/volatility ranks; not factual perishability.
+772,demand_informed_stress_test,short_shelf_life,Stress-test assignment using demand/volatility ranks; not factual perishability.
+774,demand_informed_stress_test,medium_shelf_life,Stress-test assignment using demand/volatility ranks; not factual perishability.
+775,demand_informed_stress_test,short_shelf_life,Stress-test assignment using demand/volatility ranks; not factual perishability.
+779,demand_informed_stress_test,long_shelf_life,Stress-test assignment using demand/volatility ranks; not factual perishability.
+783,demand_informed_stress_test,short_shelf_life,Stress-test assignment using demand/volatility ranks; not factual perishability.
+79,demand_informed_stress_test,short_shelf_life,Stress-test assignment using demand/volatility ranks; not factual perishability.
+793,demand_informed_stress_test,medium_shelf_life,Stress-test assignment using demand/volatility ranks; not factual perishability.
+80,demand_informed_stress_test,long_shelf_life,Stress-test assignment using demand/volatility ranks; not factual perishability.
+802,demand_informed_stress_test,short_shelf_life,Stress-test assignment using demand/volatility ranks; not factual perishability.
+804,demand_informed_stress_test,short_shelf_life,Stress-test assignment using demand/volatility ranks; not factual perishability.
+810,demand_informed_stress_test,short_shelf_life,Stress-test assignment using demand/volatility ranks; not factual perishability.
+825,demand_informed_stress_test,medium_shelf_life,Stress-test assignment using demand/volatility ranks; not factual perishability.
+834,demand_informed_stress_test,short_shelf_life,Stress-test assignment using demand/volatility ranks; not factual perishability.
+835,demand_informed_stress_test,short_shelf_life,Stress-test assignment using demand/volatility ranks; not factual perishability.
+836,demand_informed_stress_test,short_shelf_life,Stress-test assignment using demand/volatility ranks; not factual perishability.
+843,demand_informed_stress_test,medium_shelf_life,Stress-test assignment using demand/volatility ranks; not factual perishability.
+853,demand_informed_stress_test,long_shelf_life,Stress-test assignment using demand/volatility ranks; not factual perishability.
+855,demand_informed_stress_test,long_shelf_life,Stress-test assignment using demand/volatility ranks; not factual perishability.
+860,demand_informed_stress_test,short_shelf_life,Stress-test assignment using demand/volatility ranks; not factual perishability.
+88,demand_informed_stress_test,medium_shelf_life,Stress-test assignment using demand/volatility ranks; not factual perishability.
+90,demand_informed_stress_test,short_shelf_life,Stress-test assignment using demand/volatility ranks; not factual perishability.
+92,demand_informed_stress_test,short_shelf_life,Stress-test assignment using demand/volatility ranks; not factual perishability.
+93,demand_informed_stress_test,medium_shelf_life,Stress-test assignment using demand/volatility ranks; not factual perishability.
+99,demand_informed_stress_test,medium_shelf_life,Stress-test assignment using demand/volatility ranks; not factual perishability.

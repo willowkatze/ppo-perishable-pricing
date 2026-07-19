@@ -1,0 +1,20 @@
+﻿name: ppo-perishable-pricing
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python>=3.10
+  - pip
+  - numpy
+  - pandas
+  - scipy
+  - scikit-learn
+  - matplotlib
+  - seaborn
+  - joblib
+  - pyarrow
+  - pytest
+  - pip:
+      - stable-baselines3
+      - gymnasium
+      - torch

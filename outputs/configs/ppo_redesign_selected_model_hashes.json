@@ -1,0 +1,50 @@
+{
+  "selected_redesign_model:model_path": {
+    "path": "outputs\\models\\ppo_training_redesign\\balanced\\seed_123\\checkpoints\\redesign_balanced_20000_steps.zip",
+    "exists": true,
+    "sha256": "5ec6cd8cc16aad4c3ef4440dcf70d0d4eb3be4ea392495a078f5315b6019460a",
+    "bytes": 571695
+  },
+  "selected_redesign_model:vecnormalize_path": {
+    "path": "outputs\\models\\ppo_training_redesign\\balanced\\seed_123\\vecnormalize.pkl",
+    "exists": true,
+    "sha256": "c40d6d8dc08333c52deddf60104b9577620f7f053f3c3d5876039e7ff7b60337",
+    "bytes": 3459
+  },
+  "selected_redesign_model:training_metadata_path": {
+    "path": "outputs\\models\\ppo_training_redesign\\balanced\\seed_123\\training_metadata.json",
+    "exists": true,
+    "sha256": "d5486c9b7015cda6c5b71d2a64368864c64a6547813d1d236f8aca30363964b2",
+    "bytes": 522
+  },
+  "redesign_selection_table": {
+    "path": "outputs\\tables\\ppo_multimetric_checkpoint_selection.csv",
+    "exists": true,
+    "sha256": "7a59cea9aa19cfef29e508976b28dd855e1062f2e10739ae19f0e3d745faf507",
+    "bytes": 5497
+  },
+  "redesign_results_table": {
+    "path": "outputs\\tables\\ppo_training_redesign_results.csv",
+    "exists": true,
+    "sha256": "bd735ef077f1281e13d11e46e5383420d01f7a59e1ef96f62dacc111666e4a2e",
+    "bytes": 4576
+  },
+  "duplicate_model_audit": {
+    "path": "outputs\\tables\\ppo_redesign_duplicate_model_audit.csv",
+    "exists": true,
+    "sha256": "aa8a7e193084381ea67eee904bf22e04a91af96844bd80326e57f3421d314834",
+    "bytes": 1874
+  },
+  "oracle_definition_audit": {
+    "path": "outputs\\tables\\ppo_oracle_regret_definition_audit.csv",
+    "exists": true,
+    "sha256": "255084178414a674aee8b119e670e8f1f010a4c5eeb0a4b2fac885c86a755ffd",
+    "bytes": 2528
+  },
+  "oracle_pairing_audit": {
+    "path": "outputs\\tables\\ppo_oracle_pairing_audit.csv",
+    "exists": true,
+    "sha256": "b50b42265fed5de414828065509eba4dbe8c0e38f22f2a31da79765b029091ad",
+    "bytes": 27041
+  }
+}

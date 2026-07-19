@@ -1,8 +1,9 @@
-pandas
+﻿pandas
 numpy
 matplotlib
-scikit-learn
 gymnasium
 stable-baselines3
-pytest
-jupyter
+torch
+scikit-learn
+joblib
+openpyxl

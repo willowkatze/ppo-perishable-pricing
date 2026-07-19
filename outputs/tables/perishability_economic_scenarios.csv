@@ -1,0 +1,11 @@
+scenario_type,scenario_name,value,notes
+margin,low_margin,0.7,"procurement_cost_ratio * initial_inventory, charged once."
+margin,medium_margin,0.55,"procurement_cost_ratio * initial_inventory, charged once."
+margin,high_margin,0.4,"procurement_cost_ratio * initial_inventory, charged once."
+disposal,zero_disposal_cost,0.0,disposal_cost_ratio * expired units.
+disposal,moderate_disposal_cost,0.05,disposal_cost_ratio * expired units.
+disposal,high_disposal_cost,0.1,disposal_cost_ratio * expired units.
+terminal_salvage,no_salvage_value,0.0,Terminal inventory valuation; diagnostic use unless configured.
+terminal_salvage,partial_salvage_value,0.25,Terminal inventory valuation; diagnostic use unless configured.
+terminal_salvage,full_normalized_salvage_diagnostic,1.0,Terminal inventory valuation; diagnostic use unless configured.
+price,reference_full_price,1.0,selling_price = 1 - markdown_rate.

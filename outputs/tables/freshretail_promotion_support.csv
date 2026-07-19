@@ -1,0 +1,23 @@
+scope,metric,value
+overall,rows,4850000.0
+overall,promotion_observation_share,0.3749041237113402
+overall,discount_min,0.0
+overall,discount_median,0.991
+overall,discount_max,1.088
+overall,markdown_rate_min,0.0
+overall,markdown_rate_median,0.009000000000000008
+overall,markdown_rate_max,1.0
+overall,series_with_promoted_and_nonpromoted,41169.0
+overall,series_with_multiple_discount_levels,48591.0
+overall,promotion_and_stockout_overlap_share,0.20083979381443298
+discount_bin,"(-0.001, 0.001]",2357958.0
+discount_bin,"(0.001, 0.05]",330301.0
+discount_bin,"(0.05, 0.1]",457360.0
+discount_bin,"(0.1, 0.2]",905685.0
+discount_bin,"(0.2, 0.3]",459203.0
+discount_bin,"(0.3, 0.5]",305702.0
+discount_bin,"(0.5, 1.0]",33791.0
+category:unknown,rows,4850000.0
+category:unknown,promotion_rate,0.3749041237113402
+category:unknown,mean_discount,0.911900113044928
+category:unknown,mean_markdown_rate,0.08810099859093841

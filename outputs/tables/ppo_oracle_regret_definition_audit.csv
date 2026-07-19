@@ -1,0 +1,14 @@
+field,value,evidence
+metric_classification,LIMITED_ORACLE_VALUE_GAP,"The source code computes rolling_oracle_value minus the value of the PPO-selected first action, but rolling_oracle_value comes from a finite-horizon diagnostic with greedy_financial continuation and is not proven to upper-bound every evaluated PPO action."
+corrected_metric_name,diagnostic_oracle_value_gap,Signed values are retained; negative values are valid and mean the selected action exceeded this limited diagnostic benchmark under the recorded action-value table.
+formula,rolling_oracle_value - selected_action_value,src/train_ppo_recovered_redesign.py:evaluate_oracle_regret originally wrote this as oracle_regret.
+oracle_value_definition,rolling_oracle_value from financial_markdown_oracle_diagnostic.csv,Rolling finite-horizon oracle diagnostic over representative validation states.
+policy_value_definition,total_normalized_accounting_profit for the PPO-selected first_action under greedy_financial continuation when available; otherwise zero_first_action_oracle_value fallback,Action values are read from financial_markdown_multistep_action_values.csv.
+normalization,normalized_accounting_profit,"Uses the environment's normalized accounting objective, not raw currency profit."
+sign_convention,positive means diagnostic oracle value exceeds policy action value; negative means policy action value exceeds the limited diagnostic value,"Because this is not a guaranteed upper bound, negative values are not impossible."
+continuation_policy,greedy_financial,Action value lookup filters continuation_policy == greedy_financial.
+planning_horizon,"finite rolling horizon from oracle_horizon, commonly 1 to 3 steps",Recorded per state in financial_markdown_oracle_diagnostic.csv.
+identical_starting_states,yes for the diagnostic state reconstruction,PPO actions are evaluated by resetting the same validation split/scenario/calibration/episode_index and replaying prefix_actions.
+identical_episode_seeds,yes within the redesign diagnostic action extraction,Environment reset uses seed = 20000 + episode_index with deterministic_demand=True.
+oracle_search_type,"limited finite-horizon diagnostic, not exhaustive full-episode dynamic programming",The source table is financial_markdown_multistep_action_values.csv and continuation policy is greedy_financial.
+upper_bound_guarantee,no,rolling_oracle_value is not always equal to the maximum available greedy action value and the action-value table covers only a subset of diagnostic states.

@@ -1,0 +1,13 @@
+diagnostic,variable,value
+spearman_with_markdown,activity_flag,0.7867939064043055
+spearman_with_markdown,possible_stockout_flag,-0.013320064058888807
+spearman_with_markdown,stock_hour6_22_cnt,-0.00032508712844192295
+spearman_with_markdown,lag_1_observed_sales,0.15058018941693002
+spearman_with_markdown,lag_1_recovered_demand,0.1679327195046913
+spearman_with_markdown,day_of_week,0.014612395080204529
+spearman_with_markdown,trend_index,0.061848076959884785
+spearman_with_markdown,avg_temperature,0.05052310608052873
+top_store_id_markdown_concentration,store_id,737:1.000; 833:0.711; 96:0.334; 77:0.308; 532:0.304; 478:0.301; 728:0.292; 469:0.283; 254:0.276; 468:0.266
+top_product_id_markdown_concentration,product_id,267:0.856; 441:0.301; 500:0.293; 860:0.292; 682:0.257; 802:0.257; 215:0.256; 79:0.256; 644:0.243; 119:0.242
+top_timestamp_markdown_concentration,timestamp,2024-06-22 00:00:00:0.123; 2024-06-16 00:00:00:0.117; 2024-06-15 00:00:00:0.116; 2024-06-09 00:00:00:0.116; 2024-06-12 00:00:00:0.116; 2024-06-19 00:00:00:0.115; 2024-06-13 00:00:00:0.114; 2024-06-08 00:00:00:0.113; 2024-06-10 00:00:00:0.111; 2024-06-20 00:00:00:0.110
+low_inventory_markdown_difference,stock_hour6_22_cnt,-0.006218799584452081

@@ -1,0 +1,8 @@
+metric,value
+training_episodes,340.0
+training_states,694.0
+duplicate_state_count,82.0
+positive_action_share,0.4697406340057637
+max_class_share,0.5302593659942363
+planning_runtime_seconds,4913.760719099984
+candidate_sequences_evaluated,82644.0

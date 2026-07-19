@@ -1,0 +1,6 @@
+policy_id,source,normalized_profit,paired_gain_vs_baseline,waste_rate,action_entropy,runtime_seconds,interpretability,unnecessary_markdown,missed_opportunities,comparability_note
+always_0pct,current_paired_evaluation,0.15308106855426262,0.0,0.28277993471022594,0.0,1.5736194000928663,high,,,
+limited_horizon_planning_policy,current_paired_evaluation,0.16387351552355167,0.010792446969289078,0.1438590076720581,0.35050750077121096,658.0504560000263,medium,,,
+BALANCED__checkpoint_20000,outputs/tables/ppo_training_redesign_results.csv,,,,,,low_to_medium,,,Existing PPO artifacts are not treated as decisive unless evaluated on this exact high-risk paired manifest.
+selected_recovered_financial_ppo,outputs/tables/ppo_financial_paired_validation_summary.csv,,,,,,low_to_medium,,,Existing PPO artifacts are not treated as decisive unless evaluated on this exact high-risk paired manifest.
+selected_observed_financial_ppo,outputs/tables/ppo_financial_paired_validation_summary.csv,,,,,,low_to_medium,,,Existing PPO artifacts are not treated as decisive unless evaluated on this exact high-risk paired manifest.

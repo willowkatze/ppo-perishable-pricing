@@ -1,0 +1,2 @@
+agent_id,stage,episode_return_mean,episode_return_std,raw_accounting_profit_mean,waste_rate_mean
+recovered_financial,pilot,0.45,8.479468414379336e-17,0.8109190132159881,0.0

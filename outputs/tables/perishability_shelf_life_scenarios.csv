@@ -1,0 +1,10 @@
+shelf_life_class,scenario_level,shelf_life_days,source_type,notes
+short_shelf_life,low,2,scenario_assumption,Not observed in FreshRetailNet.
+short_shelf_life,base,3,scenario_assumption,Not observed in FreshRetailNet.
+short_shelf_life,high,5,scenario_assumption,Not observed in FreshRetailNet.
+medium_shelf_life,low,5,scenario_assumption,Not observed in FreshRetailNet.
+medium_shelf_life,base,7,scenario_assumption,Not observed in FreshRetailNet.
+medium_shelf_life,high,10,scenario_assumption,Not observed in FreshRetailNet.
+long_shelf_life,low,10,scenario_assumption,Not observed in FreshRetailNet.
+long_shelf_life,base,14,scenario_assumption,Not observed in FreshRetailNet.
+long_shelf_life,high,21,scenario_assumption,Not observed in FreshRetailNet.

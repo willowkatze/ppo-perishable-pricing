@@ -1,0 +1,112 @@
+{
+  "target_definitions": {
+    "observed": "observed_sales_demand",
+    "recovered": "recovered_demand"
+  },
+  "feature_list": [
+    "day_of_week",
+    "week_index",
+    "month",
+    "weekend_flag",
+    "trend_index",
+    "store_id_encoded",
+    "product_id_encoded",
+    "lag_1_observed_sales",
+    "lag_7_observed_sales",
+    "rolling_mean_7_observed_sales",
+    "rolling_mean_7_recovered_demand",
+    "rolling_mean_14_observed_sales",
+    "previous_day_possible_stockout_flag",
+    "markdown_rate",
+    "activity_flag",
+    "markdown_x_activity",
+    "stock_hour6_22_cnt",
+    "previous_day_inventory",
+    "possible_stockout_flag",
+    "avg_temperature"
+  ],
+  "preprocessing_methods": "Stable ordinal encoding for store_id/product_id fitted on train split only; numeric imputation inside Ridge pipeline.",
+  "selected_model_types": {
+    "observed": "hist_gradient_boosting",
+    "recovered": "hist_gradient_boosting"
+  },
+  "chronological_split_boundaries": {
+    "train": {
+      "date_min": "2024-03-28",
+      "date_max": "2024-05-25",
+      "rows": 17700
+    },
+    "validation": {
+      "date_min": "2024-05-26",
+      "date_max": "2024-06-13",
+      "rows": 5700
+    },
+    "test": {
+      "date_min": "2024-06-14",
+      "date_max": "2024-07-02",
+      "rows": 5700
+    }
+  },
+  "markdown_support_range": {
+    "min": 0.0,
+    "max": 1.0
+  },
+  "prediction_clipping_rules": {
+    "observed": "clip expm1(log prediction) to [0, 17.100000]",
+    "recovered": "clip expm1(log prediction) to [0, 17.318894]"
+  },
+  "support_audit": [
+    {
+      "markdown_rate": 0.0,
+      "nearby_row_count": 15105,
+      "nearby_store_count": 225,
+      "nearby_product_count": 174,
+      "status": "supported"
+    },
+    {
+      "markdown_rate": 0.05,
+      "nearby_row_count": 2401,
+      "nearby_store_count": 178,
+      "nearby_product_count": 136,
+      "status": "supported"
+    },
+    {
+      "markdown_rate": 0.1,
+      "nearby_row_count": 2941,
+      "nearby_store_count": 160,
+      "nearby_product_count": 119,
+      "status": "supported"
+    },
+    {
+      "markdown_rate": 0.2,
+      "nearby_row_count": 1654,
+      "nearby_store_count": 137,
+      "nearby_product_count": 100,
+      "status": "supported"
+    },
+    {
+      "markdown_rate": 0.3,
+      "nearby_row_count": 982,
+      "nearby_store_count": 72,
+      "nearby_product_count": 53,
+      "status": "supported"
+    },
+    {
+      "markdown_rate": 0.4,
+      "nearby_row_count": 576,
+      "nearby_store_count": 40,
+      "nearby_product_count": 25,
+      "status": "supported"
+    }
+  ],
+  "uncertainty_and_limitations": [
+    "Markdown effects are observational and confounded.",
+    "Recovered demand is model-estimated.",
+    "Actual latent demand during real stockouts remains unobserved.",
+    "Discount semantics remain uncertain_multiplier_like.",
+    "stock_hour6_22_cnt semantics remain partly uncertain.",
+    "Model-implied response curves are not causal counterfactuals.",
+    "Results are suitable for simulation calibration and sensitivity analysis, not direct operational pricing claims."
+  ],
+  "no_causal_claim_statement": "Model-implied markdown response curves are observational diagnostics, not causal counterfactuals."
+}

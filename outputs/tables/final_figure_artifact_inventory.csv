@@ -1,0 +1,88 @@
+artifact_path,artifact_type,agent,seed,timestep_coverage,intended_figure,usable,missing_fields,notes
+outputs\configs\ppo_input_artifact_hashes.json,json_metadata,,,,supporting artifact,True,,1668 bytes
+outputs\configs\ppo_operational_experiment_config.json,json_metadata,,,,supporting artifact,True,,6106 bytes
+outputs\configs\ppo_selected_financial_model_hashes.json,json_metadata,,,,supporting artifact,True,,2472 bytes
+outputs\configs\ppo_selected_financial_models.json,json_metadata,,,,supporting artifact,True,,1628 bytes
+outputs\configs\ppo_validation_episode_manifest.csv,table,,,,supporting artifact,True,,1430 bytes
+outputs\models\ppo_operational\_pytest_monitor\monitor_1051.csv.monitor.csv,monitor_log,,,,supporting artifact,True,,58 bytes
+outputs\models\ppo_operational\_pytest_monitor\monitor_42.csv.monitor.csv,monitor_log,,,,supporting artifact,True,,58 bytes
+outputs\models\ppo_operational\observed_financial\seed_42\learning_curve.csv,table,observed_financial,42,available in file,training diagnostics,True,,1271 bytes
+outputs\models\ppo_operational\observed_financial\seed_42\monitor\monitor_1051.csv.monitor.csv,monitor_log,observed_financial,42,,supporting artifact,True,,43256 bytes
+outputs\models\ppo_operational\observed_financial\seed_42\monitor\monitor_2060.csv.monitor.csv,monitor_log,observed_financial,42,,supporting artifact,True,,43282 bytes
+outputs\models\ppo_operational\observed_financial\seed_42\monitor\monitor_3069.csv.monitor.csv,monitor_log,observed_financial,42,,supporting artifact,True,,43032 bytes
+outputs\models\ppo_operational\observed_financial\seed_42\monitor\monitor_42.csv.monitor.csv,monitor_log,observed_financial,42,,supporting artifact,True,,43764 bytes
+outputs\models\ppo_operational\observed_financial\seed_42\run_state.json,json_metadata,observed_financial,42,,supporting artifact,True,,719 bytes
+outputs\models\ppo_operational\observed_financial\seed_42\training_config.json,json_metadata,observed_financial,42,available in file,supporting artifact,True,,1018 bytes
+outputs\models\ppo_operational\observed_financial\seed_42\training_summary.json,json_metadata,observed_financial,42,available in file,supporting artifact,True,,1726 bytes
+outputs\models\ppo_operational\recovered_financial\seed_42\learning_curve.csv,table,recovered_financial,42,available in file,training diagnostics,True,,1274 bytes
+outputs\models\ppo_operational\recovered_financial\seed_42\monitor\monitor_1051.csv.monitor.csv,monitor_log,recovered_financial,42,,supporting artifact,True,,43397 bytes
+outputs\models\ppo_operational\recovered_financial\seed_42\monitor\monitor_2060.csv.monitor.csv,monitor_log,recovered_financial,42,,supporting artifact,True,,43544 bytes
+outputs\models\ppo_operational\recovered_financial\seed_42\monitor\monitor_3069.csv.monitor.csv,monitor_log,recovered_financial,42,,supporting artifact,True,,43044 bytes
+outputs\models\ppo_operational\recovered_financial\seed_42\monitor\monitor_42.csv.monitor.csv,monitor_log,recovered_financial,42,,supporting artifact,True,,43488 bytes
+outputs\models\ppo_operational\recovered_financial\seed_42\run_state.json,json_metadata,recovered_financial,42,,supporting artifact,True,,718 bytes
+outputs\models\ppo_operational\recovered_financial\seed_42\training_config.json,json_metadata,recovered_financial,42,available in file,supporting artifact,True,,1021 bytes
+outputs\models\ppo_operational\recovered_financial\seed_42\training_summary.json,json_metadata,recovered_financial,42,available in file,supporting artifact,True,,1730 bytes
+outputs\models\ppo_operational\recovered_financial_metrics\seed_77\learning_curve.csv,table,recovered_financial,77,available in file,training diagnostics,True,,311 bytes
+outputs\models\ppo_operational\recovered_financial_metrics\seed_77\monitor\monitor_77.csv.monitor.csv,monitor_log,recovered_financial,77,,supporting artifact,True,,137 bytes
+outputs\models\ppo_operational\recovered_financial_metrics\seed_77\training_config.json,json_metadata,recovered_financial,77,available in file,supporting artifact,True,,776 bytes
+outputs\models\ppo_operational\recovered_financial_metrics\seed_77\training_summary.json,json_metadata,recovered_financial,77,available in file,supporting artifact,True,,1545 bytes
+outputs\models\ppo_operational\recovered_financial_pytest\seed_2026\learning_curve.csv,table,recovered_financial,2026,available in file,training diagnostics,True,,315 bytes
+outputs\models\ppo_operational\recovered_financial_pytest\seed_2026\monitor\monitor_2026.csv.monitor.csv,monitor_log,recovered_financial,2026,,supporting artifact,True,,118 bytes
+outputs\models\ppo_operational\recovered_financial_pytest\seed_2026\training_config.json,json_metadata,recovered_financial,2026,available in file,supporting artifact,True,,777 bytes
+outputs\models\ppo_operational\recovered_financial_pytest\seed_2026\training_summary.json,json_metadata,recovered_financial,2026,available in file,supporting artifact,True,,1551 bytes
+outputs\models\ppo_operational\recovered_financial_repro\seed_42\learning_curve.csv,table,recovered_financial,42,available in file,training diagnostics,True,,303 bytes
+outputs\models\ppo_operational\recovered_financial_repro\seed_42\monitor\monitor_42.csv.monitor.csv,monitor_log,recovered_financial,42,,supporting artifact,True,,118 bytes
+outputs\models\ppo_operational\recovered_financial_repro\seed_42\training_config.json,json_metadata,recovered_financial,42,available in file,supporting artifact,True,,774 bytes
+outputs\models\ppo_operational\recovered_financial_repro\seed_42\training_summary.json,json_metadata,recovered_financial,42,available in file,supporting artifact,True,,1534 bytes
+outputs\tables\financial_markdown_multistep_action_values.csv,table,,,,oracle opportunity/PPO regret,True,,455606 bytes
+outputs\tables\financial_markdown_opportunity_classification.csv,table,,,,oracle opportunity/PPO regret,True,,1721 bytes
+outputs\tables\financial_markdown_opportunity_report.json,json_metadata,,,,oracle opportunity/PPO regret,True,,1180 bytes
+outputs\tables\financial_markdown_oracle_diagnostic.csv,table,,,,oracle opportunity/PPO regret,True,,19364 bytes
+outputs\tables\financial_markdown_ppo_regret.csv,table,,,,oracle opportunity/PPO regret,True,,35091 bytes
+outputs\tables\financial_markdown_representative_states.csv,table,,,,oracle opportunity/PPO regret,True,,12737 bytes
+outputs\tables\financial_markdown_state_audit.csv,table,,,,oracle opportunity/PPO regret,True,,105030 bytes
+outputs\tables\ppo_action_distribution_diagnostics.csv,table,,,,supporting artifact,True,,240 bytes
+outputs\tables\ppo_baseline_evaluation.csv,table,,,,PPO vs baseline,True,,1790 bytes
+outputs\tables\ppo_checkpoint_action_diagnostics.csv,table,,,available in file,training curve/action distribution/checkpoint selection,True,,2578 bytes
+outputs\tables\ppo_checkpoint_level_evaluation.csv,table,,,available in file,training curve/action distribution/checkpoint selection,True,,87039 bytes
+outputs\tables\ppo_checkpoint_missing_artifacts.csv,table,,,available in file,training curve/action distribution/checkpoint selection,True,,313 bytes
+outputs\tables\ppo_checkpoint_model_selection.csv,table,,,available in file,training curve/action distribution/checkpoint selection,True,,681 bytes
+outputs\tables\ppo_checkpoint_paired_comparisons.csv,table,,,available in file,training curve/action distribution/checkpoint selection; PPO vs baseline,True,,31664 bytes
+outputs\tables\ppo_checkpoint_state_dependence.csv,table,,,available in file,training curve/action distribution/checkpoint selection,True,,7707 bytes
+outputs\tables\ppo_checkpoint_validation_report.json,json_metadata,,,available in file,training curve/action distribution/checkpoint selection,True,,2062 bytes
+outputs\tables\ppo_environment_compatibility_audit.csv,table,,,,supporting artifact,True,,1386 bytes
+outputs\tables\ppo_episode_level_evaluation.csv,table,,,,supporting artifact,True,,3228 bytes
+outputs\tables\ppo_financial_baseline_value_classification.csv,table,,,,PPO vs baseline,True,,399 bytes
+outputs\tables\ppo_financial_calibration_transmission.csv,table,,,,supporting artifact,True,,1042 bytes
+outputs\tables\ppo_financial_paired_policy_comparisons.csv,table,,,,PPO vs baseline,True,,7436 bytes
+outputs\tables\ppo_financial_paired_validation_episode_level.csv,table,,,,PPO vs baseline,True,,60593 bytes
+outputs\tables\ppo_financial_paired_validation_report.json,json_metadata,,,,PPO vs baseline,True,,4489 bytes
+outputs\tables\ppo_financial_paired_validation_summary.csv,table,,,,PPO vs baseline,True,,7578 bytes
+outputs\tables\ppo_financial_profit_comparability_audit.csv,table,,,,supporting artifact,True,,2950 bytes
+outputs\tables\ppo_financial_profit_waste_tradeoff.csv,table,,,,supporting artifact,True,,1066 bytes
+outputs\tables\ppo_financial_state_dependent_actions.csv,table,,,,supporting artifact,True,,5214 bytes
+outputs\tables\ppo_hyperparameter_selection.csv,table,,,,supporting artifact,True,,1385 bytes
+outputs\tables\ppo_lambda_selection.csv,table,,,,supporting artifact,True,,662 bytes
+outputs\tables\ppo_pilot_final_report.json,json_metadata,,,,supporting artifact,True,,1385 bytes
+outputs\tables\ppo_reward_value_diagnostics.csv,table,,,,supporting artifact,True,,175 bytes
+outputs\tables\ppo_smoke_final_report.json,json_metadata,,,,supporting artifact,True,,1337 bytes
+outputs\tables\ppo_training_curves.csv,table,,,available in file,training diagnostics,True,,1274 bytes
+outputs\tables\ppo_training_diagnostics.csv,table,,,available in file,supporting artifact,True,,1385 bytes
+outputs\tables\sustainability_calibration_transmission.csv,table,,,,profit-waste tradeoff,True,,1227 bytes
+outputs\tables\sustainability_fixed_policy_episode_level.csv,table,,,,profit-waste tradeoff,True,,355428 bytes
+outputs\tables\sustainability_fixed_policy_evaluation.csv,table,,,,profit-waste tradeoff,True,,26652 bytes
+outputs\tables\sustainability_lambda_audit.csv,table,,,,profit-waste tradeoff,True,,5311 bytes
+outputs\tables\sustainability_managerial_policy_summary.csv,table,,,,profit-waste tradeoff,True,,4679 bytes
+outputs\tables\sustainability_nondominated_policy_set.csv,table,,,,profit-waste tradeoff,True,,39580 bytes
+outputs\tables\sustainability_opportunity_audit_report.json,json_metadata,,,,profit-waste tradeoff,True,,1196 bytes
+outputs\tables\sustainability_profit_waste_tradeoff.csv,table,,,,profit-waste tradeoff,True,,27392 bytes
+outputs\tables\sustainability_reward_wiring_audit.csv,table,,,,profit-waste tradeoff,True,,7186 bytes
+outputs\tables\sustainability_scenario_audit.csv,table,,,,profit-waste tradeoff,True,,17094 bytes
+outputs\tables\sustainability_scenario_selection.csv,table,,,,profit-waste tradeoff,True,,1076 bytes
+outputs\tables\sustainability_scenario_tradeoff_classification.csv,table,,,,profit-waste tradeoff,True,,1415 bytes
+outputs\tables\sustainability_selected_tradeoff_scenarios.csv,table,,,,profit-waste tradeoff,True,,2458 bytes
+outputs\tables\sustainability_tradeoff_analysis_report.json,json_metadata,,,,profit-waste tradeoff,True,,1561 bytes
+outputs\tables\sustainability_tradeoff_episode_level.csv,table,,,,profit-waste tradeoff,True,,446584 bytes
+outputs\tables\sustainability_tradeoff_vs_always_zero.csv,table,,,,profit-waste tradeoff,True,,47623 bytes
+outputs\tables\sustainability_waste_constrained_policy_selection.csv,table,,,,profit-waste tradeoff,True,,13712 bytes
+outputs\tables\sustainability_waste_reduction_efficiency.csv,table,,,,profit-waste tradeoff,True,,32786 bytes

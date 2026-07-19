@@ -1,0 +1,10 @@
+metric,value
+mean_observed_sales,1.0762858762886598
+mean_recovered_demand,1.2196169518683806
+median_observed_sales,0.7
+median_recovered_demand,0.8
+total_observed_sales,31319.919
+total_recovered_demand,35490.853299369875
+percentage_increase_aggregate_demand,13.317193762122681
+share_of_rows_adjusted,0.40195876288659793
+mean_adjustment_among_adjusted_rows,0.35658154222192623

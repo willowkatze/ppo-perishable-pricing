@@ -1,0 +1,12 @@
+item,value,notes
+original_training_scenario,core_008,Existing PPO training used one default scenario in train_ppo_operational.py.
+redesign_training_scenarios,core_002|core_003|core_005|core_006|core_009|core_012,Scenario-balanced sampling uses existing meaningful profit-waste scenarios only.
+learning_rate_original,0.0003,
+entropy_coefficient_original,0.01,
+rollout_length,1024,
+batch_size,256,
+n_parallel_envs,4,
+checkpoint_frequency,5000,
+oracle_positive_markdown_share,0.2857142857142857,Diagnostic only; not used as supervised label.
+early_stopping_logic,documented,Stop if collapse and no regret/return improvement persist for two evaluation points.
+previous_recovered_runtime_seconds,5714.6373923,

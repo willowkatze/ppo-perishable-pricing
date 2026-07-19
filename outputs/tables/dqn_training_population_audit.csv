@@ -1,0 +1,15 @@
+metric,value,notes
+eligible_training_episodes,340,from training HIGH_RISK_B planning labels
+eligible_training_scenarios,6,core_002|core_003|core_005|core_006|core_009|core_012
+scenario_episode_count__core_002,78,
+scenario_episode_count__core_003,80,
+scenario_episode_count__core_005,78,
+scenario_episode_count__core_006,80,
+scenario_episode_count__core_009,12,
+scenario_episode_count__core_012,12,
+available_actions,0|1|2|3|4|5,existing six markdown actions
+sample_reward_mean,-0.10603627561453711,first-step sample across actions
+sample_reward_std,0.08590754619988722,first-step sample across actions
+sample_reward_min,-0.23754564764642797,first-step sample across actions
+sample_reward_max,0.2050510889322347,first-step sample across actions
+sample_horizon_mean,3.0,sampled eligible episodes

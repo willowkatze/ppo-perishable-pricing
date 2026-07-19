@@ -1,0 +1,42 @@
+[
+  {
+    "path": "outputs\\models\\dqn_high_risk_b\\STANDARD_DQN\\seed_42\\checkpoints\\dqn_20000_steps.zip",
+    "sha256": "e73c1513af8485ca6cee40c9148e781d68387b9a9e0b449d642abdfbe4b26637",
+    "artifact_type": "component_model"
+  },
+  {
+    "path": "outputs\\models\\dqn_high_risk_b\\STANDARD_DQN\\seed_123\\checkpoints\\dqn_15000_steps.zip",
+    "sha256": "43496f6b08fd941ad362e1ed5df9ca95a36532fc33c4be7bd9ea9fc2d7f89125",
+    "artifact_type": "component_model"
+  },
+  {
+    "path": "outputs\\models\\dqn_high_risk_b\\STANDARD_DQN\\seed_456\\checkpoints\\dqn_25000_steps.zip",
+    "sha256": "fe699c0fc11810ad6aa6a69af2f3d49a7682eb9cc08feb2dcfde7e113bbb9493",
+    "artifact_type": "component_model"
+  },
+  {
+    "path": "outputs\\models\\dqn_high_risk_b\\STANDARD_DQN\\seed_42\\checkpoints\\vecnormalize_20000_steps.pkl",
+    "sha256": "09615d328e19a4b447002b1cc1105fe7d100ae390e1cd17e3a611fa63231b180",
+    "artifact_type": "vecnormalize"
+  },
+  {
+    "path": "outputs\\models\\dqn_high_risk_b\\STANDARD_DQN\\seed_123\\checkpoints\\vecnormalize_15000_steps.pkl",
+    "sha256": "17b3634824ac4f09f6b5c6e8d419ae6048aa8b27e0c46c6b6ff255d6e2eed34f",
+    "artifact_type": "vecnormalize"
+  },
+  {
+    "path": "outputs\\models\\dqn_high_risk_b\\STANDARD_DQN\\seed_456\\checkpoints\\vecnormalize_25000_steps.pkl",
+    "sha256": "2c492b2e4669f05d0a4bbc9265698dfc7c3baa97018bc471e3445416613ee8c3",
+    "artifact_type": "vecnormalize"
+  },
+  {
+    "path": "outputs\\configs\\final_locked_dqn_ensemble.json",
+    "sha256": "884c53fd49ace53324e209a1ff4af09f6e906cd0c4d92af9727356ceb7c6ca0e",
+    "artifact_type": "candidate_lock"
+  },
+  {
+    "path": "outputs\\manifests\\high_risk_b_expanded_validation_manifest.csv",
+    "sha256": "bd6aa08efcfbc21a2e1e2f541197b4d2ce9d11343823dc848883bb5d5afd317b",
+    "artifact_type": "validation_manifest"
+  }
+]

@@ -1,3 +1,4 @@
-# Notebooks
+﻿# Notebooks
 
-Use this directory for exploratory notebooks. Keep notebooks focused, documented, and reproducible enough to support later implementation in `src/`.
+Exploratory notebooks for the redesigned operational-data pipeline will be placed here.
+

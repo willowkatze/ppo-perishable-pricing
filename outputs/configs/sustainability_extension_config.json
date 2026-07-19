@@ -1,0 +1,10 @@
+{
+  "status": "SUSTAINABILITY_ANALYSIS_ONLY",
+  "validation_split_only": true,
+  "test_split_used": false,
+  "ppo_training_requested": false,
+  "environment_modified": false,
+  "selected_scenario_id": null,
+  "selected_lambda_waste": null,
+  "recommended_next_action": "Do not run sustainability PPO; use empirical profit-waste analysis or audit unsupported scenario interfaces."
+}

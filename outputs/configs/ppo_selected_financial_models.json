@@ -1,0 +1,30 @@
+{
+  "created_for": "formal financial paired validation",
+  "validation_split_only": true,
+  "test_split_used": false,
+  "selected_models": {
+    "selected_observed_financial_ppo": {
+      "agent_id": "observed_financial",
+      "calibration_mode": "observed_calibration",
+      "checkpoint_label": "checkpoint_22288",
+      "model_path": "outputs\\models\\ppo_operational\\observed_financial\\seed_42\\checkpoints\\pilot_observed_financial_22288_steps.zip",
+      "vecnormalize_path": "outputs\\models\\ppo_operational\\observed_financial\\seed_42\\vecnormalize.pkl",
+      "training_config_path": "outputs\\models\\ppo_operational\\observed_financial\\seed_42\\training_config.json",
+      "classification": "STATE_DEPENDENT_POLICY"
+    },
+    "selected_recovered_financial_ppo": {
+      "agent_id": "recovered_financial",
+      "calibration_mode": "recovered_calibration",
+      "checkpoint_label": "checkpoint_22288",
+      "model_path": "outputs\\models\\ppo_operational\\recovered_financial\\seed_42\\checkpoints\\pilot_recovered_financial_22288_steps.zip",
+      "vecnormalize_path": "outputs\\models\\ppo_operational\\recovered_financial\\seed_42\\vecnormalize.pkl",
+      "training_config_path": "outputs\\models\\ppo_operational\\recovered_financial\\seed_42\\training_config.json",
+      "classification": "MOSTLY_ZERO_BUT_STATE_DEPENDENT"
+    }
+  },
+  "limitations": [
+    "Only one PPO training seed is available.",
+    "Original immutable 10k final models were overwritten by resume training.",
+    "Sustainability PPO is not evaluated because lambda wiring remains under review."
+  ]
+}

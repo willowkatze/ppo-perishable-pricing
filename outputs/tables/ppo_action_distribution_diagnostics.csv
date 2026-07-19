@@ -1,0 +1,2 @@
+agent_id,stage,action_0_share,action_1_share,action_2_share,action_3_share,action_4_share,action_5_share,average_markdown,zero_action_collapse_flag,max_action_collapse_flag
+recovered_financial,pilot,1.0,0.0,0.0,0.0,0.0,0.0,0.0,True,False

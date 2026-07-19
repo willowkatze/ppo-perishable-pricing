@@ -1,0 +1,9 @@
+figure_file,report_section,main_text_or_appendix,presentation_priority,key_message,required_source_table,ready_status
+outputs/figures/final_report/figure_ppo_validation_return_over_training.png,PPO training,main_text,1,Checkpoint selection and non-monotonic training.,outputs/tables/final_ppo_training_curve_data.csv,READY
+outputs/figures/final_report/figure_recovered_action_distribution_over_training.png,Policy behavior,main_text,2,Recovered policy becomes conservative and collapses later.,outputs/tables/final_ppo_training_curve_data.csv,READY
+outputs/figures/final_report/figure_ppo_vs_baselines_normalized_profit.png,Financial validation,main_text,3,Always-zero beats both PPO policies; recovered beats observed.,outputs/tables/ppo_financial_paired_validation_summary.csv,READY
+outputs/figures/final_report/figure_financial_markdown_opportunity_map.png,Decision opportunity,main_text,4,Sparse positive markdown opportunities exist.,outputs/tables/financial_markdown_oracle_diagnostic.csv,READY
+outputs/figures/final_report/figure_ppo_vs_oracle_error_decomposition.png,Decision quality,main_text,5,PPO mainly loses value through unnecessary markdown.,outputs/tables/financial_markdown_ppo_regret.csv,READY
+outputs/figures/final_report/figure_empirical_profit_waste_tradeoff.png,Sustainability,main_text,6,Empirical profit-waste trade-off over finite policies.,outputs/tables/sustainability_tradeoff_vs_always_zero.csv,READY
+outputs/figures/final_report/figure_oracle_action_values_by_state.png,Decision quality,appendix,7,Representative state action-value gaps.,outputs/tables/financial_markdown_multistep_action_values.csv,READY
+outputs/figures/final_report/figure_waste_reduction_efficiency.png,Sustainability,appendix,8,Efficiency of waste reduction relative to profit sacrifice.,outputs/tables/sustainability_waste_reduction_efficiency.csv,READY

@@ -1,0 +1,8 @@
+label,count,share,rule
+confirmed_or_likely_uncensored,12733,0.4375601374570447,
+possible_stockout,16367,0.5624398625429553,
+ambiguous_inventory_state,0,0.0,
+uncensored_training_flag,12733,0.4375601374570447,
+rule_observed_sales_demand,29100,1.0,observed_sales_demand equals original sale_amount/sales_qty.
+rule_uncensored_training_flag,29100,1.0,"possible_stockout_flag is false, sales is non-negative, and inventory value is not missing."
+rule_possible_stockout,29100,1.0,possible_stockout_flag from diagnostic zero-inventory/stockout definition; not latent-demand truth.

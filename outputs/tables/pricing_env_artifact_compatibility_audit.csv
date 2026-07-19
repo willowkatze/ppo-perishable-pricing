@@ -1,0 +1,4 @@
+artifact,path,load_status,model_type,feature_count,has_encoders,prediction_cap,self_contained_pipeline,notes
+observed,outputs\models\discount_response_observed.joblib,loaded_with_FittedResponseModel_compatibility_shim,hist_gradient_boosting,20,True,11.4,False,Joblib artifact needs compatibility shim because wrapper class was saved from script context.
+recovered,outputs\models\discount_response_recovered.joblib,loaded_with_FittedResponseModel_compatibility_shim,hist_gradient_boosting,20,True,11.545929003706142,False,Joblib artifact needs compatibility shim because wrapper class was saved from script context.
+response_config,outputs\models\discount_response_config.json,loaded,"{""observed"": ""hist_gradient_boosting"", ""recovered"": ""hist_gradient_boosting""}",20,True,,False,"Config supplies feature list, split boundaries, support range, and clipping rules."

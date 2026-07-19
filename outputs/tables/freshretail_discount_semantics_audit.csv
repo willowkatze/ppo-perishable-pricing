@@ -1,0 +1,19 @@
+metric,value,notes
+rows,4850000,
+discount_non_missing_share,1.0,
+discount_min,0.0,
+discount_p01,0.505,
+discount_median,0.991,
+discount_p99,1.0,
+discount_max,1.088,
+discount_equal_1_share,0.4861684536082474,Consistent with no-discount multiplier if interpretation is correct.
+discount_between_0_and_1_share,0.9999929896907217,"Rows where markdown_rate = 1 - discount is within [0, 1]."
+discount_above_1_share,7.010309278350515e-06,Above-one values prevent certainty about simple multiplier semantics.
+markdown_rate_non_missing_share,0.9999929896907217,markdown_rate set only where 0 <= discount <= 1.
+markdown_rate_min,0.0,
+markdown_rate_median,0.009000000000000008,
+markdown_rate_p90,0.262,
+markdown_rate_max,1.0,
+local_metadata_discount_hits,2,README.md; archive\prototype_kaggle\README.md
+discount_semantics_status,uncertain_multiplier_like,"Observed values mostly support multiplier behavior, but local metadata does not prove the field definition."
+stock_hour6_22_cnt_semantics_status,uncertain_count_or_duration,"Name and integer range suggest a count over hours 6-22, but no local dictionary was found."

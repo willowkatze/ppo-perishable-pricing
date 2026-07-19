@@ -1,0 +1,197 @@
+{
+  "created_at": "2026-07-19T22:59:55.993477+00:00",
+  "default_cli_stage": "smoke",
+  "primary_experiment_matrix": [
+    {
+      "agent_id": "observed_financial",
+      "calibration_mode": "observed_calibration",
+      "reward_mode": "financial"
+    },
+    {
+      "agent_id": "recovered_financial",
+      "calibration_mode": "recovered_calibration",
+      "reward_mode": "financial"
+    },
+    {
+      "agent_id": "observed_sustainability",
+      "calibration_mode": "observed_calibration",
+      "reward_mode": "sustainability"
+    },
+    {
+      "agent_id": "recovered_sustainability",
+      "calibration_mode": "recovered_calibration",
+      "reward_mode": "sustainability"
+    }
+  ],
+  "environment_parameters": {
+    "training_split": "train",
+    "validation_split": "validation",
+    "locked_test_split": "test",
+    "default_scenario_id": "core_008",
+    "promotion_context_mode": "derived_from_action",
+    "deterministic_demand_smoke": true,
+    "deterministic_demand_pilot_main": true,
+    "residual_noise_mode": "none",
+    "stochastic_demand_limitation": "train-only residual bootstrap not validated; deterministic demand is used."
+  },
+  "ppo_hyperparameters": {
+    "learning_rate": 0.0003,
+    "n_steps": 1024,
+    "batch_size": 256,
+    "n_epochs": 10,
+    "gamma": 0.99,
+    "gae_lambda": 0.95,
+    "clip_range": 0.2,
+    "ent_coef": 0.01,
+    "vf_coef": 0.5,
+    "max_grad_norm": 0.5,
+    "policy_kwargs": {
+      "net_arch": {
+        "pi": [
+          128,
+          128
+        ],
+        "vf": [
+          128,
+          128
+        ]
+      },
+      "activation_fn": "Tanh"
+    }
+  },
+  "pilot_hyperparameter_variants": [
+    {
+      "config_id": "ppo_lr3e-4_ent0.01",
+      "learning_rate": 0.0003,
+      "ent_coef": 0.01
+    },
+    {
+      "config_id": "ppo_lr1e-4_ent0.01",
+      "learning_rate": 0.0001,
+      "ent_coef": 0.01
+    },
+    {
+      "config_id": "ppo_lr3e-4_ent0.00",
+      "learning_rate": 0.0003,
+      "ent_coef": 0.0
+    },
+    {
+      "config_id": "ppo_lr3e-4_ent0.02",
+      "learning_rate": 0.0003,
+      "ent_coef": 0.02
+    }
+  ],
+  "evaluation_frequency": {
+    "pilot": 10000,
+    "main": 25000
+  },
+  "checkpoint_frequency": {
+    "smoke": 1000,
+    "pilot": 10000,
+    "main": 25000
+  },
+  "seed_list": [
+    42,
+    123,
+    2026
+  ],
+  "selected_sustainability_lambda": null,
+  "lambda_selection_rule": "validation diagnostics only; if no candidate qualifies, sustainability training is blocked for pilot/main.",
+  "baseline_policies": [
+    "always_0pct",
+    "always_10pct",
+    "always_20pct",
+    "always_40pct",
+    "random_policy",
+    "expiry_threshold_rule",
+    "inventory_coverage_rule"
+  ],
+  "scenario_ids": {
+    "training": [
+      "core_008"
+    ],
+    "robustness": [
+      "core_005",
+      "core_008",
+      "core_014",
+      "core_007",
+      "core_009",
+      "sensitivity_023"
+    ]
+  },
+  "model_selection_metric": {
+    "financial": "mean validation normalized financial return",
+    "sustainability": "mean validation sustainability return using selected lambda"
+  },
+  "output_paths": {
+    "models": "outputs\\models\\ppo_operational",
+    "tables": "outputs\\tables",
+    "figures": "outputs\\figures\\ppo_operational"
+  },
+  "artifact_hashes": {
+    "pricing_env_operational.py": {
+      "path": "src\\pricing_env_operational.py",
+      "sha256": "a918db52b3f10cd6877cc7c4d8946fe58c8a1e6df33ad3ee370bfd499c5e7116",
+      "exists": true,
+      "bytes": 36495
+    },
+    "pricing_env_operational_config.json": {
+      "path": "outputs\\configs\\pricing_env_operational_config.json",
+      "sha256": "7a05a111a299425edb5c7a41456a70a68c05c94b8a38d5182871fa014c60691e",
+      "exists": true,
+      "bytes": 4165
+    },
+    "perishability_master_config.json": {
+      "path": "outputs\\configs\\perishability_master_config.json",
+      "sha256": "ffcf13b6fd0fbb22e82d30ab32be50c908c4e8f3fd8a60495d2652ab4773b2eb",
+      "exists": true,
+      "bytes": 2356
+    },
+    "discount_response_observed.joblib": {
+      "path": "C:\\Users\\26446\\Desktop\\ppo-perishable-pricing-github-archive\\outputs\\models\\discount_response_observed.joblib",
+      "sha256": null,
+      "exists": false,
+      "bytes": null
+    },
+    "discount_response_recovered.joblib": {
+      "path": "C:\\Users\\26446\\Desktop\\ppo-perishable-pricing-github-archive\\outputs\\models\\discount_response_recovered.joblib",
+      "sha256": null,
+      "exists": false,
+      "bytes": null
+    },
+    "discount_response_config.json": {
+      "path": "outputs\\models\\discount_response_config.json",
+      "sha256": "6db90cbf3f355b18d622049f57d07eedfc089a318971e208cb41c6896acb3042",
+      "exists": true,
+      "bytes": 3322
+    },
+    "freshretail_demand_recovered.parquet": {
+      "path": "C:\\Users\\26446\\Desktop\\ppo-perishable-pricing-github-archive\\data\\freshretail\\processed\\freshretail_demand_recovered.parquet",
+      "sha256": null,
+      "exists": false,
+      "bytes": null
+    }
+  },
+  "software_versions": {
+    "python": "3.13.9 | packaged by Anaconda, Inc. | (main, Oct 21 2025, 19:09:58) [MSC v.1929 64 bit (AMD64)]",
+    "platform": "Windows-11-10.0.22000-SP0",
+    "numpy": "2.3.5",
+    "pandas": "2.3.3",
+    "torch": "2.13.0+cpu"
+  },
+  "transmission_thresholds": {
+    "material_action_distribution_l1": 0.25,
+    "moderate_action_distribution_l1": 0.1,
+    "material_average_markdown_difference": 0.05
+  },
+  "limitations": [
+    "Observed sales are not confirmed latent demand.",
+    "Recovered demand is model-estimated.",
+    "Markdown response is observational and model-implied.",
+    "Actual latent demand during stockouts remains unobserved.",
+    "Shelf life, inventory age, and physical waste are simulated.",
+    "Procurement and disposal costs are normalized assumptions.",
+    "Promotion-context mapping is an environment assumption.",
+    "Results support controlled RL experiments, not direct retailer deployment claims."
+  ]
+}
