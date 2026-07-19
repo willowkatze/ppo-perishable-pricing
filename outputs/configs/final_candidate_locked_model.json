@@ -1,0 +1,14 @@
+{
+  "final_validation_status": "PLANNING_VALUE_EXISTS_BUT_NOT_LEARNED",
+  "model_selection_status": "NO_LEARNED_MODEL_BEATS_BASELINE",
+  "test_split_used": false,
+  "final_model_locked": false,
+  "locked_baseline": "always_0pct",
+  "high_risk_population": "HIGH_RISK_B",
+  "expanded_validation_manifest": "outputs/manifests/high_risk_b_expanded_validation_manifest.csv",
+  "planning_expanded_mean_gain": 0.010792446969289078,
+  "planning_expanded_ci": [
+    -0.025570684320289874,
+    0.03909370846781676
+  ]
+}

@@ -1,0 +1,7 @@
+{
+  "per_period_reward": "sales_revenue_t - disposal_cost_t - initial_procurement_cost_if_first_period + terminal_salvage_if_terminal",
+  "initial_procurement_cost": "procurement_cost_ratio * initial_inventory charged at reset or first period.",
+  "avoid_double_counting": true,
+  "sales_revenue_t": "(1 - markdown_rate_t) * units_sold_t",
+  "disposal_cost_t": "disposal_cost_ratio * expired_units_t"
+}

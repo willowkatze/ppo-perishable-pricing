@@ -1,0 +1,17 @@
+﻿cff-version: 1.2.0
+title: "Stockout-Aware Dynamic Markdown Decisions for Perishable Retail"
+message: "If you use this repository, please cite the project and separately cite FreshRetailNet-50K according to the dataset authors' instructions."
+type: software
+authors:
+  - family-names: "willowkatze"
+repository-code: "https://github.com/willowkatze/ppo-perishable-pricing"
+license: MIT
+version: "1.0.0"
+date-released: "2026-07-20"
+keywords:
+  - reinforcement-learning
+  - perishable-inventory
+  - markdown-pricing
+  - stockout-aware-demand
+  - dqn
+  - ppo

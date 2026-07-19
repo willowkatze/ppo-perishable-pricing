@@ -1,0 +1,88 @@
+{
+  "lock_status": "FINAL_CANDIDATE_LOCKED_BEFORE_TEST",
+  "model_name": "STANDARD_DQN_EQUAL_WEIGHT_Q_ENSEMBLE",
+  "component_model_ids": [
+    "STANDARD_DQN__seed_42__20000",
+    "STANDARD_DQN__seed_123__15000",
+    "STANDARD_DQN__seed_456__25000"
+  ],
+  "components": [
+    {
+      "seed": 42,
+      "checkpoint_timesteps": 20000,
+      "model_id": "STANDARD_DQN__seed_42__20000",
+      "model_path": "outputs\\models\\dqn_high_risk_b\\STANDARD_DQN\\seed_42\\checkpoints\\dqn_20000_steps.zip",
+      "model_sha256": "e73c1513af8485ca6cee40c9148e781d68387b9a9e0b449d642abdfbe4b26637",
+      "vecnormalize_path": "outputs\\models\\dqn_high_risk_b\\STANDARD_DQN\\seed_42\\checkpoints\\vecnormalize_20000_steps.pkl",
+      "vecnormalize_sha256": "09615d328e19a4b447002b1cc1105fe7d100ae390e1cd17e3a611fa63231b180"
+    },
+    {
+      "seed": 123,
+      "checkpoint_timesteps": 15000,
+      "model_id": "STANDARD_DQN__seed_123__15000",
+      "model_path": "outputs\\models\\dqn_high_risk_b\\STANDARD_DQN\\seed_123\\checkpoints\\dqn_15000_steps.zip",
+      "model_sha256": "43496f6b08fd941ad362e1ed5df9ca95a36532fc33c4be7bd9ea9fc2d7f89125",
+      "vecnormalize_path": "outputs\\models\\dqn_high_risk_b\\STANDARD_DQN\\seed_123\\checkpoints\\vecnormalize_15000_steps.pkl",
+      "vecnormalize_sha256": "17b3634824ac4f09f6b5c6e8d419ae6048aa8b27e0c46c6b6ff255d6e2eed34f"
+    },
+    {
+      "seed": 456,
+      "checkpoint_timesteps": 25000,
+      "model_id": "STANDARD_DQN__seed_456__25000",
+      "model_path": "outputs\\models\\dqn_high_risk_b\\STANDARD_DQN\\seed_456\\checkpoints\\dqn_25000_steps.zip",
+      "model_sha256": "fe699c0fc11810ad6aa6a69af2f3d49a7682eb9cc08feb2dcfde7e113bbb9493",
+      "vecnormalize_path": "outputs\\models\\dqn_high_risk_b\\STANDARD_DQN\\seed_456\\checkpoints\\vecnormalize_25000_steps.pkl",
+      "vecnormalize_sha256": "2c492b2e4669f05d0a4bbc9265698dfc7c3baa97018bc471e3445416613ee8c3"
+    }
+  ],
+  "preprocessing": "Each component uses its own saved VecNormalize observation statistics; norm_reward=False.",
+  "ensemble_rule": "Q_ensemble(s,a)=mean(Q_seed42(s,a), Q_seed123(s,a), Q_seed456(s,a)); action=argmax_a Q_ensemble(s,a)",
+  "ensemble_weights": {
+    "42": 0.3333333333333333,
+    "123": 0.3333333333333333,
+    "456": 0.3333333333333333
+  },
+  "deterministic_inference": true,
+  "population_id": "HIGH_RISK_B",
+  "high_risk_b_definition": {
+    "population_id": "HIGH_RISK_B",
+    "description": "Coverage >= 1.5, fraction expiring within two days >= 0.50, and projected sell-through proxy <= 0.75.",
+    "calibration_mode": "recovered_calibration",
+    "scenario_ids": "core_002|core_003|core_005|core_006|core_009|core_012",
+    "min_inventory_coverage": 1.5,
+    "min_fraction_expiring_within_two_days": 0.5,
+    "max_projected_sell_through": 0.75,
+    "max_remaining_shelf_life": NaN,
+    "state_count": 40,
+    "episode_count_proxy": 7,
+    "share_of_total_episodes_proxy": 0.1458333333333333,
+    "always_zero_mean_waste_rate": 0.1483779384894419,
+    "mean_inventory_coverage": 4.590383559465408,
+    "mean_fraction_expiring_within_two_days": 0.7665427267551422,
+    "mean_projected_sell_through_proxy": 0.173119561178709,
+    "selected_for_lock": true,
+    "selection_reason": "Operationally interpretable exception-management definition; not selected using PPO wins."
+  },
+  "calibration_mode": "recovered_calibration",
+  "locked_baseline": "always_0pct",
+  "action_mapping": {
+    "0": 0.0,
+    "1": 0.05,
+    "2": 0.1,
+    "3": 0.15,
+    "4": 0.2,
+    "5": 0.3
+  },
+  "reward_mode": "financial",
+  "lambda_waste": 0.1,
+  "accounting_version": "existing pricing_env_operational normalized accounting profit",
+  "validation_manifest": "outputs\\manifests\\high_risk_b_expanded_validation_manifest.csv",
+  "validation_manifest_sha256": "bd6aa08efcfbc21a2e1e2f541197b4d2ce9d11343823dc848883bb5d5afd317b",
+  "test_success_criteria": {
+    "primary_endpoint": "paired normalized-profit gain = ensemble - always_0pct",
+    "primary_success_condition": "mean paired normalized-profit gain > 0 with valid accounting and pairing",
+    "strict_secondary_robustness_diagnostic": "win_share >= 0.60"
+  },
+  "locked_utc": "2026-07-19T11:44:07.883726+00:00",
+  "test_split_accessed_before_lock": false
+}

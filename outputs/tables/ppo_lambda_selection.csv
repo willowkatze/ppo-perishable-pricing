@@ -1,0 +1,5 @@
+candidate_lambda,diagnostic_waste_reward_share,qualifies,selection_rule,uses_test_split,selected,status
+0.1,0.0,False,"smallest lambda with approximate waste reward share in [0.10, 0.40]",False,False,PPO_SUSTAINABILITY_LAMBDA_REQUIRES_REVIEW
+0.25,0.0,False,"smallest lambda with approximate waste reward share in [0.10, 0.40]",False,False,PPO_SUSTAINABILITY_LAMBDA_REQUIRES_REVIEW
+0.5,0.0,False,"smallest lambda with approximate waste reward share in [0.10, 0.40]",False,False,PPO_SUSTAINABILITY_LAMBDA_REQUIRES_REVIEW
+1.0,0.0,False,"smallest lambda with approximate waste reward share in [0.10, 0.40]",False,False,PPO_SUSTAINABILITY_LAMBDA_REQUIRES_REVIEW

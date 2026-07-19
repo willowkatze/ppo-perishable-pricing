@@ -1,0 +1,13 @@
+required_constructor_parameter,actual_parameter_name,expected_value,compatibility_status,notes
+split,split,train/validation/test,pass,
+calibration_mode,calibration_mode,observed_calibration or recovered_calibration,pass,
+reward_mode,reward_mode,financial or sustainability,pass,
+lambda_waste,lambda_waste,float,pass,
+scenario_id,scenario_id,core_008,pass,
+deterministic_demand,deterministic_demand,bool,pass,
+residual_noise_mode,residual_noise_mode,none/bootstrap,pass,
+promotion_context_mode,promotion_context_mode,derived_from_action,pass,
+random_seed,random_seed,int,pass,
+action_space,action_space,Discrete(6),pass,Discrete(6)
+observation_space,observation_space,finite Box containing reset observation,pass,"shape=(41,)"
+step API,step,"obs, reward, terminated, truncated, info",pass,"reset_info_keys=['accounting_profit', 'calibration_mode', 'cumulative_disposal_cost', 'cumulative_procurement_cost', 'cumulative_revenue', 'cumulative_sales', 'cumulative_waste', 'date', 'expired_units', 'extrapolation_flag', 'inventory_after', 'inventory_before', 'markdown_rate', 'predicted_demand', 'product_id', 'profit_identity_error', 'promotion_context_mode', 'raw_financial_step', 'remaining_life_profile', 'reward_mode', 'sales', 'scenario_id', 'sell_through_rate', 'selling_price', 'step_conservation_error', 'stockout_flag', 'store_id', 'waste_rate', 'weak_support_flag']"

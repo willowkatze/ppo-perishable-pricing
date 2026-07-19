@@ -1,0 +1,5 @@
+audit_item,field,available,value,notes
+product_identifier,product_id,True,177,Numeric/anonymized product identifier; no food category is inferred.
+store_identifier,store_id,True,232,Store identifier available for grouping.
+category_field,category,True,1,Available as local field; semantic category names are not inferred unless explicit.
+products_by_category,category,True,177,unknown

@@ -1,32 +1,28 @@
-# Raw Dataset
+﻿# Raw Data
 
-## Dataset Name
+Raw datasets are not committed to this public repository.
 
-Managing Perishable Inventory Data
+## Primary Dataset
 
-## Kaggle Source Description
-
-This project expects the Managing Perishable Inventory Data dataset from Kaggle. The dataset must be downloaded manually by a user with Kaggle access.
-
-## Expected Filename
+FreshRetailNet-50K by Dingdong-Inc is the primary operational dataset used by the final project. Download it separately from Hugging Face according to the dataset license and terms:
 
 ```text
-perishable_goods_management.csv
+Dingdong-Inc/FreshRetailNet-50K
 ```
 
-## Expected Local Path
+Expected local raw files may include:
 
 ```text
-data/raw/perishable_goods_management.csv
+data/operational/raw/freshretail/raw/freshretail_train.parquet
+data/operational/raw/freshretail/raw/freshretail_eval.parquet
 ```
 
-## Git Exclusion
+## Derived Artifacts
 
-Raw data files are excluded from Git so the repository does not commit large or externally licensed dataset files.
+Processed data and fitted model artifacts are also excluded from the public Git archive by default. See:
 
-## Manual Download Instructions
+- `docs/data_and_assumptions.md`
+- `docs/reproducibility.md`
+- `outputs/models/MODEL_ARTIFACTS.md`
 
-1. Open Kaggle in a browser and locate the Managing Perishable Inventory Data dataset.
-2. Download the dataset according to Kaggle's terms.
-3. Place the CSV file in this directory with the expected filename above.
-4. Run project scripts only after confirming the file is present locally.
+The repository keeps source code, locked configs, selected result tables, report-ready figures, and checksum manifests, but not raw or restricted datasets.

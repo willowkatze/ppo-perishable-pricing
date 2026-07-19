@@ -1,0 +1,4 @@
+distribution,scenario_count,high_risk_share_estimate,oracle_positive_markdown_share,classification,notes
+original_training,1,0.0,0.2857142857142857,STRONGLY_IMBALANCED,"Original recovered PPO training used default scenario core_008, outside the six meaningful trade-off scenarios."
+scenario_balanced_training,6,0.7714285714285714,0.2857142857142857,BALANCED,Uses weighted exposure to meaningful scenarios; no oracle labels used during training.
+oracle_audit,6,0.2857142857142857,0.2857142857142857,diagnostic_reference,"Validation-state diagnostic, not training target."

@@ -1,0 +1,15 @@
+metric,value
+rows,4850000
+stores,898
+skus,865
+categories,1
+date_min,2024-03-28 00:00:00
+date_max,2024-07-02 00:00:00
+duplicate_store_sku_timestamp_rows,0
+sequence_count,50000
+sequence_length_min,97
+sequence_length_median,97.0
+sequence_length_max,97
+most_common_interval_hours,24.0
+irregular_interval_rate,0.0
+inference_inventory_timing,insufficient_metadata_to_determine_inventory_timing

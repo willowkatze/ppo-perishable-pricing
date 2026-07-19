@@ -1,0 +1,10 @@
+inventory_coverage_scenario,expected_demand_days_low,expected_demand_days_high,age_profile,bucket_rule,lower_inventory_bound,median_recovered_demand,upper_inventory_bound,source_type,notes
+lean_inventory,1.0,1.5,fresh_heavy,Weights increase with remaining life.,0.0,0.8,13.0,scenario_assumption,Inventory is represented as non-negative remaining-life buckets summing to initial inventory.
+lean_inventory,1.0,1.5,uniform,Equal weight across remaining-life buckets.,0.0,0.8,13.0,scenario_assumption,Inventory is represented as non-negative remaining-life buckets summing to initial inventory.
+lean_inventory,1.0,1.5,near_expiry_heavy,Weights increase near expiration.,0.0,0.8,13.0,scenario_assumption,Inventory is represented as non-negative remaining-life buckets summing to initial inventory.
+balanced_inventory,2.0,3.0,fresh_heavy,Weights increase with remaining life.,0.0,0.8,13.0,scenario_assumption,Inventory is represented as non-negative remaining-life buckets summing to initial inventory.
+balanced_inventory,2.0,3.0,uniform,Equal weight across remaining-life buckets.,0.0,0.8,13.0,scenario_assumption,Inventory is represented as non-negative remaining-life buckets summing to initial inventory.
+balanced_inventory,2.0,3.0,near_expiry_heavy,Weights increase near expiration.,0.0,0.8,13.0,scenario_assumption,Inventory is represented as non-negative remaining-life buckets summing to initial inventory.
+high_inventory,4.0,6.0,fresh_heavy,Weights increase with remaining life.,0.0,0.8,18.685967120550302,scenario_assumption,Inventory is represented as non-negative remaining-life buckets summing to initial inventory.
+high_inventory,4.0,6.0,uniform,Equal weight across remaining-life buckets.,0.0,0.8,18.685967120550302,scenario_assumption,Inventory is represented as non-negative remaining-life buckets summing to initial inventory.
+high_inventory,4.0,6.0,near_expiry_heavy,Weights increase near expiration.,0.0,0.8,18.685967120550302,scenario_assumption,Inventory is represented as non-negative remaining-life buckets summing to initial inventory.

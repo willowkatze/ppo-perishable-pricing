@@ -1,0 +1,3 @@
+agent_id,selected_policy_id,classification,mean_episode_return,mean_normalized_accounting_profit,mean_raw_accounting_profit,action_entropy,zero_action_share,selection_note
+observed_financial,observed_financial__checkpoint_22288,STATE_DEPENDENT_POLICY,0.41727229460802917,0.41727229460802917,1.0415602552719039,0.5318645395419033,0.45,Selected using validation metrics after finite/accounting and behavior checks.
+recovered_financial,recovered_financial__checkpoint_22288,MOSTLY_ZERO_BUT_STATE_DEPENDENT,0.43682878391244645,0.43682878391244645,1.295645437431443,0.3267520359871763,0.7916666666666667,Selected using validation metrics after finite/accounting and behavior checks.

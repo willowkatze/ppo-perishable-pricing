@@ -1,0 +1,21 @@
+feature,source,leakage_status,notes
+day_of_week,current_episode_date,no_future_target_after_reset,Dynamic lag features are updated from simulated episode outcomes after reset.
+week_index,current_episode_date,no_future_target_after_reset,Dynamic lag features are updated from simulated episode outcomes after reset.
+month,current_episode_date,no_future_target_after_reset,Dynamic lag features are updated from simulated episode outcomes after reset.
+weekend_flag,current_episode_date,no_future_target_after_reset,Dynamic lag features are updated from simulated episode outcomes after reset.
+trend_index,current_episode_date,no_future_target_after_reset,Dynamic lag features are updated from simulated episode outcomes after reset.
+store_id_encoded,saved_training_encoder,no_future_target_after_reset,Dynamic lag features are updated from simulated episode outcomes after reset.
+product_id_encoded,saved_training_encoder,no_future_target_after_reset,Dynamic lag features are updated from simulated episode outcomes after reset.
+lag_1_observed_sales,simulated_episode_history_after_reset,no_future_target_after_reset,Dynamic lag features are updated from simulated episode outcomes after reset.
+lag_7_observed_sales,pre_episode_history_until_available_then_simulated_history,no_future_target_after_reset,Dynamic lag features are updated from simulated episode outcomes after reset.
+rolling_mean_7_observed_sales,pre_episode_history_until_available_then_simulated_history,no_future_target_after_reset,Dynamic lag features are updated from simulated episode outcomes after reset.
+rolling_mean_7_recovered_demand,pre_episode_history_until_available_then_simulated_history,no_future_target_after_reset,Dynamic lag features are updated from simulated episode outcomes after reset.
+rolling_mean_14_observed_sales,pre_episode_history_until_available_then_simulated_history,no_future_target_after_reset,Dynamic lag features are updated from simulated episode outcomes after reset.
+previous_day_possible_stockout_flag,simulated_episode_history,no_future_target_after_reset,Dynamic lag features are updated from simulated episode outcomes after reset.
+markdown_rate,agent_action_current_step,no_future_target_after_reset,Dynamic lag features are updated from simulated episode outcomes after reset.
+activity_flag,promotion_context_mode=derived_from_action,no_future_target_after_reset,Dynamic lag features are updated from simulated episode outcomes after reset.
+markdown_x_activity,unknown,requires_review,Dynamic lag features are updated from simulated episode outcomes after reset.
+stock_hour6_22_cnt,simulated_inventory_state,no_future_target_after_reset,Dynamic lag features are updated from simulated episode outcomes after reset.
+previous_day_inventory,simulated_inventory_state,no_future_target_after_reset,Dynamic lag features are updated from simulated episode outcomes after reset.
+possible_stockout_flag,simulated_inventory_state,no_future_target_after_reset,Dynamic lag features are updated from simulated episode outcomes after reset.
+avg_temperature,historical_exogenous_current_date,no_future_target_after_reset,Dynamic lag features are updated from simulated episode outcomes after reset.

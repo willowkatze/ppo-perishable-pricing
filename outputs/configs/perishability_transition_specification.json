@@ -1,0 +1,24 @@
+{
+  "not_gymnasium": true,
+  "logic": [
+    "Action sets markdown_rate.",
+    "Demand is generated from selected model-implied response.",
+    "Sales are min(demand, available_inventory).",
+    "Inventory issued FEFO: first-expire-first-out.",
+    "Unsold inventory ages by one period.",
+    "Units reaching zero remaining life after aging become physical waste.",
+    "Default experiment disables replenishment.",
+    "No negative inventory is allowed.",
+    "sales + ending_inventory + waste = beginning_inventory per period when no replenishment."
+  ],
+  "pseudo_code": [
+    "begin_inventory = sum(I_1..I_L)",
+    "demand = demand_model(state, markdown_rate)",
+    "sales = min(demand, begin_inventory)",
+    "issue sales from I_1 then I_2 ... I_L",
+    "waste = remaining I_1 after sales",
+    "I'_k = remaining I_{k+1} for k=1..L-1",
+    "I'_L = 0 when replenishment disabled",
+    "assert begin_inventory == sales + waste + sum(I')"
+  ]
+}

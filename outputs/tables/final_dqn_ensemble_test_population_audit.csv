@@ -1,0 +1,8 @@
+metric,value,details
+eligible_test_episodes,60,
+test_scenarios,1,core_002
+validation_episode_overlap_count,0,episode_id namespace includes split
+store_product_overlap_with_validation,not_applicable_without_validation_store_product_manifest,FreshRetail split design is temporal/split-contained; no threshold changed.
+scenario_count__core_002,60,
+inventory_risk_distribution,HIGH_RISK_B_locked,coverage threshold inherited from lock
+expiry_risk_distribution,HIGH_RISK_B_locked,fraction-expiring-within-two-days threshold inherited from lock

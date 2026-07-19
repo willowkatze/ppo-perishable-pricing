@@ -1,0 +1,8 @@
+{
+  "status": "PLANNING_VALUE_EXISTS_BUT_DISTILLATION_FAILED",
+  "final_model_locked": false,
+  "test_split_used": false,
+  "reason": "No distilled policy met all validation eligibility rules.",
+  "locked_baseline": "always_0pct",
+  "population": "HIGH_RISK_B"
+}

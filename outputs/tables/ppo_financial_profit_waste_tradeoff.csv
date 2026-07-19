@@ -1,0 +1,11 @@
+policy_id,average_markdown,normalized_accounting_profit,sell_through_rate,waste_rate,dominated_within_evaluated_set,description
+always_0pct,0.0,0.44999999999999984,1.0,0.0,False,empirical profit-waste trade-off set
+always_10pct,0.0,0.34999999999999987,1.0,0.0,True,empirical profit-waste trade-off set
+always_20pct,0.0,0.24999999999999994,1.0,0.0,True,empirical profit-waste trade-off set
+always_40pct,0.0,0.04999999999999991,1.0,0.0,True,empirical profit-waste trade-off set
+always_5pct,0.0,0.39999999999999997,1.0,0.0,True,empirical profit-waste trade-off set
+expiry_threshold_rule,0.0,0.3498231727573856,1.0,0.0,True,empirical profit-waste trade-off set
+inventory_coverage_rule,0.0,0.22548186640065254,1.0,0.0,True,empirical profit-waste trade-off set
+random_policy,0.0,0.2812041893536145,1.0,0.0,True,empirical profit-waste trade-off set
+selected_observed_financial_ppo,0.0,0.41727229460802917,1.0,0.0,True,empirical profit-waste trade-off set
+selected_recovered_financial_ppo,0.0,0.43682878391244656,1.0,0.0,True,empirical profit-waste trade-off set

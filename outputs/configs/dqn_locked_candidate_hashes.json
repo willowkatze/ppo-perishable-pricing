@@ -1,0 +1,37 @@
+[
+  {
+    "path": "outputs\\tables\\dqn_checkpoint_evaluation_all_seeds.csv",
+    "sha256": "3bd7be96ef270fee34906e0b16b17c9119d3b7bc0ac6346de9871d32aa89046c",
+    "bytes": 13790
+  },
+  {
+    "path": "outputs\\tables\\dqn_seed_stability.csv",
+    "sha256": "1b1d4614627bdd155fcd87e401362642f266ac2316cf688309d0512eb8b50f18",
+    "bytes": 1259
+  },
+  {
+    "path": "outputs\\tables\\dqn_pooled_validation_results.csv",
+    "sha256": "830d4e2ed107f16f854dfc1e6c3a66592413141e38bec6d9c225b217d5935d45",
+    "bytes": 576
+  },
+  {
+    "path": "outputs\\tables\\dqn_seed_by_episode_profit_differences.csv",
+    "sha256": "9cc291aecd9ef25090699f13832268ecc1d425201973630797ff7ee2d77acf46",
+    "bytes": 19515
+  },
+  {
+    "path": "outputs\\tables\\dqn_worst_episode_diagnostics.csv",
+    "sha256": "7a7a4f4a9ac6cf860b147245dcfb76e66ddbad54fc9c9d90581b038657fcb58b",
+    "bytes": 1891
+  },
+  {
+    "path": "outputs\\tables\\dqn_canonical_candidate_selection.csv",
+    "sha256": "c73cd236d314143f828e410303a603c0b4b18a6ac4ef54ced253bf5fee80e0a5",
+    "bytes": 1472
+  },
+  {
+    "path": "outputs\\configs\\dqn_locked_candidate.json",
+    "sha256": "dbac94d26040bfaad160f354cf5a22be4dcdb99ab1b194b7c82a689607a0d48a",
+    "bytes": 3683
+  }
+]

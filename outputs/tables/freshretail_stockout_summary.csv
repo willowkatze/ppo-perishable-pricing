@@ -1,0 +1,13 @@
+metric,value
+rows,4850000
+stockout_observation_share,0.5597022680412371
+zero_stock_share,0.5597022680412371
+zero_sales_share,0.044396494845360825
+zero_stock_and_zero_sales_share,0.010461030927835051
+positive_sales_immediately_before_stockout_share,0.5370888659793814
+sequence_stockout_frequency_mean,0.5597022680412371
+sequences_with_any_stockout,50000
+stockout_duration_count,841237
+stockout_duration_median_observations,2.0
+stockout_duration_max_observations,80
+sales_appear_censored_during_stockout,not_clear_from_available_fields

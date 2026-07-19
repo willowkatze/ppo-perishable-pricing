@@ -1,0 +1,13 @@
+{
+  "full_price": 1.0,
+  "selling_price": "1.0 - markdown_rate",
+  "revenue": "sum(selling_price_t * units_sold_t)",
+  "procurement_cost": "procurement_cost_ratio * initial_inventory",
+  "procurement_cost_note": "Charged once for initial inventory; not charged again for sold or wasted units.",
+  "disposal_cost": "disposal_cost_ratio * total_waste_units",
+  "accounting_profit": "revenue - procurement_cost - disposal_cost + terminal_salvage_value",
+  "physical_waste_units": "sum(expired_units_t)",
+  "waste_rate": "physical_waste_units / initial_inventory",
+  "sell_through_rate": "total_units_sold / initial_inventory",
+  "terminal_inventory_treatment": "default no_salvage_value; sensitivity may use partial/full diagnostic salvage."
+}

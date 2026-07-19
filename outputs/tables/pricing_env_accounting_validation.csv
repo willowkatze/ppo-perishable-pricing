@@ -1,0 +1,2 @@
+maximum_step_conservation_error,maximum_episode_conservation_error,negative_inventory_events,sales_above_inventory_events,procurement_double_charge_events,maximum_reward_accounting_discrepancy,non_finite_observations,non_finite_rewards,split_boundary_violations
+4.440892098500626e-16,4.440892098500626e-16,0,0,0,0.0,0,0,0

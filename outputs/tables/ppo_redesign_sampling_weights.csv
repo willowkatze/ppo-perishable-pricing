@@ -1,0 +1,7 @@
+scenario_id,shelf_life_class,inventory_coverage,demand_target,always_zero_waste_rate,raw_sampling_weight,normalized_sampling_weight
+core_002,short_shelf_life,balanced_inventory,observed_sales_demand,0.0535416193538628,2.25,0.12857142857142856
+core_003,short_shelf_life,high_inventory,observed_sales_demand,0.3993287610379565,4.5,0.2571428571428571
+core_005,short_shelf_life,balanced_inventory,recovered_demand,0.0535416193538628,2.25,0.12857142857142856
+core_006,short_shelf_life,high_inventory,recovered_demand,0.3993287610379565,4.5,0.2571428571428571
+core_009,medium_shelf_life,high_inventory,observed_sales_demand,0.0001475421836564,2.0,0.11428571428571428
+core_012,medium_shelf_life,high_inventory,recovered_demand,0.0001475421836564,2.0,0.11428571428571428

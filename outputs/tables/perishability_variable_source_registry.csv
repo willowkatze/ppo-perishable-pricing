@@ -1,0 +1,21 @@
+variable,module,source_type,source_description,uncertainty,allowed_interpretation
+date,FreshRetailNet processing,observed,Calendar date from dt/timestamp.,low,Operational time index only.
+store_id,FreshRetailNet processing,observed,Anonymized store identifier.,low,Grouping key; no store semantics inferred.
+product_id,FreshRetailNet processing,observed,Anonymized product identifier.,low,Grouping key; no food category inferred.
+observed_sales_demand,latent_demand_recovery,observed,Observed sales quantity from sale_amount/sales_qty.,medium,"Observed sales, not confirmed latent demand."
+stock_hour6_22_cnt,FreshRetailNet processing,observed,Inventory-related count/status field.,high,Inventory context only; semantics partly uncertain.
+activity_flag,FreshRetailNet processing,observed,Promotion/activity flag.,medium,"Promotion context, not causal treatment."
+discount,FreshRetailNet processing,observed,Multiplier-like discount field.,medium,Preserved original field; semantics uncertain_multiplier_like.
+avg_temperature,FreshRetailNet processing,observed,Weather covariate.,low,Context feature.
+recovered_demand,latent_demand_recovery,model_estimated,Stockout-aware recovered demand estimate.,high,"Model estimate, not observed truth."
+model-implied markdown response,discount_response,model_estimated,Observed/recovered target response models.,high,"Observational model-implied curves, not causal counterfactuals."
+markdown_rate,FreshRetailNet processing,derived,1 - discount.,medium,Derived markdown rate under multiplier-like interpretation.
+lagged features,latent_demand_recovery / discount_response,derived,Prior-period sales/inventory features.,medium,Leakage-safe history variables.
+possible_stockout_flag,FreshRetailNet processing,derived,Diagnostic stockout-risk flag.,high,Not ground-truth stockout or latent demand.
+shelf_life_days,perishability_scenarios,scenario_assumption,Short/medium/long shelf-life classes.,high,Scenario assumption only.
+age distribution,perishability_scenarios,scenario_assumption,Fresh-heavy/uniform/near-expiry inventory buckets.,high,Simulated initial age composition.
+procurement cost ratio,perishability_scenarios,scenario_assumption,Normalized procurement cost / full price.,high,Economic scenario parameter.
+disposal cost ratio,perishability_scenarios,scenario_assumption,Disposal handling cost / full price.,high,Economic scenario parameter.
+expiration rule,perishability_scenarios,scenario_assumption,Units with one period remaining expire after the period.,high,Simulation rule.
+waste penalty,perishability_scenarios,scenario_assumption,Lambda weight on physical waste.,high,Reward-scenario parameter.
+terminal salvage value,perishability_scenarios,scenario_assumption,No/partial/full terminal valuation.,high,Diagnostic scenario parameter.

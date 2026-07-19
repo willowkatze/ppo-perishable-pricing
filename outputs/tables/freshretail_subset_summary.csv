@@ -1,0 +1,35 @@
+scope,metric,value
+loaded_full_selected_columns,rows,4850000
+loaded_full_selected_columns,stores,898
+loaded_full_selected_columns,skus,865
+loaded_full_selected_columns,categories,1
+loaded_full_selected_columns,time_min,2024-03-28 00:00:00
+loaded_full_selected_columns,time_max,2024-07-02 00:00:00
+loaded_full_selected_columns,stockout_rate,0.5597022680412371
+loaded_full_selected_columns,promotion_rate,0.3749041237113402
+loaded_full_selected_columns,discount_min,0.0
+loaded_full_selected_columns,discount_median,0.991
+loaded_full_selected_columns,discount_max,1.088
+loaded_full_selected_columns,mean_sales,1.0126246
+loaded_full_selected_columns,median_sales,0.7
+loaded_full_selected_columns,sequence_length_min,97
+loaded_full_selected_columns,sequence_length_median,97.0
+loaded_full_selected_columns,sequence_length_max,97
+loaded_full_selected_columns,memory_mb,1187.2427310943604
+selected_subset,rows,899
+selected_subset,stores,30
+selected_subset,skus,9
+selected_subset,categories,1
+selected_subset,time_min,2024-03-28 00:00:00
+selected_subset,time_max,2024-04-25 00:00:00
+selected_subset,stockout_rate,0.7408231368186874
+selected_subset,promotion_rate,0.681868743047831
+selected_subset,discount_min,0.559
+selected_subset,discount_median,0.834
+selected_subset,discount_max,1.0
+selected_subset,mean_sales,1.1734816462736375
+selected_subset,median_sales,0.9
+selected_subset,sequence_length_min,29
+selected_subset,sequence_length_median,29.0
+selected_subset,sequence_length_max,29
+selected_subset,memory_mb,0.2721281051635742

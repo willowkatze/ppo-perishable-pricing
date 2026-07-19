@@ -1,0 +1,3 @@
+agent_id,expected_policy,status,note
+observed_financial,original_10k,missing,The 10k final_model.zip was overwritten by the 30k resume run; no immutable 10k copy was found.
+recovered_financial,original_10k,missing,The 10k final_model.zip was overwritten by the 30k resume run; no immutable 10k copy was found.

@@ -1,0 +1,28 @@
+{
+  "thresholds": {
+    "negligible_waste_rate": 1e-06,
+    "meaningful_waste_reduction": 0.0001,
+    "meaningful_profit_tradeoff": 0.0001,
+    "usable_lambda_waste_share_low": 0.1,
+    "usable_lambda_waste_share_high": 0.4
+  },
+  "episodes_per_scenario_policy": 8,
+  "policies": [
+    "always_0pct",
+    "always_5pct",
+    "always_10pct",
+    "always_20pct",
+    "always_40pct",
+    "expiry_threshold_rule",
+    "inventory_coverage_rule"
+  ],
+  "lambda_values": [
+    0.1,
+    0.25,
+    0.5,
+    1.0
+  ],
+  "validation_split_only": true,
+  "test_split_used": false,
+  "scenario_interface_note": "OperationalPerishablePricingEnv currently loads perishability_core_scenario_grid.csv only."
+}

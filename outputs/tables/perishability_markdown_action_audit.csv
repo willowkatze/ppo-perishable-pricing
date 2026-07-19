@@ -1,0 +1,59 @@
+scope,segment,rows,share,store_count,product_count,notes
+overall,markdown_rate == 0,13897,0.4775601374570447,225.0,174.0,100% markdown is not assumed to be a normal future commercial action.
+overall,0 < markdown_rate <= 0.10,5012,0.17223367697594502,204.0,159.0,100% markdown is not assumed to be a normal future commercial action.
+overall,0.10 < markdown_rate <= 0.20,5382,0.1849484536082474,190.0,143.0,100% markdown is not assumed to be a normal future commercial action.
+overall,0.20 < markdown_rate <= 0.30,2706,0.09298969072164949,140.0,99.0,100% markdown is not assumed to be a normal future commercial action.
+overall,0.30 < markdown_rate <= 0.40,1490,0.05120274914089347,72.0,50.0,100% markdown is not assumed to be a normal future commercial action.
+overall,0.40 < markdown_rate <= 0.50,364,0.012508591065292096,35.0,24.0,100% markdown is not assumed to be a normal future commercial action.
+overall,0.50 < markdown_rate < 1.00,80,0.0027491408934707906,13.0,9.0,100% markdown is not assumed to be a normal future commercial action.
+overall,markdown_rate == 1.00,169,0.005807560137457045,3.0,2.0,100% markdown is not assumed to be a normal future commercial action.
+high_markdown_gt_0_40_by_product_id,267,166,0.2707993474714519,,,Concentration audit for high markdown observations.
+high_markdown_gt_0_40_by_product_id,104,76,0.12398042414355628,,,Concentration audit for high markdown observations.
+high_markdown_gt_0_40_by_product_id,768,56,0.09135399673735727,,,Concentration audit for high markdown observations.
+high_markdown_gt_0_40_by_product_id,860,35,0.057096247960848286,,,Concentration audit for high markdown observations.
+high_markdown_gt_0_40_by_product_id,802,34,0.05546492659053834,,,Concentration audit for high markdown observations.
+high_markdown_gt_0_40_by_product_id,259,33,0.053833605220228384,,,Concentration audit for high markdown observations.
+high_markdown_gt_0_40_by_product_id,335,31,0.05057096247960848,,,Concentration audit for high markdown observations.
+high_markdown_gt_0_40_by_product_id,500,28,0.04567699836867863,,,Concentration audit for high markdown observations.
+high_markdown_gt_0_40_by_product_id,215,28,0.04567699836867863,,,Concentration audit for high markdown observations.
+high_markdown_gt_0_40_by_product_id,441,22,0.03588907014681892,,,Concentration audit for high markdown observations.
+high_markdown_gt_0_40_by_product_id,6,21,0.03425774877650897,,,Concentration audit for high markdown observations.
+high_markdown_gt_0_40_by_product_id,300,18,0.02936378466557912,,,Concentration audit for high markdown observations.
+high_markdown_gt_0_40_by_product_id,489,18,0.02936378466557912,,,Concentration audit for high markdown observations.
+high_markdown_gt_0_40_by_product_id,666,17,0.02773246329526917,,,Concentration audit for high markdown observations.
+high_markdown_gt_0_40_by_product_id,140,7,0.011419249592169658,,,Concentration audit for high markdown observations.
+high_markdown_gt_0_40_by_store_id,737,97,0.15823817292006526,,,Concentration audit for high markdown observations.
+high_markdown_gt_0_40_by_store_id,833,69,0.11256117455138662,,,Concentration audit for high markdown observations.
+high_markdown_gt_0_40_by_store_id,728,35,0.057096247960848286,,,Concentration audit for high markdown observations.
+high_markdown_gt_0_40_by_store_id,468,34,0.05546492659053834,,,Concentration audit for high markdown observations.
+high_markdown_gt_0_40_by_store_id,206,33,0.053833605220228384,,,Concentration audit for high markdown observations.
+high_markdown_gt_0_40_by_store_id,244,33,0.053833605220228384,,,Concentration audit for high markdown observations.
+high_markdown_gt_0_40_by_store_id,469,33,0.053833605220228384,,,Concentration audit for high markdown observations.
+high_markdown_gt_0_40_by_store_id,585,31,0.05057096247960848,,,Concentration audit for high markdown observations.
+high_markdown_gt_0_40_by_store_id,478,22,0.03588907014681892,,,Concentration audit for high markdown observations.
+high_markdown_gt_0_40_by_store_id,548,20,0.03262642740619902,,,Concentration audit for high markdown observations.
+high_markdown_gt_0_40_by_store_id,613,18,0.02936378466557912,,,Concentration audit for high markdown observations.
+high_markdown_gt_0_40_by_store_id,532,17,0.02773246329526917,,,Concentration audit for high markdown observations.
+high_markdown_gt_0_40_by_store_id,542,17,0.02773246329526917,,,Concentration audit for high markdown observations.
+high_markdown_gt_0_40_by_store_id,358,15,0.024469820554649267,,,Concentration audit for high markdown observations.
+high_markdown_gt_0_40_by_store_id,77,15,0.024469820554649267,,,Concentration audit for high markdown observations.
+high_markdown_gt_0_40_by_timestamp,2024-06-22 00:00:00,17,0.02773246329526917,,,Concentration audit for high markdown observations.
+high_markdown_gt_0_40_by_timestamp,2024-06-21 00:00:00,17,0.02773246329526917,,,Concentration audit for high markdown observations.
+high_markdown_gt_0_40_by_timestamp,2024-06-20 00:00:00,15,0.024469820554649267,,,Concentration audit for high markdown observations.
+high_markdown_gt_0_40_by_timestamp,2024-06-19 00:00:00,15,0.024469820554649267,,,Concentration audit for high markdown observations.
+high_markdown_gt_0_40_by_timestamp,2024-06-18 00:00:00,15,0.024469820554649267,,,Concentration audit for high markdown observations.
+high_markdown_gt_0_40_by_timestamp,2024-06-13 00:00:00,13,0.021207177814029365,,,Concentration audit for high markdown observations.
+high_markdown_gt_0_40_by_timestamp,2024-06-12 00:00:00,13,0.021207177814029365,,,Concentration audit for high markdown observations.
+high_markdown_gt_0_40_by_timestamp,2024-05-31 00:00:00,12,0.01957585644371941,,,Concentration audit for high markdown observations.
+high_markdown_gt_0_40_by_timestamp,2024-06-11 00:00:00,12,0.01957585644371941,,,Concentration audit for high markdown observations.
+high_markdown_gt_0_40_by_timestamp,2024-06-10 00:00:00,12,0.01957585644371941,,,Concentration audit for high markdown observations.
+high_markdown_gt_0_40_by_timestamp,2024-06-09 00:00:00,12,0.01957585644371941,,,Concentration audit for high markdown observations.
+high_markdown_gt_0_40_by_timestamp,2024-06-08 00:00:00,12,0.01957585644371941,,,Concentration audit for high markdown observations.
+high_markdown_gt_0_40_by_timestamp,2024-06-05 00:00:00,12,0.01957585644371941,,,Concentration audit for high markdown observations.
+high_markdown_gt_0_40_by_timestamp,2024-06-02 00:00:00,11,0.01794453507340946,,,Concentration audit for high markdown observations.
+high_markdown_gt_0_40_by_timestamp,2024-06-01 00:00:00,11,0.01794453507340946,,,Concentration audit for high markdown observations.
+high_markdown_gt_0_40_by_activity_flag,1,388,0.632952691680261,,,Concentration audit for high markdown observations.
+high_markdown_gt_0_40_by_activity_flag,0,225,0.367047308319739,,,Concentration audit for high markdown observations.
+high_markdown_gt_0_40_by_possible_stockout_flag,0,317,0.5171288743882545,,,Concentration audit for high markdown observations.
+high_markdown_gt_0_40_by_possible_stockout_flag,1,296,0.4828711256117455,,,Concentration audit for high markdown observations.
+future_action_support,"0.00,0.05,0.10,0.20,0.30,0.40",29100,1.0,232.0,177.0,Default future action support excludes >40% markdown despite observed extremes.

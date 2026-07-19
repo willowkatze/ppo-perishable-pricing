@@ -1,0 +1,14 @@
+check,passed,compatibility_status,detail
+observation_space_box,True,pass,"Box(0.0, [10. 10.  1.  1.  1.  1.  1.  1.  1.  1.  1.  1.  1.  1.  1.  1.  1.  1.
+  1.  1.  1. 20. 20. 20. 20. 20. 20. 20.  6.  6.  1. 40.  1.  1.  1.  1.
+  1.  1.  1.  1.  1.], (41,), float32)"
+observation_dtype_float32,True,pass,float32
+observation_finite_after_reset,True,pass,obs_dim=41
+action_space_discrete_6,True,pass,Discrete(6)
+reward_finite_for_all_actions,True,pass,reward_min=0.030983; reward_max=0.132566
+reward_scaling_reasonable,True,pass,max_abs_step_reward=0.132566
+episode_termination_available,True,pass,terminal rules implemented in env.step
+vecnormalize_handling,True,pass,"VecNormalize(norm_obs=True, norm_reward=False) used for DQN; validation uses saved obs stats only"
+train_validation_separated,True,pass,training split=train; validation split=validation
+validation_deterministic_paired,True,pass,validation_episodes=22
+test_split_not_used,True,pass,script never constructs split='test'

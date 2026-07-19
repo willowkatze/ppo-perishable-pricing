@@ -1,0 +1,11 @@
+metric,value
+action_0_preferred_share,0.4
+action_1_preferred_share,0.4
+action_2_preferred_share,0.0
+action_3_preferred_share,0.05
+action_4_preferred_share,0.0
+action_5_preferred_share,0.15
+optimal_action_entropy,1.1673871969099057
+dominant_action_share,0.4
+classification,NON_DEGENERATE
+dominant_action_warning_threshold,0.9

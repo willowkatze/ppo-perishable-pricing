@@ -1,37 +1,85 @@
-# Raw and processed datasets
-data/raw/*
-data/processed/*
-
-# Keep documentation and placeholders
-!data/raw/README.md
-!data/processed/.gitkeep
-
-# Python
+﻿# Python caches
 __pycache__/
 *.py[cod]
-*.egg-info/
+*$py.class
 .pytest_cache/
-.coverage
-htmlcov/
+.mypy_cache/
+.ruff_cache/
+.ipynb_checkpoints/
 
-# Virtual environments
+# Environments and local config
+.env
+.env.*
+!.env.example
 .venv/
 venv/
 env/
 
-# Jupyter
-.ipynb_checkpoints/
-
-# Models and generated outputs
-outputs/models/*
-!outputs/models/.gitkeep
-
-# Environment variables and secrets
-.env
-.env.*
-
-# IDE and operating system
-.vscode/
+# IDE and OS files
 .idea/
+.vscode/
 .DS_Store
 Thumbs.db
+
+# Logs and temporary files
+*.log
+*.tmp
+*.temp
+*.bak
+*.swp
+
+# Raw and derived datasets are not committed to the public repository.
+data/raw/*
+!data/raw/.gitkeep
+data/interim/*
+!data/interim/.gitkeep
+data/processed/*
+!data/processed/.gitkeep
+data/operational/raw/*
+!data/operational/raw/.gitkeep
+data/freshretail/processed/*
+!data/freshretail/processed/.gitkeep
+archive/prototype_kaggle/data/*
+
+# Training caches and experiment runtime directories
+outputs/checkpoints/
+outputs/debug/
+outputs/cache/
+wandb/
+runs/
+tensorboard/
+
+# Model binaries are excluded by default; archive hashes and metadata instead.
+*.zip
+*.tar
+*.tar.gz
+*.7z
+*.pkl
+*.joblib
+*.pt
+*.pth
+
+# Keep model documentation/configuration manifests.
+!outputs/models/MODEL_ARTIFACTS.md
+!outputs/configs/*.csv
+!outputs/configs/*.json
+!outputs/configs/*.sha256
+
+# Keep scientifically important result tables, manifests, and report-ready figures.
+!outputs/tables/**
+!outputs/manifests/**
+!outputs/figures/**
+
+# Legacy local prototype contains raw/derived data and machine-specific paths.
+archive/prototype_kaggle/
+docs/machine_specific_path_audit.csv
+
+# Public archive keeps model metadata only, not run directories or monitor logs.
+outputs/models/**
+!outputs/models/
+!outputs/models/.gitkeep
+!outputs/models/MODEL_ARTIFACTS.md
+!outputs/models/discount_response_config.json
+
+# Partial/interrupted outputs are not committed.
+*.partial.csv

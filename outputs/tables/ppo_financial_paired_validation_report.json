@@ -1,0 +1,135 @@
+{
+  "status": "PPO_FINANCIAL_BASELINE_VALIDATION_COMPLETE",
+  "best_baseline": "always_0pct",
+  "observed_ppo_classification": "WORSE_THAN_BEST_BASELINE",
+  "recovered_ppo_classification": "WORSE_THAN_BEST_BASELINE",
+  "paired_normalized_profit_differences": [
+    {
+      "left_policy": "selected_observed_financial_ppo",
+      "right_policy": "always_0pct",
+      "paired_mean_difference": -0.03272770539197073,
+      "bootstrap_ci_low": -0.039538955954964206,
+      "bootstrap_ci_high": -0.026408222312943947,
+      "win_share": 0.05,
+      "tie_share": 0.0,
+      "loss_share": 0.95
+    },
+    {
+      "left_policy": "selected_recovered_financial_ppo",
+      "right_policy": "always_0pct",
+      "paired_mean_difference": -0.013171216087553447,
+      "bootstrap_ci_low": -0.019445499939689012,
+      "bootstrap_ci_high": -0.006833545105676768,
+      "win_share": 0.0,
+      "tie_share": 0.5,
+      "loss_share": 0.5
+    },
+    {
+      "left_policy": "selected_observed_financial_ppo",
+      "right_policy": "expiry_threshold_rule",
+      "paired_mean_difference": 0.06744912185064361,
+      "bootstrap_ci_low": 0.057691973428682375,
+      "bootstrap_ci_high": 0.07720688637921282,
+      "win_share": 1.0,
+      "tie_share": 0.0,
+      "loss_share": 0.0
+    },
+    {
+      "left_policy": "selected_recovered_financial_ppo",
+      "right_policy": "expiry_threshold_rule",
+      "paired_mean_difference": 0.0870056111550609,
+      "bootstrap_ci_low": 0.07757283245576435,
+      "bootstrap_ci_high": 0.0953579941131392,
+      "win_share": 1.0,
+      "tie_share": 0.0,
+      "loss_share": 0.0
+    },
+    {
+      "left_policy": "selected_observed_financial_ppo",
+      "right_policy": "inventory_coverage_rule",
+      "paired_mean_difference": 0.19179042820737663,
+      "bootstrap_ci_low": 0.17566932471580143,
+      "bootstrap_ci_high": 0.20735950543361162,
+      "win_share": 1.0,
+      "tie_share": 0.0,
+      "loss_share": 0.0
+    },
+    {
+      "left_policy": "selected_recovered_financial_ppo",
+      "right_policy": "inventory_coverage_rule",
+      "paired_mean_difference": 0.2113469175117939,
+      "bootstrap_ci_low": 0.19946758564636907,
+      "bootstrap_ci_high": 0.22390789695712568,
+      "win_share": 1.0,
+      "tie_share": 0.0,
+      "loss_share": 0.0
+    },
+    {
+      "left_policy": "selected_recovered_financial_ppo",
+      "right_policy": "selected_observed_financial_ppo",
+      "paired_mean_difference": 0.019556489304417283,
+      "bootstrap_ci_low": 0.011413354567168011,
+      "bootstrap_ci_high": 0.028680484491916656,
+      "win_share": 0.85,
+      "tie_share": 0.0,
+      "loss_share": 0.15
+    }
+  ],
+  "profit_comparability_status": "RAW_PROFIT_NOT_DIRECTLY_SCALE_COMPARABLE",
+  "calibration_transmission_classification": "MATERIAL_POLICY_CHANGE",
+  "waste_rate_comparison": [
+    {
+      "policy_id": "always_0pct",
+      "mean": 0.0
+    },
+    {
+      "policy_id": "always_10pct",
+      "mean": 0.0
+    },
+    {
+      "policy_id": "always_20pct",
+      "mean": 0.0
+    },
+    {
+      "policy_id": "always_40pct",
+      "mean": 0.0
+    },
+    {
+      "policy_id": "always_5pct",
+      "mean": 0.0
+    },
+    {
+      "policy_id": "expiry_threshold_rule",
+      "mean": 0.0
+    },
+    {
+      "policy_id": "inventory_coverage_rule",
+      "mean": 0.0
+    },
+    {
+      "policy_id": "random_policy",
+      "mean": 0.0
+    },
+    {
+      "policy_id": "selected_observed_financial_ppo",
+      "mean": 0.0
+    },
+    {
+      "policy_id": "selected_recovered_financial_ppo",
+      "mean": 0.0
+    }
+  ],
+  "files_created": [
+    "outputs/configs/ppo_selected_financial_models.json",
+    "outputs/configs/ppo_selected_financial_model_hashes.json",
+    "outputs/tables/ppo_financial_paired_validation_episode_level.csv",
+    "outputs/tables/ppo_financial_paired_validation_summary.csv",
+    "outputs/tables/ppo_financial_paired_policy_comparisons.csv",
+    "outputs/tables/ppo_financial_profit_comparability_audit.csv",
+    "outputs/tables/ppo_financial_state_dependent_actions.csv",
+    "outputs/tables/ppo_financial_calibration_transmission.csv",
+    "outputs/tables/ppo_financial_baseline_value_classification.csv",
+    "outputs/tables/ppo_financial_profit_waste_tradeoff.csv"
+  ],
+  "recommended_next_step": "Write the financial PPO validation results; do not run main training until sustainability reward wiring is audited."
+}

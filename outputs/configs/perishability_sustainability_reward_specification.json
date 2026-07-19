@@ -1,0 +1,13 @@
+{
+  "financial_only": "R_financial = sales_revenue - initial_procurement_cost_when_applicable - disposal_cost",
+  "financial_plus_waste": "R_sustainable = normalized_financial_reward - lambda_waste * normalized_expired_units",
+  "constrained_later": "maximize accounting_profit subject to waste_rate <= threshold",
+  "lambda_waste_values": [
+    0.0,
+    0.1,
+    0.25,
+    0.5,
+    1.0
+  ],
+  "normalization": "financial terms and expired units divided by initial_inventory to keep comparable scale."
+}

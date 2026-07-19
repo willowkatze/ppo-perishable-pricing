@@ -1,0 +1,47 @@
+scope,metric,value
+loaded_full_selected_columns,rows,4850000
+loaded_full_selected_columns,stores,898
+loaded_full_selected_columns,skus,865
+loaded_full_selected_columns,categories,1
+loaded_full_selected_columns,time_min,2024-03-28 00:00:00
+loaded_full_selected_columns,time_max,2024-07-02 00:00:00
+loaded_full_selected_columns,stockout_rate,0.5597022680412371
+loaded_full_selected_columns,promotion_rate,0.3749041237113402
+loaded_full_selected_columns,discount_min,0.0
+loaded_full_selected_columns,discount_median,0.991
+loaded_full_selected_columns,discount_max,1.088
+loaded_full_selected_columns,markdown_rate_min,0.0
+loaded_full_selected_columns,markdown_rate_median,0.009000000000000008
+loaded_full_selected_columns,markdown_rate_max,1.0
+loaded_full_selected_columns,mean_sales,1.0126246
+loaded_full_selected_columns,median_sales,0.7
+loaded_full_selected_columns,inventory_median,0.0
+loaded_full_selected_columns,zero_inventory_rate,0.5597022680412371
+loaded_full_selected_columns,possible_stockout_rate,0.5597022680412371
+loaded_full_selected_columns,sequence_length_min,97
+loaded_full_selected_columns,sequence_length_median,97.0
+loaded_full_selected_columns,sequence_length_max,97
+loaded_full_selected_columns,memory_mb,1256.622537612915
+modeling_subset,rows,29100
+modeling_subset,stores,232
+modeling_subset,skus,177
+modeling_subset,categories,1
+modeling_subset,time_min,2024-03-28 00:00:00
+modeling_subset,time_max,2024-07-02 00:00:00
+modeling_subset,stockout_rate,0.5624398625429553
+modeling_subset,promotion_rate,0.3619931271477663
+modeling_subset,discount_min,0.0
+modeling_subset,discount_median,0.9864999949932098
+modeling_subset,discount_max,1.0
+modeling_subset,markdown_rate_min,0.0
+modeling_subset,markdown_rate_median,0.013500005006790161
+modeling_subset,markdown_rate_max,1.0
+modeling_subset,mean_sales,1.0762858762886598
+modeling_subset,median_sales,0.7
+modeling_subset,inventory_median,0.0
+modeling_subset,zero_inventory_rate,0.5624398625429553
+modeling_subset,possible_stockout_rate,0.5624398625429553
+modeling_subset,sequence_length_min,97
+modeling_subset,sequence_length_median,97.0
+modeling_subset,sequence_length_max,97
+modeling_subset,memory_mb,9.060115814208984

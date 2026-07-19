@@ -1,0 +1,9 @@
+audit_item,value,details
+sampling_unit,validation_episode,The 22 locked validation episodes are the independent units.
+unique_episodes,22,
+seeds,3,42|123|456
+dependence_structure,clustered_seed_repeats_within_episode,"Each episode appears once for each selected DQN seed, creating repeated dependent rows."
+current_bootstrap_method,row_bootstrap_over_seed_episode_rows,Existing pooled table has 66 rows from 22 episodes x 3 seeds.
+classification,PSEUDOREPLICATION_RISK,Do not treat the 66 seed-episode rows as independent.
+corrected_recommended_method,episode_cluster_bootstrap,Bootstrap episode IDs; either average seeds within episode first or resample episode clusters.
+existing_pooled_ci,"[0.0004968892569879, 0.0223528623641095]",Retained for audit trail only.

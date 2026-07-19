@@ -1,0 +1,3 @@
+policy_id,best_baseline,classification,normalized_profit_mean_difference_vs_best_baseline,bootstrap_ci_low,win_share,state_dependent_behavior_recorded
+selected_observed_financial_ppo,always_0pct,WORSE_THAN_BEST_BASELINE,-0.03272770539197073,-0.039538955954964206,0.05,True
+selected_recovered_financial_ppo,always_0pct,WORSE_THAN_BEST_BASELINE,-0.013171216087553447,-0.019445499939689012,0.0,True

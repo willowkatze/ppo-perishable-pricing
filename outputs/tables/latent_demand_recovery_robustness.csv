@@ -1,0 +1,6 @@
+check_type,setting,eligible_trainval_rows,aggregate_recovery_pct_reference,material_change_flag
+uncensored_definition,strict,9508,13.317193762122681,False
+uncensored_definition,moderate,10412,13.317193762122681,False
+recovery_cap,p0.99,12733,13.258289348667995,False
+recovery_cap,p0.995,12733,13.321708460899506,False
+alternative_model,selected_primary=extra_trees; compared_against=seasonal_baseline_in_validation_metrics,10412,13.317193762122681,False
