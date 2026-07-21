@@ -1,3 +1,70 @@
+﻿# PPO Experiment History
+
+This file consolidates earlier experiment notes and keeps the order of major decisions without repeating the main result tables.
+
+## Source: limited_horizon_planning_decision.md
+
+# Limited-Horizon Planning Decision
+
+## Locked Decision Task
+
+Population: `HIGH_RISK_B`.
+Split: validation only.
+Calibration: recovered-demand calibration.
+Locked baseline: `always_0pct`.
+
+## Planning Method
+
+Policy name: `limited_horizon_planning_policy`.
+Planning horizon: 3 decision steps.
+Branching factor: 6 markdown actions.
+Maximum candidate sequences per decision: 216.
+Continuation assumption: deterministic finite lookahead using the existing environment and reward/accounting mechanics.
+Terminal value handling: no learned terminal value beyond simulated rewards within the bounded horizon.
+Optimality: not a perfect oracle and not guaranteed globally optimal.
+
+## Primary Result
+
+Status: `DYNAMIC_VALUE_MODEST`.
+PPO retraining status: `PPO_RETRAINING_JUSTIFIED`.
+
+Mean paired normalized-profit gain: 0.010792.
+95% bootstrap CI: [-0.025571, 0.039094].
+Win/tie/loss: 0.818 / 0.091 / 0.091.
+Waste-rate difference: -0.138921.
+Sell-through difference: 0.138921.
+
+Best scenario: `core_003` with mean gain 0.039615.
+Worst scenario: `core_009` with mean gain -0.218162.
+
+Runtime: 684.8 seconds.
+
+## Interpretation
+
+If status is `DYNAMIC_VALUE_CONFIRMED`, the locked high-risk task contains realizable dynamic value under the current economic assumptions, and further RL training can be justified without using the test split.
+
+If status is `DYNAMIC_VALUE_MODEST`, dynamic value may exist but uncertainty remains; further RL work should be cautious and validation-locked.
+
+If status is `NO_DEFENSIBLE_DYNAMIC_MODEL`, the current environment and locked task do not support a defensible claim that dynamic markdown beats the strong baseline.
+
+## PPO Limitations
+
+This is a bounded limited-horizon planner, not a perfect oracle. It uses validation only and must not be tuned against the test split.
+
+
+
+## Source: planning_and_distillation_results.md
+
+锘? Planning and Distillation Results
+
+Limited-horizon planning on locked validation episodes found modest positive dynamic value in HIGH_RISK_B states. The planning evaluation justified a focused learned-policy attempt but did not itself constitute a deployable learned policy.
+
+Planning distillation generated labels for high-risk states and supported later DQN experiments. Distillation and planning were validation-locked and did not use the held-out test split for tuning.
+
+
+
+## Source: ppo_redesign_reporting_corrections.md
+
 # PPO Redesign Reporting Corrections
 
 ## Audit Outcome
@@ -48,3 +115,15 @@ Updated figures:
 ## Confirmation
 
 No PPO training was run. No training artifacts, environment mechanics, rewards, scenarios, demand models, response models, selected checkpoint files, or VecNormalize files were modified.
+
+
+
+## Source: ppo_results.md
+
+锘? PPO Results
+
+PPO was useful as a benchmark and diagnostic tool, but did not become the final successful model. Financial PPO variants exposed action-collapse risks, sensitivity to recovered versus observed demand calibration, and the need for paired validation against strong conservative baselines.
+
+Scenario-balanced PPO tested whether sparse positive-markdown opportunities were underrepresented. It produced diagnostic value, but did not support a final claim that PPO beat the no-markdown baseline.
+
+
