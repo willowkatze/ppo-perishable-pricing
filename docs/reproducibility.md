@@ -1,9 +1,26 @@
-﻿# Reproducibility
+# Reproducibility
 
-Use the repository as an archived research workflow. Raw FreshRetailNet files must be downloaded separately and placed in the expected data directory. Do not commit raw data.
+## Purpose
+Explain review and rerun process.
 
-Important entry points include data processing, demand recovery, environment validation, PPO evaluation, planning evaluation, DQN training/evaluation, statistical audits, and final held-out test evaluation under `src/`.
+## Inputs
+Local data/model artifacts excluded from GitHub.
 
-The final held-out test should not be rerun for model selection. If rerun for verification, it must use the locked protocol and must not be followed by post-test tuning.
+## Method
+Use numbered scripts; training is explicit and optional.
 
-Reproducibility metadata are stored under `outputs/configs/`, including file inventory and checksum manifests where available.
+## Implementation
+pip install -r requirements.txt; python -m pytest tests.
+
+## Main Results
+Final summary and key figures can be inspected without rerunning experiments.
+
+## Interpretation
+Archive supports review and partial reproduction.
+
+## Limitations
+Skipped tests mean missing excluded artifacts, not full reproduction.
+
+## Related Files
+scripts/README.md; pyproject.toml
+
