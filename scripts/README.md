@@ -10,4 +10,4 @@ Run scripts from the repository root. They wrap existing `src/` modules and do n
 6. `python scripts/06_evaluate_models.py` evaluates locked model artifacts.
 7. `python scripts/07_generate_report_outputs.py` regenerates final report outputs without retraining by design.
 
-Teacher review usually requires only `START_HERE.md`, `README.md`, `docs/`, and `results/`.
+
