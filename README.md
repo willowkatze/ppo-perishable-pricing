@@ -40,7 +40,7 @@ DQN is a value-based follow-up comparison for the discrete action space. It prod
 
 - [START_HERE.md](START_HERE.md): five-minute project entry.
 - [docs/](docs/): consolidated evidence-based methodology and results.
-- [results/](results/): curated teacher-facing tables and figures.
+- [results/](results/): curated tables and figures.
 - [archive/](archive/): intermediate tables, diagnostic figures, old configs, and experiment notes.
 - [src/](src/): implementation modules retained without import-path rewrites.
 - [scripts/](scripts/): numbered wrappers for reproducibility entry points.
