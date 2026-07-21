@@ -1,4 +1,4 @@
-﻿# PPO Perishable Pricing
+# PPO Perishable Pricing
 
 This repository contains a reinforcement-learning course project on markdown decisions for perishable fresh-retail inventory. The project uses FreshRetailNet-informed demand recovery, a semi-synthetic perishability environment, PPO experiments, a DQN comparison, and a locked held-out baseline ladder.
 
@@ -28,13 +28,19 @@ The full 13-policy comparison is in `results/tables/final_heldout_baseline_ladde
 
 ## Repository Structure
 
-- `START_HERE.md`: short project entry.
-- `docs/`: six main documentation files.
-- `src/`: implementation modules.
-- `scripts/`: numbered execution wrappers.
-- `configs/`: saved experiment and environment configs.
-- `results/`: final report tables and figures.
-- `archive/`: supporting outputs, audits, and experiment history.
+| Directory | Purpose | Important contents |
+|---|---|---|
+| `scripts/` | Numbered command-line entry points for the main workflow. | Data preparation, demand recovery, PPO/DQN training wrappers, locked DQN evaluation, final baseline ladder. |
+| `src/` | Active implementation modules. | FreshRetailNet processing, latent-demand recovery, discount response, scenario generation, Gymnasium environment, PPO/DQN training, locked evaluation, final report figures. |
+| `configs/` | Small repository-level configuration records. | Lightweight config files retained in Git; many locked runtime configs are generated under `outputs/configs/` and archived as records. |
+| `results/` | Selected final report artifacts. | Five main tables and seven main figures used by the written report. |
+| `outputs/` | Generated intermediate and diagnostic artifacts. | Local training, validation, diagnostic, manifest, model, and figure outputs; many large artifacts are excluded from Git. |
+| `docs/` | Main project explanation. | Research design, data, methods, results, conclusions, reproducibility. |
+| `tests/` | Lightweight code checks. | Environment and PPO pipeline tests; model-dependent tests may be skipped without local artifacts. |
+| `archive/` | Supporting history and traceability. | Consolidated experiment history, audits, intermediate tables, and archived source modules; not required for the main reading path. |
+| `data/` | Local raw and processed data location. | FreshRetailNet raw files and processed parquet files; raw data is not committed. |
+
+`outputs/` and `results/` have different roles. `outputs/` is the working area for generated intermediate diagnostics and model-run artifacts. `results/` contains only the selected final tables and figures intended for the report.
 
 ## Setup Quickstart
 
@@ -56,4 +62,3 @@ pip install -r requirements.txt
 ## Project Limitations
 
 The environment is semi-synthetic. Raw data and trained model binaries are excluded from GitHub. No learned policy beat always_0pct on the locked held-out test set.
-

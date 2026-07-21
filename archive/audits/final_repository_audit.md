@@ -337,8 +337,8 @@ CONSOLIDATION_INTEGRITY_CHECK_PASSED for the concise project archive. Full exper
 | Saved configs | PASS | configs/ | JSON configs are committed. | None. |
 | Random seeds recorded | PASS | configs/ and result tables | Seeds are present in experiment configs/results. | None. |
 | Data splits documented | PASS | outputs/manifests/; configs/evaluation/ | Validation and held-out manifests are committed. | None. |
-| Training scripts separate from notebooks | PASS | scripts/03_train_ppo.py; scripts/04_train_balanced_ppo.py; scripts/05_train_dqn.py | Training wrappers are separate. | None. |
-| Evaluation scripts do not train automatically | PASS | scripts/06_evaluate_models.py; scripts/07_generate_report_outputs.py | Evaluation/reporting wrappers are separate. | None. |
+| Training scripts separate from notebooks | PASS | scripts/03_train_original_ppo.py; scripts/04_train_balanced_ppo.py; scripts/05_train_dqn.py | Training wrappers are separate. | None. |
+| Evaluation scripts do not train automatically | PASS | scripts/06_evaluate_locked_dqn_ensemble.py; scripts/07_run_final_baseline_ladder.py | Evaluation/reporting wrappers are separate. | None. |
 | README commands valid | PASS | README.md | Setup commands are simple and non-training. | None. |
 | Relative paths | PARTIAL | src/ and docs/ | Some local artifact paths may exist in archived diagnostics, not main docs. | Keep main docs path-relative. |
 | No raw data committed | PASS | git-tracked scan | No raw data files are tracked. | None. |

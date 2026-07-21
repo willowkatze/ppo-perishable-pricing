@@ -1,4 +1,4 @@
-﻿"""Unit tests for OperationalPerishablePricingEnv."""
+"""Unit tests for OperationalPerishablePricingEnv."""
 
 from __future__ import annotations
 

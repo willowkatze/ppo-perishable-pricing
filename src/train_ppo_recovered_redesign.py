@@ -1,3 +1,11 @@
+"""Scenario-balanced PPO redesign training for recovered financial calibration.
+
+This module keeps the environment, reward, action space, and validation
+manifest fixed while changing only training-scenario sampling and one stable
+hyperparameter variant. The goal is to test decision precision, not to force a
+policy to beat the no-markdown baseline.
+"""
+
 from __future__ import annotations
 
 import argparse

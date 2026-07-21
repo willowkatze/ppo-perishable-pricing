@@ -969,9 +969,14 @@ def run() -> str:
     return status
 
 
+def main() -> None:
+    """Command-line entry point for stockout-aware demand recovery."""
+    run()
+
+
 if __name__ == "__main__":
     try:
-        run()
+        main()
     except Exception as exc:
         print(f"Latent demand recovery failed: {exc}")
         print("LATENT_DEMAND_RECOVERY_REQUIRES_REVISION")

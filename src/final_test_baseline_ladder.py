@@ -1,4 +1,4 @@
-﻿"""Secondary baseline-ladder evaluation on the locked held-out test population.
+"""Secondary baseline-ladder evaluation on the locked held-out test population.
 
 This is a post-hoc descriptive analysis. It does not retrain models, does not
 modify the locked DQN ensemble, and does not replace the primary conclusion that

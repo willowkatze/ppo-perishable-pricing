@@ -1,3 +1,9 @@
+"""Build final report figures from existing output tables.
+
+This module is reporting-only: it reads selected intermediate outputs and
+creates publication figures without retraining models or changing metrics.
+"""
+
 from __future__ import annotations
 
 import json

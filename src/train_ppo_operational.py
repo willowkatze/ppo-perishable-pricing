@@ -1,3 +1,11 @@
+"""Original PPO training and diagnostic pipeline.
+
+This module trains the observed/recovered PPO agents used in the project
+history. It also records input artifact hashes, validation diagnostics,
+checkpoint summaries, and action-distribution diagnostics so later evaluations
+can be tied back to a fixed environment and calibration setup.
+"""
+
 from __future__ import annotations
 
 import argparse
