@@ -1,4 +1,4 @@
-# PPO Perishable Pricing
+﻿# PPO Perishable Pricing
 
 This repository is a reinforcement-learning course project on dynamic markdown decisions for perishable fresh-retail inventory. It uses FreshRetailNet-informed operational time series, stockout-aware demand recovery, and a semi-synthetic financial perishability environment. The central finding is precise and conservative: balanced recovered PPO is the strongest learned policy, while always_0pct remains the strongest overall held-out policy.
 
@@ -40,7 +40,7 @@ DQN is a value-based follow-up comparison for the discrete action space. It prod
 
 - [START_HERE.md](START_HERE.md): five-minute project entry.
 - [docs/](docs/): consolidated evidence-based methodology and results.
-- [results/](results/): curated tables and figures.
+- [results/](results/): curated key result tables and figures.
 - [archive/](archive/): intermediate tables, diagnostic figures, old configs, and experiment notes.
 - [src/](src/): implementation modules retained without import-path rewrites.
 - [scripts/](scripts/): numbered wrappers for reproducibility entry points.
@@ -63,3 +63,5 @@ See [scripts/README.md](scripts/README.md). The scripts are numbered by pipeline
 ## Limitations
 
 No learned policy beat always_0pct on the locked held-out test. The environment is semi-synthetic, so the result should be interpreted as a controlled decision-quality experiment rather than a deployed pricing system. The secondary baseline ladder does not replace the primary negative held-out conclusion.
+
+

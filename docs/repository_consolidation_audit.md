@@ -1,4 +1,4 @@
-# Repository Consolidation Audit
+﻿# Repository Consolidation Audit
 
 Generated before moving files on 2026-07-21 18:14:30.
 
@@ -13,7 +13,7 @@ Generated before moving files on 2026-07-21 18:14:30.
 
 ## Complete File Inventory
 
-| file path | file type | size | purpose | main teacher-facing file | supporting material | duplicated | move to archive | obsolete | files that reference it |
+| file path | file type | size | purpose | main review file | supporting material | duplicated | move to archive | obsolete | files that reference it |
 |---|---:|---:|---|---:|---:|---:|---:|---:|---|
 | .gitignore | unknown | 1643 | supporting project artifact | False | True | False | False | False | docs/security_and_file_size_audit.md; outputs/configs/artifact_manifest.csv; outputs/configs/repository_file_inventory.csv |
 | CITATION.cff | config | 558 | supporting project artifact | False | True | False | False | False | README.md; docs/archive_integrity_check.md; outputs/configs/artifact_manifest.csv |
@@ -549,3 +549,4 @@ Generated before moving files on 2026-07-21 18:14:30.
 | tests/__pycache__/test_pricing_env_operational.cpython-313-pytest-8.4.2.pyc | pyc | 39200 | supporting project artifact | False | True | False | False | False | outputs/configs/repository_file_inventory.csv |
 | tests/test_ppo_pipeline_operational.py | python | 10302 | supporting project artifact | False | True | False | False | False | outputs/configs/artifact_manifest.csv; outputs/configs/repository_file_inventory.csv |
 | tests/test_pricing_env_operational.py | python | 6598 | supporting project artifact | False | True | False | False | False | src/validate_pricing_env_operational.py; outputs/configs/artifact_manifest.csv; outputs/configs/repository_file_inventory.csv |
+

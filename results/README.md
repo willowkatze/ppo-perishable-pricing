@@ -1,4 +1,4 @@
-# Results
+﻿# Key Results
 
 This folder keeps the compact result set used by the final report. Full supporting material is retained under `archive/`.
 
@@ -23,3 +23,5 @@ This folder keeps the compact result set used by the final report. Full supporti
 - `06_learned_policies_vs_fixed_markdown.png`: learned policies versus fixed markdowns.
 - `07_profit_waste_pareto_frontier.png`: profit-waste frontier.
 - `08_project_method_timeline_proxy.png`: PPO training trajectory as compact method-progress evidence.
+
+

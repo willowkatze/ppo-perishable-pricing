@@ -1,6 +1,6 @@
 ﻿# Consolidation Integrity Check
 
-Generated after teacher-facing consolidation on 2026-07-21.
+Generated after project-results consolidation on 2026-07-21.
 
 ## Non-Training Checks Run
 
@@ -22,7 +22,7 @@ Generated after teacher-facing consolidation on 2026-07-21.
 
 ## Repository Structure Check
 
-- Teacher-facing entry files exist: `README.md`, `START_HERE.md`, `results/README.md`.
+- Main entry files exist: `README.md`, `START_HERE.md`, `results/README.md`.
 - Primary documents exist: `docs/01_research_design.md` through `docs/07_limitations.md`, plus `docs/reproducibility.md`.
 - Curated result tables exist under `results/key_tables/`.
 - Curated figures exist under `results/key_figures/`.
@@ -32,4 +32,5 @@ Generated after teacher-facing consolidation on 2026-07-21.
 
 ## Integrity Outcome
 
-CONSOLIDATION_INTEGRITY_CHECK_PASSED for the teacher-facing archive. Full experiment reruns still require local data and model artifacts that are intentionally excluded from GitHub.
+CONSOLIDATION_INTEGRITY_CHECK_PASSED for the concise project archive. Full experiment reruns still require local data and model artifacts that are intentionally excluded from GitHub.
+
