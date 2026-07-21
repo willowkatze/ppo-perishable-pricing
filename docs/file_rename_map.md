@@ -1,4 +1,4 @@
-# File Rename and Move Map
+﻿# File Rename and Move Map
 
 | original path | new path | reason |
 |---|---|---|
@@ -8,3 +8,7 @@
 | results/README.md heading: Teacher-Facing Results | results/README.md heading: Key Results | Avoid unnatural audience-specific wording. |
 | docs/repository_consolidation_audit.md column: main teacher-facing file | docs/repository_consolidation_audit.md column: main review file | Use ordinary review language. |
 | archive/intermediate_tables/dqn_canonical_candidate_selection.csv | not renamed | Archived internal filename; not used in main report, so renaming could reduce traceability. |
+
+| results/key_figures/05_final_heldout_baseline_ladder.png | archive/diagnostic_figures/final_test_baseline_ladder/05_final_heldout_baseline_ladder_previous.png | Replaced by clearer full 13-policy comparison figure. |
+| archive/intermediate_tables/final_heldout_baseline_ladder_full_source.csv | results/key_tables/final_heldout_baseline_ladder.csv | Full source retained in archive; main table rewritten as concise report table without changing values. |
+

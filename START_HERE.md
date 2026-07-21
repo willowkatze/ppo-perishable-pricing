@@ -1,4 +1,4 @@
-# Start Here
+﻿# Start Here
 
 ## Project in one paragraph
 This repository studies dynamic markdown decisions for perishable fresh-retail inventory using FreshRetailNet-informed operational time series, stockout-aware demand recovery, and a semi-synthetic perishability and financial environment. PPO is the main experimental and diagnostic model; DQN is a value-based follow-up comparison for the six-action markdown space. The final held-out result is conservative: balanced recovered PPO is the strongest learned policy, but the strongest overall policy is always_0pct.
@@ -27,7 +27,7 @@ PPO is the primary experimental model for calibration sensitivity, action-collap
 always_0pct was the strongest overall policy on the locked held-out HIGH_RISK_B test population.
 
 ## Strongest learned policy
-balanced_recovered_ppo was the strongest learned policy. It beat all evaluated positive fixed-markdown policies, random pricing, two simple rule-based strategies, original PPO variants, and the DQN ensemble. It did not beat always_0pct.
+Balanced recovered PPO was the strongest learned policy on the held-out test set. It outperformed all evaluated positive fixed-markdown policies, random_uniform, two simple rule-based policies, the original PPO variants, and the locked DQN ensemble. However, always_0pct remained the strongest overall policy.
 
 ## What the project demonstrates
 The project demonstrates meaningful policy learning and model improvement, but not overall superiority over the strongest operational baseline.
@@ -43,3 +43,4 @@ The project demonstrates meaningful policy learning and model improvement, but n
 
 ## Reproduction entry points
 Use the numbered wrappers in [scripts/README.md](scripts/README.md). Training scripts are explicit and optional.
+

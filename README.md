@@ -13,7 +13,7 @@ Start with [START_HERE.md](START_HERE.md). Curated tables and figures are under 
 | locked_dqn_ensemble | value-based follow-up | 0.42572130058655044 | -0.022278030033447582 | Did not generalize beyond always_0pct. |
 
 
-The locked DQN ensemble achieved 0.425721 mean normalized profit on held-out test versus 0.447999 for always_0pct. Its paired gain was -0.022278 with bootstrap 95% CI [-0.027486, -0.017319], so it did not beat the primary baseline. The secondary baseline ladder is post-hoc descriptive: balanced recovered PPO beat all evaluated positive fixed-markdown baselines, random pricing, two rule-based strategies, original PPO variants, and DQN, but did not beat always_0pct.
+The locked DQN ensemble achieved 0.425721 mean normalized profit on held-out test versus 0.447999 for always_0pct. Its paired gain was -0.022278 with bootstrap 95% CI [-0.027486, -0.017319], so it did not beat the primary baseline. The secondary baseline ladder is post-hoc descriptive: Balanced recovered PPO was the strongest learned policy on the held-out test set. It outperformed all evaluated positive fixed-markdown policies, random_uniform, two simple rule-based policies, the original PPO variants, and the locked DQN ensemble. However, always_0pct remained the strongest overall policy.
 
 ## Dataset
 
@@ -63,5 +63,6 @@ See [scripts/README.md](scripts/README.md). The scripts are numbered by pipeline
 ## Limitations
 
 No learned policy beat always_0pct on the locked held-out test. The environment is semi-synthetic, so the result should be interpreted as a controlled decision-quality experiment rather than a deployed pricing system. The secondary baseline ladder does not replace the primary negative held-out conclusion.
+
 
 

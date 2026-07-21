@@ -10,7 +10,7 @@ Prior work is only summarized at a high level in the repository. The final 8-12 
 
 ## Incorrect Tables Found
 
-One reporting inconsistency was found and corrected: `results/key_tables/final_heldout_baseline_ladder.csv` listed the locked DQN bootstrap CI as approximately [-0.027435, -0.017247], while the locked held-out DQN summary and course audit target give [-0.027486, -0.017319]. The table now uses the locked held-out DQN summary value. Supporting DQN validation rows were clarified as repeated seed-episode observations, not independent episodes.
+One reporting inconsistency was found and corrected earlier: `results/key_tables/final_heldout_baseline_ladder.csv` now uses the locked DQN held-out bootstrap CI [-0.027486, -0.017319]. The same table has also been restored as the full 13-policy held-out comparison, including all fixed-markdown, random, rule-based, PPO, and DQN policies. Supporting DQN validation rows were clarified as repeated seed-episode observations, not independent episodes.
 
 ## Incorrect Figures Found
 
@@ -36,7 +36,7 @@ Audience-specific and generated-sounding labels such as `teacher-facing` were re
 
 ## Files Archived
 
-Two supporting result tables and one supporting figure were moved from `results/` back to `archive/`.
+Two supporting result tables and one supporting figure were moved from `results/` back to `archive/`. The full held-out baseline ladder remains in `results/key_tables/` because it is a main report result.
 
 ## Final Main Tables
 
@@ -52,7 +52,7 @@ Two supporting result tables and one supporting figure were moved from `results/
 2. `results/key_figures/02_recovered_demand_adjustment_distribution.png`
 3. `results/key_figures/03_original_vs_balanced_ppo_error_decomposition.png`
 4. `results/key_figures/04_ppo_action_collapse_diagnostic.png`
-5. `results/key_figures/05_final_heldout_baseline_ladder.png`
+5. `results/key_figures/heldout_policy_comparison.png`
 6. `results/key_figures/06_learned_policies_vs_fixed_markdown.png`
 7. `results/key_figures/07_profit_waste_pareto_frontier.png`
 
@@ -69,4 +69,5 @@ Reproducibility is mostly complete for repository review: source code, configs, 
 ## Readiness
 
 The repository is ready to support an 8-12 page final report and a 10-minute presentation, provided the final written report adds a concise prior-work section and uses only the selected main tables and figures.
+
 
