@@ -1,6 +1,6 @@
 # PPO Perishable Pricing
 
-This repository is a teacher-facing archive of a reinforcement-learning course project on dynamic markdown decisions for perishable fresh-retail inventory. It uses FreshRetailNet-informed operational time series, stockout-aware demand recovery, and a semi-synthetic financial perishability environment. The central finding is precise and conservative: balanced recovered PPO is the strongest learned policy, while always_0pct remains the strongest overall held-out policy.
+This repository is a reinforcement-learning course project on dynamic markdown decisions for perishable fresh-retail inventory. It uses FreshRetailNet-informed operational time series, stockout-aware demand recovery, and a semi-synthetic financial perishability environment. The central finding is precise and conservative: balanced recovered PPO is the strongest learned policy, while always_0pct remains the strongest overall held-out policy.
 
 Start with [START_HERE.md](START_HERE.md). Curated tables and figures are under [results/](results/). Full intermediate outputs are retained under [archive/](archive/).
 
