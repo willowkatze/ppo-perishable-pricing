@@ -1,26 +1,34 @@
-# Reproducibility
+﻿# Reproducibility
 
-## Purpose
-Explain review and rerun process.
+## Setup
 
-## Inputs
-Local data/model artifacts excluded from GitHub.
+Install dependencies with `pip install -r requirements.txt` or use `environment.yml`.
 
-## Method
-Use numbered scripts; training is explicit and optional.
+## Package Versions
 
-## Implementation
-pip install -r requirements.txt; python -m pytest tests.
+Dependency files are included, but exact locked hashes are not provided. This is a partial reproducibility item.
 
-## Main Results
-Final summary and key figures can be inspected without rerunning experiments.
+## Configs and Seeds
 
-## Interpretation
-Archive supports review and partial reproduction.
+Configuration files are stored under `configs/`. Random seeds and selected model metadata are recorded in configs and result tables.
 
-## Limitations
-Skipped tests mean missing excluded artifacts, not full reproduction.
+## Data Splits
 
-## Related Files
-scripts/README.md; pyproject.toml
+Validation and held-out test manifests are stored under `outputs/manifests/`. The final result uses the locked 60-episode HIGH_RISK_B held-out test set.
+
+## Execution Order
+
+Use the numbered scripts under `scripts/`. Training scripts are separate from evaluation and reporting scripts. Do not run training unless the local raw data and model artifacts are available.
+
+## Excluded Artifacts
+
+Raw data and trained model binaries are intentionally not committed. `outputs/models/MODEL_ARTIFACTS.md` documents this.
+
+## Non-Training Checks
+
+Useful checks include `python -m compileall -q src scripts`, Markdown link validation, CSV schema validation, JSON config parsing, and a secret scan.
+
+## Skipped Tests
+
+Model-dependent tests may skip in the public repository because raw data and model binaries are excluded.
 
