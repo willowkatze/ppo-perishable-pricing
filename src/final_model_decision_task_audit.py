@@ -527,7 +527,7 @@ def write_interpretation(candidates: pd.DataFrame, baselines: pd.DataFrame, gate
 
 ## Purpose
 
-This audit implements the instructor's strict success criterion: a final model must beat a strong, pre-specified baseline on a paired held-out task. This script does not use the test split and does not train any model.
+This audit implements the course requirement's strict success criterion: a final model must beat a strong, pre-specified baseline on a paired held-out task. This script does not use the test split and does not train any model.
 
 ## Locked High-Risk Population
 
