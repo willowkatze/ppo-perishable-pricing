@@ -1,4 +1,4 @@
-# Teacher-Facing Results
+# Results
 
 This folder keeps the compact result set used by the final report. Full supporting material is retained under `archive/`.
 
