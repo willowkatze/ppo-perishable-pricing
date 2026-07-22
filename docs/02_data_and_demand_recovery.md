@@ -1,26 +1,51 @@
-﻿# Data and Demand Recovery
+# Data and Demand Recovery
 
-## Data
+## What Was Done
 
-The project uses FreshRetailNet-informed operational time series. Raw data is not committed to the repository. Public files retain processed summaries, source-code entry points, and configuration records.
+FreshRetailNet-50K was used as the operational data source for a smaller, split-contained modeling subset. The public dataset is described as approximately 50,000 store-product 90-day series from 898 stores, 865 perishable SKUs, and 18 major cities, with separate train and evaluation parquet files. Raw files are not committed; expected local paths are listed in `data/raw/README.md`.
 
-## Modeling Subset
+The final modeling subset contains 29,100 rows from 300 complete store-product sequences, covering 232 stores and 177 SKUs. The subset is the input to demand recovery and downstream response modeling; it is not the full public dataset.
 
-The modeling subset is documented through archived data-processing tables and figures. The final report should use `results/tables/demand_recovery_summary.csv` as the main table for this part of the project.
+## Why It Matters
+
+Sales are censored when available inventory is insufficient. A recorded zero or low sales value can therefore mean low demand, or demand that could not be fulfilled. A markdown policy that treats all observed sales as demand may understate the opportunity to sell and may misrepresent the relationship between markdown and demand.
 
 ## Stockout Censoring
 
-Observed sales can be censored during stockouts because demand above available inventory is not observed. This matters because markdown policies trained on observed sales alone can learn from a biased demand signal.
+The pipeline identifies observations compatible with stockout censoring using the available stock, sales, inventory, and time-series fields. The censoring label is used to define a recovery target. This does not reveal the true unobserved demand; it identifies rows where observed sales are an incomplete signal.
 
 ## Recovery Method
 
-The project uses a stockout-aware recovered-demand target before downstream pricing experiments. The implementation is in `src/latent_demand_recovery.py`, supported by data preparation in `src/freshretail_data_processing.py`.
+`src/latent_demand_recovery.py` fits an ExtraTrees recovery model using the prepared modeling subset. The recovered target is constrained so recovered demand is never below observed sales. The fitted model and validation outputs are written locally under `outputs/models/` and `outputs/tables/` when the recovery script is run.
 
-## Recovery Results
+The recovery step also produces segment summaries, robustness checks, and a promotion-stockout interaction table. These outputs make it possible to inspect how the adjustment varies across markdown and operational segments before the pricing environment is used.
 
-The main demand-recovery evidence is `results/tables/demand_recovery_summary.csv` and the figures `results/figures/01_observed_vs_recovered_demand.png` and `results/figures/02_recovered_demand_adjustment_distribution.png`.
+## Main Result
 
-## Data Limitations
+The selected recovery summary reports:
 
-Raw data and large generated artifacts are excluded from GitHub. The recovered-demand step improves the modeling signal but does not remove all uncertainty about unobserved demand.
+- Mean observed sales: `1.0763`.
+- Mean recovered demand: `1.2196`.
+- Aggregate recovered-demand increase: `13.317%`.
+- Share of rows adjusted: `40.196%`.
+- Recovered demand never below observed sales by construction.
 
+The increase is a model estimate, not a measurement of true latent demand. It indicates how the downstream experiment changes when possible stockout censoring is represented.
+
+## Interpretation
+
+Demand recovery supplies an alternative calibration signal for the pricing environment. It should be interpreted as a proxy that is useful for controlled sensitivity analysis. It cannot establish what customers would have bought if inventory had been available, and it does not by itself identify a causal markdown effect.
+
+## Limitations
+
+The raw source data is not in the repository, the subset is much smaller than the public dataset, and the recovery model depends on the available operational features and split design. Generalization beyond the documented store-product subset is not established. Markdown response remains observational and model-implied in later stages.
+
+## Related Files
+
+- Data source and local paths: `data/raw/README.md`
+- Subset preparation: `src/freshretail_data_processing.py`
+- Recovery implementation: `src/latent_demand_recovery.py`
+- Recovery summary: `results/tables/demand_recovery_summary.csv`
+- Observed versus recovered demand: `results/figures/01_observed_vs_recovered_demand.png`
+- Adjustment distribution: `results/figures/02_recovered_demand_adjustment_distribution.png`
+- Local detailed outputs: `outputs/tables/latent_demand_*` and `outputs/models/freshretail_latent_demand_model.joblib`

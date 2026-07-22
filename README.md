@@ -1,46 +1,58 @@
 # PPO Perishable Pricing
 
-This repository contains a reinforcement-learning course project on markdown decisions for perishable fresh-retail inventory. The project uses FreshRetailNet-informed demand recovery, a semi-synthetic perishability environment, PPO experiments, a DQN comparison, and a locked held-out baseline ladder.
+This repository studies dynamic markdown decisions for perishable fresh-retail inventory. The workflow uses FreshRetailNet-50K-informed time series, stockout-aware demand recovery, a semi-synthetic perishability environment, PPO, a DQN comparison, and a locked held-out baseline ladder.
 
-## Research Question
+The project asks whether learned markdown policies improve normalized accounting profit on high-risk inventory after waste, stockout, and finite-shelf-life effects are represented. It is a controlled offline decision experiment, not a deployed pricing system.
 
-Can learned markdown policies improve decision quality for high-risk perishable inventory, and do they outperform fixed, random, rule-based, and no-markdown baselines on a locked held-out test set?
+## Data and Problem
+
+FreshRetailNet-50K provides the operational fresh-retail setting. Raw parquet files are not committed; the expected local files are described in [data/raw/README.md](data/raw/README.md). The project selects a modeling subset, identifies stockout-censored observations, and estimates a recovered demand signal before pricing experiments.
+
+The final modeling subset contains 29,100 rows from 300 complete store-product sequences, covering 232 stores and 177 SKUs. The recovery summary reports a 13.317% aggregate increase from observed sales to recovered demand, with 40.196% of rows adjusted. These estimates are model-based proxies, not direct observations of latent demand.
 
 ## Method Pipeline
 
-1. Prepare FreshRetailNet-informed time series.
-2. Recover demand affected by stockout censoring.
-3. Build a semi-synthetic perishability pricing environment.
-4. Train and diagnose PPO policies.
-5. Train balanced recovered PPO after collapse diagnostics.
-6. Compare DQN as an additional value-based method.
-7. Evaluate all final policies on the locked 60-episode HIGH_RISK_B held-out test set.
+1. Prepare a split-contained FreshRetailNet modeling subset.
+2. Recover demand affected by stockout censoring with an ExtraTrees model.
+3. Fit observed and recovered discount-response artifacts.
+4. Simulate inventory aging, FEFO issuing, markdown actions, demand response, waste, and accounting in the pricing environment.
+5. Train and diagnose original PPO policies.
+6. Train balanced recovered PPO after observing action-collapse diagnostics.
+7. Train and lock a multi-seed DQN ensemble as a value-based comparison.
+8. Evaluate learned policies and fixed, random, and rule-based baselines on the identical 60-episode HIGH_RISK_B held-out test set.
 
-## Main Results
+## Main Models
 
-| Policy | Role | Mean normalized profit | Gain vs always_0pct | Interpretation |
-|---|---|---:|---:|---|
-| always_0pct | strongest overall | 0.447999 | 0.000000 | Best held-out policy. |
-| balanced_recovered_ppo | strongest learned | 0.435909 | -0.012091 | Beat positive fixed-markdown, random, rule-based, original PPO, and DQN alternatives; did not beat always_0pct. |
-| locked_dqn_ensemble | learned comparison | 0.425721 | -0.022278 | Did not beat always_0pct; CI [-0.027486, -0.017319]. |
+- Original PPO uses observed or recovered calibration under the operational environment.
+- Balanced recovered PPO changes training-scenario exposure while preserving the environment, reward, action space, and validation protocol.
+- The locked DQN ensemble averages Q-values from three STANDARD_DQN seeds and selects the highest-valued action.
+- Baselines include no markdown, fixed markdown levels, uniform random actions, and two simple risk rules.
 
-The full 13-policy comparison is in `results/tables/final_heldout_baseline_ladder.csv` and `results/figures/heldout_policy_comparison.png`.
+## Compact Final Result
+
+| Policy | Mean normalized profit | Gain vs always_0pct |
+|---|---:|---:|
+| `always_0pct` | 0.447999 | 0.000000 |
+| `balanced_recovered_ppo` | 0.435909 | -0.012091 |
+| `locked_dqn_ensemble` | 0.425721 | -0.022278 |
+
+`always_0pct` is the strongest overall held-out policy. `balanced_recovered_ppo` is the strongest learned policy, but no learned policy beat `always_0pct`. The complete 13-policy comparison is in [results/tables/final_heldout_baseline_ladder.csv](results/tables/final_heldout_baseline_ladder.csv), with the main visual comparison in [results/figures/heldout_policy_comparison.png](results/figures/heldout_policy_comparison.png).
 
 ## Repository Structure
 
 | Directory | Purpose | Important contents |
 |---|---|---|
 | `scripts/` | Numbered command-line entry points for the main workflow. | Data preparation, demand recovery, PPO/DQN training wrappers, locked DQN evaluation, final baseline ladder. |
-| `src/` | Active implementation modules. | FreshRetailNet processing, latent-demand recovery, discount response, scenario generation, Gymnasium environment, PPO/DQN training, locked evaluation, final report figures. |
-| `configs/` | Small repository-level configuration records. | Lightweight config files retained in Git; many locked runtime configs are generated under `outputs/configs/` and archived as records. |
-| `results/` | Selected final report artifacts. | Five main tables and seven main figures used by the written report. |
-| `outputs/` | Generated intermediate and diagnostic artifacts. | Local training, validation, diagnostic, manifest, model, and figure outputs; many large artifacts are excluded from Git. |
-| `docs/` | Main project explanation. | Research design, data, methods, results, conclusions, reproducibility. |
-| `tests/` | Lightweight code checks. | Environment and PPO pipeline tests; model-dependent tests may be skipped without local artifacts. |
-| `archive/` | Supporting history and traceability. | Consolidated experiment history, audits, intermediate tables, and archived source modules; not required for the main reading path. |
-| `data/` | Local raw and processed data location. | FreshRetailNet raw files and processed parquet files; raw data is not committed. |
+| `src/` | Active implementation modules. | FreshRetailNet processing, latent-demand recovery, discount response, scenario generation, pricing environment, PPO/DQN training, evaluation, and reporting. |
+| `configs/` | Version-controlled final specifications, manifests, and locked metadata. | Environment, PPO, DQN, and held-out evaluation records retained in Git. |
+| `results/` | Selected final report artifacts. | Main tables and figures used to interpret the final findings. |
+| `outputs/` | Generated intermediate and diagnostic artifacts. | Local training, validation, manifests, model artifacts, and runtime configuration records. |
+| `docs/` | Main project explanation. | Research design, data, methods, results, conclusions, and reproducibility. |
+| `tests/` | Lightweight code checks. | Environment and PPO pipeline tests; model-dependent tests may skip without local artifacts. |
+| `archive/` | Supporting history and traceability. | Experiment history, audits, intermediate tables, and archived source modules; not required for the main code path. |
+| `data/` | Local data location. | Raw and processed data placeholders; raw files are not committed. |
 
-`outputs/` and `results/` have different roles. `outputs/` is the working area for generated intermediate diagnostics and model-run artifacts. `results/` contains only the selected final tables and figures intended for the report.
+`configs/` and `outputs/configs/` are deliberately different. `configs/` contains version-controlled final records included in Git. `outputs/configs/` contains local runtime-generated copies, checksums, and execution records. Similarly, `outputs/` is the working area for generated intermediate diagnostics, while `results/` contains selected final tables and figures.
 
 ## Setup Quickstart
 
@@ -50,15 +62,23 @@ python -m venv .venv
 pip install -r requirements.txt
 ```
 
-## Main Documents
+Raw FreshRetailNet files and trained model binaries must be supplied locally before data preparation or training. The numbered commands and their exact inputs are documented in [scripts/README.md](scripts/README.md). Start with [START_HERE.md](START_HERE.md) for the three reading paths.
 
-- [Project and research design](docs/01_project_and_research_design.md)
-- [Data and demand recovery](docs/02_data_and_demand_recovery.md)
-- [Environment and methods](docs/03_environment_and_methods.md)
-- [Results](docs/04_results.md)
-- [Conclusions and limitations](docs/05_conclusions_and_limitations.md)
-- [Reproducibility](docs/reproducibility.md)
+## Key Files
+
+- [docs/02_data_and_demand_recovery.md](docs/02_data_and_demand_recovery.md)
+- [docs/03_environment_and_methods.md](docs/03_environment_and_methods.md)
+- [docs/04_results.md](docs/04_results.md)
+- [scripts/README.md](scripts/README.md)
+- [src/latent_demand_recovery.py](src/latent_demand_recovery.py)
+- [src/pricing_env_operational.py](src/pricing_env_operational.py)
+- [src/train_ppo_operational.py](src/train_ppo_operational.py)
+- [src/train_ppo_recovered_redesign.py](src/train_ppo_recovered_redesign.py)
+- [src/train_dqn_high_risk_b.py](src/train_dqn_high_risk_b.py)
+- [src/final_test_baseline_ladder.py](src/final_test_baseline_ladder.py)
+- [results/tables/final_heldout_baseline_ladder.csv](results/tables/final_heldout_baseline_ladder.csv)
+- [results/figures/heldout_policy_comparison.png](results/figures/heldout_policy_comparison.png)
 
 ## Project Limitations
 
-The environment is semi-synthetic. Raw data and trained model binaries are excluded from GitHub. No learned policy beat always_0pct on the locked held-out test set.
+The environment is semi-synthetic. Raw data and trained model binaries are excluded from GitHub. Full reproduction therefore requires local data and model artifacts. No learned policy beat `always_0pct` on the locked held-out test set.
