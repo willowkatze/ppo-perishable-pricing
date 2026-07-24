@@ -1,8 +1,7 @@
-"""Secondary baseline-ladder evaluation on the locked held-out test population.
+"""Evaluate the locked 13-policy baseline ladder on held-out test episodes.
 
-This is a post-hoc descriptive analysis. It does not retrain models, does not
-modify the locked DQN ensemble, and does not replace the primary conclusion that
-that locked ensemble did not beat always_0pct on held-out test episodes.
+The ladder is a post-hoc descriptive analysis. Its primary reference remains
+the paired comparison between the locked DQN ensemble and ``always_0pct``.
 """
 
 from __future__ import annotations
@@ -26,9 +25,18 @@ SRC_DIR = PROJECT_ROOT / "src"
 if str(SRC_DIR) not in sys.path:
     sys.path.insert(0, str(SRC_DIR))
 
-from dqn_statistical_audit_and_ensemble import ensemble_action, load_members  # noqa: E402
-from pricing_env_operational import ACTION_MARKDOWNS, observation_names  # noqa: E402
-from train_dqn_high_risk_b import make_env, reset_env, safe_float, action_entropy  # noqa: E402
+if __package__:
+    from src.dqn_statistical_audit_and_ensemble import ensemble_action, load_members
+    from src.pricing_env_operational import ACTION_MARKDOWNS, observation_names
+    from src.train_dqn_high_risk_b import action_entropy, make_env, reset_env, safe_float
+else:
+    from dqn_statistical_audit_and_ensemble import ensemble_action, load_members
+    from pricing_env_operational import ACTION_MARKDOWNS, observation_names
+    from train_dqn_high_risk_b import action_entropy, make_env, reset_env, safe_float
+
+# ---------------------------------------------------------------------------
+# Paths and locked evaluation settings
+# ---------------------------------------------------------------------------
 
 TABLES_DIR = PROJECT_ROOT / "outputs" / "tables"
 FIGURES_DIR = PROJECT_ROOT / "outputs" / "figures" / "final_test_baseline_ladder"
@@ -110,6 +118,11 @@ class PPOMember:
         self.vecnormalize.close()
 
 
+# ---------------------------------------------------------------------------
+# Locked policy loading
+# ---------------------------------------------------------------------------
+
+
 def require_file(path: Path) -> None:
     if not path.exists():
         raise FileNotFoundError(f"Required locked artifact not found: {path}")
@@ -133,16 +146,24 @@ def load_ppo_members(first_scenario: str) -> dict[str, PPOMember]:
     missing: list[str] = []
     for policy_id, (model_path, vec_path) in PPO_CONFIGS.items():
         if not model_path.exists() or not vec_path.exists():
-            missing.append(policy_id)
+            missing.append(
+                f"{policy_id}: model={model_path} ({'present' if model_path.exists() else 'missing'}); "
+                f"vecnormalize={vec_path} ({'present' if vec_path.exists() else 'missing'})"
+            )
             continue
+    if missing:
+        details = "\n- ".join(missing)
+        raise FileNotFoundError(
+            "The final 13-policy ladder requires every locked PPO artifact. Missing requirements:\n- " + details
+        )
+
+    for policy_id, (model_path, vec_path) in PPO_CONFIGS.items():
         dummy = DummyVecEnv([lambda scenario=first_scenario: make_env("test", scenario, BOOTSTRAP_SEED)])
         vec = VecNormalize.load(str(vec_path), dummy)
         vec.training = False
         vec.norm_reward = False
         model = PPO.load(str(model_path), env=None)
         members[policy_id] = PPOMember(policy_id=policy_id, model=model, vecnormalize=vec)
-    if missing:
-        print("Skipping incompatible/missing PPO policies: " + ", ".join(missing), flush=True)
     return members
 
 
@@ -169,6 +190,11 @@ def fixed_or_rule_action(policy_id: str, obs: np.ndarray, step: int, episode_ind
         value = float(obs[idx["inventory_coverage"]])
         return action_for_markdown(0.10) if value >= thresholds["min_inventory_coverage"] else action_for_markdown(0.00)
     raise ValueError(f"Not a fixed/rule baseline: {policy_id}")
+
+
+# ---------------------------------------------------------------------------
+# Episode evaluation
+# ---------------------------------------------------------------------------
 
 
 def evaluate_episode(
@@ -239,6 +265,11 @@ def evaluate_episode(
         "raw_financial_sum_error": safe_float(final_info.get("raw_financial_sum_error"), 0.0),
     }
     return row, pd.DataFrame(state_rows)
+
+
+# ---------------------------------------------------------------------------
+# Paired statistics
+# ---------------------------------------------------------------------------
 
 
 def bootstrap_ci(values: pd.Series) -> tuple[float, float]:
@@ -349,6 +380,20 @@ def gain_matrix(pairwise_df: pd.DataFrame) -> pd.DataFrame:
     return pairwise_df.pivot(index="policy_a", columns="policy_b", values="mean_gain_a_minus_b").reset_index()
 
 
+def validate_complete_ladder(results: pd.DataFrame, expected_episodes: int) -> None:
+    """Reject incomplete final tables before any result artifact is written."""
+    observed = set(results["policy_id"].astype(str))
+    missing = [policy for policy in POLICY_ORDER if policy not in observed]
+    unexpected = sorted(observed.difference(POLICY_ORDER))
+    counts = results.groupby("policy_id")["episode_id"].nunique().to_dict()
+    incomplete = {policy: int(counts.get(policy, 0)) for policy in POLICY_ORDER if counts.get(policy, 0) != expected_episodes}
+    if missing or unexpected or incomplete:
+        raise RuntimeError(
+            "Final baseline ladder is incomplete: "
+            f"missing={missing}; unexpected={unexpected}; episode_counts={incomplete}"
+        )
+
+
 def pareto_frontier(summary: pd.DataFrame) -> pd.DataFrame:
     evaluated = summary.loc[summary["evaluation_status"].eq("EVALUATED")].copy()
     frontier = []
@@ -364,6 +409,11 @@ def pareto_frontier(summary: pd.DataFrame) -> pd.DataFrame:
         frontier.append(len(dominated) == 0)
     evaluated["profit_waste_pareto_frontier"] = frontier
     return evaluated[["policy_id", "mean_normalized_profit", "waste_rate", "sell_through", "profit_waste_pareto_frontier"]]
+
+
+# ---------------------------------------------------------------------------
+# Output generation
+# ---------------------------------------------------------------------------
 
 
 def make_figures(summary: pd.DataFrame, matrix: pd.DataFrame, pairwise_df: pd.DataFrame) -> None:
@@ -483,7 +533,7 @@ def main() -> None:
     first_scenario = str(manifest["scenario_id"].iloc[0])
     dqn_members = load_members(first_scenario)
     ppo_members = load_ppo_members(first_scenario)
-    policies = BASELINES + [p for p in LEARNED_POLICIES if p == "locked_dqn_ensemble" or p in ppo_members]
+    policies = POLICY_ORDER.copy()
 
     rows: list[dict[str, Any]] = []
     state_rows: list[pd.DataFrame] = []
@@ -500,6 +550,7 @@ def main() -> None:
 
     results = pd.DataFrame(rows)
     states = pd.concat(state_rows, ignore_index=True) if state_rows else pd.DataFrame()
+    validate_complete_ladder(results, expected_episodes=len(manifest))
     summary = summarize(results)
     pairwise_df = pairwise(results)
     matrix = gain_matrix(pairwise_df)

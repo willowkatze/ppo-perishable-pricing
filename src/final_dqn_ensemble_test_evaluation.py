@@ -22,28 +22,52 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
-from dqn_statistical_audit_and_ensemble import SELECTED, ensemble_action, load_members
-from high_risk_b_planning_distillation import feature_row_from_obs, is_high_risk_b
-from train_dqn_high_risk_b import (
-    BASELINE_POLICY,
-    BOOTSTRAP_SEED,
-    CALIBRATION_MODE,
-    CONFIGS_DIR,
-    LAMBDA_WASTE,
-    PLANNING_POLICY,
-    POPULATION_ID,
-    PROJECT_ROOT,
-    REWARD_MODE,
-    SELECTED_PPO_POLICY,
-    TABLES_DIR,
-    TIE_TOL,
-    action_entropy,
-    load_validation_manifest,
-    make_env,
-    reset_env,
-    safe_float,
-    sha256,
-)
+if __package__:
+    from src.dqn_statistical_audit_and_ensemble import SELECTED, ensemble_action, load_members
+    from src.high_risk_b_planning_distillation import feature_row_from_obs, is_high_risk_b
+    from src.train_dqn_high_risk_b import (
+        BASELINE_POLICY,
+        BOOTSTRAP_SEED,
+        CALIBRATION_MODE,
+        CONFIGS_DIR,
+        LAMBDA_WASTE,
+        PLANNING_POLICY,
+        POPULATION_ID,
+        PROJECT_ROOT,
+        REWARD_MODE,
+        SELECTED_PPO_POLICY,
+        TABLES_DIR,
+        TIE_TOL,
+        action_entropy,
+        load_validation_manifest,
+        make_env,
+        reset_env,
+        safe_float,
+        sha256,
+    )
+else:
+    from dqn_statistical_audit_and_ensemble import SELECTED, ensemble_action, load_members
+    from high_risk_b_planning_distillation import feature_row_from_obs, is_high_risk_b
+    from train_dqn_high_risk_b import (
+        BASELINE_POLICY,
+        BOOTSTRAP_SEED,
+        CALIBRATION_MODE,
+        CONFIGS_DIR,
+        LAMBDA_WASTE,
+        PLANNING_POLICY,
+        POPULATION_ID,
+        PROJECT_ROOT,
+        REWARD_MODE,
+        SELECTED_PPO_POLICY,
+        TABLES_DIR,
+        TIE_TOL,
+        action_entropy,
+        load_validation_manifest,
+        make_env,
+        reset_env,
+        safe_float,
+        sha256,
+    )
 
 MANIFESTS_DIR = PROJECT_ROOT / "outputs" / "manifests"
 FIGURES_DIR = PROJECT_ROOT / "outputs" / "figures" / "final_dqn_ensemble_test"

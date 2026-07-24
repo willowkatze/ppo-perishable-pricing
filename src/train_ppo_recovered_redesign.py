@@ -33,7 +33,14 @@ SRC_DIR = PROJECT_ROOT / "src"
 if str(SRC_DIR) not in sys.path:
     sys.path.insert(0, str(SRC_DIR))
 
-from pricing_env_operational import ACTION_MARKDOWNS, OperationalPerishablePricingEnv  # noqa: E402
+if __package__:
+    from src.pricing_env_operational import ACTION_MARKDOWNS, OperationalPerishablePricingEnv
+else:
+    from pricing_env_operational import ACTION_MARKDOWNS, OperationalPerishablePricingEnv
+
+# ---------------------------------------------------------------------------
+# Paths and fixed experiment settings
+# ---------------------------------------------------------------------------
 
 TABLES_DIR = PROJECT_ROOT / "outputs" / "tables"
 CONFIGS_DIR = PROJECT_ROOT / "outputs" / "configs"
@@ -115,6 +122,11 @@ def load_meaningful_scenarios() -> pd.DataFrame:
     return audit.loc[audit["classification"].eq("MEANINGFUL_PROFIT_WASTE_TRADEOFF")].copy()
 
 
+# ---------------------------------------------------------------------------
+# Scenario-balanced sampling
+# ---------------------------------------------------------------------------
+
+
 def scenario_sampling_weights(scenarios: pd.DataFrame) -> pd.DataFrame:
     rows: list[dict[str, Any]] = []
     for _, row in scenarios.iterrows():
@@ -139,6 +151,11 @@ def scenario_sampling_weights(scenarios: pd.DataFrame) -> pd.DataFrame:
     weights["normalized_sampling_weight"] = weights["raw_sampling_weight"] / weights["raw_sampling_weight"].sum()
     weights.to_csv(TABLES_DIR / "ppo_redesign_sampling_weights.csv", index=False)
     return weights
+
+
+# ---------------------------------------------------------------------------
+# Environment construction
+# ---------------------------------------------------------------------------
 
 
 class ScenarioBalancedEnv(gym.Env):
@@ -250,6 +267,11 @@ def action_for_baseline(policy_id: str, obs: np.ndarray) -> int:
             return 2
         return 0
     raise ValueError(policy_id)
+
+
+# ---------------------------------------------------------------------------
+# Validation and statistics
+# ---------------------------------------------------------------------------
 
 
 def evaluate_policy_on_manifest(
@@ -506,6 +528,11 @@ def state_balance_audit(weights: pd.DataFrame) -> None:
     pd.DataFrame(rows).to_csv(TABLES_DIR / "ppo_training_state_balance_audit.csv", index=False)
 
 
+# ---------------------------------------------------------------------------
+# Model training
+# ---------------------------------------------------------------------------
+
+
 def train_variant(spec: VariantSpec, timesteps: int) -> dict[str, Any]:
     started = time.perf_counter()
     set_seed(SEED)
@@ -626,6 +653,11 @@ def compare_and_select(results: pd.DataFrame) -> pd.DataFrame:
     combined["comparison_outcome"] = outcome
     combined.to_csv(TABLES_DIR / "ppo_multimetric_checkpoint_selection.csv", index=False)
     return combined
+
+
+# ---------------------------------------------------------------------------
+# Output generation
+# ---------------------------------------------------------------------------
 
 
 def plot_results(results: pd.DataFrame, selection: pd.DataFrame) -> None:

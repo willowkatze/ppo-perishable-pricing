@@ -1,13 +1,8 @@
-"""
-Final validation-locked DQN experiment for the HIGH_RISK_B task.
+"""Train and validate DQN candidates for the locked HIGH_RISK_B task.
 
-This script is intentionally narrow:
-- no test split use
-- no PPO retraining
-- no planning-distillation retraining
-- no environment, reward, response-model, demand-recovery, accounting, or action-space changes
-- training uses only training episodes already identified as HIGH_RISK_B
-- validation uses the locked HIGH_RISK_B validation manifest
+Training uses HIGH_RISK_B episodes from the train split, and model selection
+uses the fixed validation manifest. This module does not access the held-out
+test split.
 
 Run from project root:
     python -u src/train_dqn_high_risk_b.py
@@ -48,7 +43,10 @@ import pandas as pd
 import torch
 from gymnasium import spaces
 
-from pricing_env_operational import ACTION_MARKDOWNS, OperationalPerishablePricingEnv
+if __package__:
+    from src.pricing_env_operational import ACTION_MARKDOWNS, OperationalPerishablePricingEnv
+else:
+    from pricing_env_operational import ACTION_MARKDOWNS, OperationalPerishablePricingEnv
 
 try:
     from stable_baselines3 import DQN, PPO
@@ -58,6 +56,10 @@ try:
 except Exception as exc:  # pragma: no cover
     raise ImportError("stable-baselines3 is required for the final DQN experiment.") from exc
 
+
+# ---------------------------------------------------------------------------
+# Paths and fixed experiment settings
+# ---------------------------------------------------------------------------
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 TABLES_DIR = PROJECT_ROOT / "outputs" / "tables"
@@ -80,6 +82,11 @@ BOOTSTRAP_N = 5000
 BOOTSTRAP_SEED = 20260718
 TIE_TOL = 1e-9
 PLANNING_HORIZON = 3
+
+
+# ---------------------------------------------------------------------------
+# Experiment records and environment construction
+# ---------------------------------------------------------------------------
 
 
 @dataclass(frozen=True)
@@ -154,6 +161,11 @@ def action_entropy(actions: list[int] | pd.Series) -> float:
         return 0.0
     probs = s.value_counts(normalize=True)
     return float(-(probs * np.log(probs)).sum())
+
+
+# ---------------------------------------------------------------------------
+# Paired validation statistics
+# ---------------------------------------------------------------------------
 
 
 def bootstrap_ci(diff: pd.Series) -> tuple[float, float]:
@@ -285,6 +297,42 @@ def make_vec_env(eligible: pd.DataFrame, seed: int, n_envs: int, monitor_dir: Pa
     )
 
 
+# ---------------------------------------------------------------------------
+# Environment compatibility
+# ---------------------------------------------------------------------------
+
+
+def bounded_termination_rollout(env: gym.Env, action: int = 0, max_steps: int | None = None) -> dict[str, Any]:
+    """Run one bounded episode and report whether Gymnasium termination is reachable."""
+    horizon = max(1, int(getattr(env, "horizon", 0)))
+    step_limit = int(max_steps) if max_steps is not None else horizon
+    if step_limit < 1:
+        raise ValueError("max_steps must be positive")
+
+    steps = 0
+    terminated = False
+    truncated = False
+    flags_are_boolean = True
+    while steps < step_limit and not (terminated or truncated):
+        _, _, terminated_raw, truncated_raw, _ = env.step(int(action))
+        flags_are_boolean = flags_are_boolean and isinstance(terminated_raw, (bool, np.bool_))
+        flags_are_boolean = flags_are_boolean and isinstance(truncated_raw, (bool, np.bool_))
+        terminated = bool(terminated_raw)
+        truncated = bool(truncated_raw)
+        steps += 1
+
+    terminal_reached = bool(terminated or truncated)
+    return {
+        "flags_are_boolean": bool(flags_are_boolean),
+        "terminal_reached": terminal_reached,
+        "terminated": bool(terminated),
+        "truncated": bool(truncated),
+        "steps": int(steps),
+        "max_steps": int(step_limit),
+        "bounded_completion": bool(terminal_reached and steps <= step_limit),
+    }
+
+
 def audit_environment_compatibility() -> pd.DataFrame:
     rows: list[dict[str, Any]] = []
     train_episodes = load_training_episode_table()
@@ -292,16 +340,25 @@ def audit_environment_compatibility() -> pd.DataFrame:
     env = make_env("train", str(train_episodes["scenario_id"].iloc[0]), BOOTSTRAP_SEED)
     obs, _ = reset_env(env, int(train_episodes["episode_index"].iloc[0]))
     rewards = []
-    terminated_seen = False
     finite_seen = True
     for action in ACTION_SPACE:
         probe = make_env("train", str(train_episodes["scenario_id"].iloc[0]), BOOTSTRAP_SEED + action)
         reset_env(probe, int(train_episodes["episode_index"].iloc[0]))
-        _, reward, terminated, truncated, info = probe.step(action)
+        _, reward, _, _, info = probe.step(action)
         rewards.append(safe_float(reward))
         finite_seen = finite_seen and np.isfinite(reward) and np.isfinite(safe_float(info.get("normalized_accounting_profit"), 0.0))
-        terminated_seen = terminated_seen or truncated
         probe.close()
+
+    termination_probe = make_env("train", str(train_episodes["scenario_id"].iloc[0]), BOOTSTRAP_SEED)
+    try:
+        reset_env(termination_probe, int(train_episodes["episode_index"].iloc[0]))
+        termination_audit = bounded_termination_rollout(termination_probe, action=0)
+    finally:
+        termination_probe.close()
+    termination_detail = (
+        f"terminated={termination_audit['terminated']}; truncated={termination_audit['truncated']}; "
+        f"steps={termination_audit['steps']}; max_steps={termination_audit['max_steps']}"
+    )
     checks = [
         ("observation_space_box", isinstance(env.observation_space, spaces.Box), str(env.observation_space)),
         ("observation_dtype_float32", env.observation_space.dtype == np.float32, str(env.observation_space.dtype)),
@@ -309,7 +366,9 @@ def audit_environment_compatibility() -> pd.DataFrame:
         ("action_space_discrete_6", isinstance(env.action_space, spaces.Discrete) and int(env.action_space.n) == 6, str(env.action_space)),
         ("reward_finite_for_all_actions", finite_seen, f"reward_min={np.nanmin(rewards):.6f}; reward_max={np.nanmax(rewards):.6f}"),
         ("reward_scaling_reasonable", bool(np.nanmax(np.abs(rewards)) < 10.0), f"max_abs_step_reward={np.nanmax(np.abs(rewards)):.6f}"),
-        ("episode_termination_available", isinstance(terminated_seen, bool), "terminal rules implemented in env.step"),
+        ("termination_flags_boolean", termination_audit["flags_are_boolean"], termination_detail),
+        ("episode_terminal_reachable", termination_audit["terminal_reached"], termination_detail),
+        ("bounded_rollout_completion", termination_audit["bounded_completion"], termination_detail),
         ("vecnormalize_handling", True, "VecNormalize(norm_obs=True, norm_reward=False) used for DQN; validation uses saved obs stats only"),
         ("train_validation_separated", True, "training split=train; validation split=validation"),
         ("validation_deterministic_paired", validation_manifest["episode_id"].nunique() == len(validation_manifest), f"validation_episodes={len(validation_manifest)}"),
@@ -362,6 +421,11 @@ def training_population_audit(episodes: pd.DataFrame) -> pd.DataFrame:
     audit = pd.DataFrame(rows)
     audit.to_csv(TABLES_DIR / "dqn_training_population_audit.csv", index=False)
     return audit
+
+
+# ---------------------------------------------------------------------------
+# Model training
+# ---------------------------------------------------------------------------
 
 
 def dqn_params(config: DQNConfig) -> dict[str, Any]:
@@ -524,6 +588,11 @@ def load_vecnormalize(path: Path, validation_scenario: str, seed: int) -> VecNor
     vec.training = False
     vec.norm_reward = False
     return vec
+
+
+# ---------------------------------------------------------------------------
+# Validation evaluation
+# ---------------------------------------------------------------------------
 
 
 def evaluate_dqn_episode(record: pd.Series, episode: EvalEpisode) -> tuple[dict[str, Any], pd.DataFrame]:
@@ -826,6 +895,11 @@ def select_candidate(summary: pd.DataFrame, stability: pd.DataFrame) -> tuple[pd
     hashes = [{"path": str(path.relative_to(PROJECT_ROOT)), "sha256": sha256(path), "bytes": path.stat().st_size if path.exists() else None} for path in hash_paths]
     (CONFIGS_DIR / "dqn_locked_candidate_hashes.json").write_text(json.dumps(hashes, indent=2), encoding="utf-8")
     return candidate, status
+
+
+# ---------------------------------------------------------------------------
+# Output generation
+# ---------------------------------------------------------------------------
 
 
 def make_figures(summary: pd.DataFrame, results: pd.DataFrame) -> None:

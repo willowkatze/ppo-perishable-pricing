@@ -1,8 +1,8 @@
 """Stockout-aware latent-demand recovery for FreshRetailNet modeling subset.
 
-This module is intentionally simple and explainable. It validates the existing
-modeling subset, builds leakage-safe time-series features, evaluates recovery
-models with artificial censoring, selects a model using validation data only,
+This module validates the existing modeling subset, builds leakage-safe
+time-series features, evaluates recovery models with artificial censoring,
+selects a model using validation data only,
 and saves a recovered-demand dataset for later demand modeling and RL work.
 """
 
@@ -24,6 +24,10 @@ from sklearn.ensemble import ExtraTreesRegressor
 from sklearn.ensemble import HistGradientBoostingRegressor
 from sklearn.metrics import mean_absolute_error, mean_squared_error
 
+
+# ---------------------------------------------------------------------------
+# Paths and fixed experiment settings
+# ---------------------------------------------------------------------------
 
 RANDOM_SEED = 42
 EPSILON = 1e-6
@@ -55,6 +59,11 @@ EXPECTED_SERIES = 300
 EXPECTED_DAYS = 97
 EXPECTED_DATE_MIN = "2024-03-28"
 EXPECTED_DATE_MAX = "2024-07-02"
+
+
+# ---------------------------------------------------------------------------
+# Recovery models and input validation
+# ---------------------------------------------------------------------------
 
 
 @dataclass
@@ -220,6 +229,11 @@ def as_bool(series: pd.Series) -> pd.Series:
     return parsed.astype(bool)
 
 
+# ---------------------------------------------------------------------------
+# Censoring labels and feature engineering
+# ---------------------------------------------------------------------------
+
+
 def create_censoring_labels(data: pd.DataFrame) -> pd.DataFrame:
     """Create transparent censoring and training-eligibility labels."""
     output = data.copy()
@@ -336,6 +350,11 @@ def prepare_model_matrix(data: pd.DataFrame, columns: list[str]) -> pd.DataFrame
         median = frame[column].median()
         frame[column] = frame[column].fillna(0.0 if pd.isna(median) else median)
     return frame
+
+
+# ---------------------------------------------------------------------------
+# Model fitting and validation
+# ---------------------------------------------------------------------------
 
 
 def train_models(features: pd.DataFrame, train_mask: pd.Series) -> dict[str, FittedModel]:
@@ -563,6 +582,11 @@ def fit_final_model(features: pd.DataFrame, selected_model: str) -> FittedModel:
     return models[selected_model]
 
 
+# ---------------------------------------------------------------------------
+# Recovery and diagnostics
+# ---------------------------------------------------------------------------
+
+
 def recover_demand(features: pd.DataFrame, fitted: FittedModel) -> pd.DataFrame:
     """Recover demand for possible-stockout observations."""
     output = features.copy()
@@ -694,6 +718,11 @@ def robustness_checks(features: pd.DataFrame, recovered: pd.DataFrame, selected_
     output = pd.DataFrame(rows)
     output.to_csv(ROBUSTNESS_PATH, index=False)
     return output
+
+
+# ---------------------------------------------------------------------------
+# Output generation
+# ---------------------------------------------------------------------------
 
 
 def create_figures(recovered: pd.DataFrame, validation_predictions: pd.DataFrame, validation_metrics: pd.DataFrame) -> None:
@@ -937,6 +966,11 @@ def save_metadata(status: str, selected_model: str, checks: dict[str, Any], summ
         "limitations": limitations(),
     }
     METADATA_PATH.write_text(json.dumps(metadata, indent=2, default=str), encoding="utf-8")
+
+
+# ---------------------------------------------------------------------------
+# Pipeline entry point
+# ---------------------------------------------------------------------------
 
 
 def run() -> str:

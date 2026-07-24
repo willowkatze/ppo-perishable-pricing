@@ -26,26 +26,48 @@ from stable_baselines3 import DQN
 from stable_baselines3.common.monitor import Monitor
 from stable_baselines3.common.vec_env import DummyVecEnv, VecNormalize
 
-from train_dqn_high_risk_b import (
-    BASELINE_POLICY,
-    CALIBRATION_MODE,
-    CONFIGS_DIR,
-    DISTILLED_POLICY,
-    LAMBDA_WASTE,
-    PLANNING_POLICY,
-    POPULATION_ID,
-    PROJECT_ROOT,
-    REWARD_MODE,
-    SELECTED_PPO_POLICY,
-    TABLES_DIR,
-    TIE_TOL,
-    action_entropy,
-    bootstrap_ci,
-    load_validation_manifest,
-    make_env,
-    reset_env,
-    safe_float,
-)
+if __package__:
+    from src.train_dqn_high_risk_b import (
+        BASELINE_POLICY,
+        CALIBRATION_MODE,
+        CONFIGS_DIR,
+        DISTILLED_POLICY,
+        LAMBDA_WASTE,
+        PLANNING_POLICY,
+        POPULATION_ID,
+        PROJECT_ROOT,
+        REWARD_MODE,
+        SELECTED_PPO_POLICY,
+        TABLES_DIR,
+        TIE_TOL,
+        action_entropy,
+        bootstrap_ci,
+        load_validation_manifest,
+        make_env,
+        reset_env,
+        safe_float,
+    )
+else:
+    from train_dqn_high_risk_b import (
+        BASELINE_POLICY,
+        CALIBRATION_MODE,
+        CONFIGS_DIR,
+        DISTILLED_POLICY,
+        LAMBDA_WASTE,
+        PLANNING_POLICY,
+        POPULATION_ID,
+        PROJECT_ROOT,
+        REWARD_MODE,
+        SELECTED_PPO_POLICY,
+        TABLES_DIR,
+        TIE_TOL,
+        action_entropy,
+        bootstrap_ci,
+        load_validation_manifest,
+        make_env,
+        reset_env,
+        safe_float,
+    )
 
 FIGURES_DIR = PROJECT_ROOT / "outputs" / "figures" / "dqn_final_statistical_audit"
 DOCS_DIR = PROJECT_ROOT / "docs"
