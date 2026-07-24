@@ -1,12 +1,12 @@
 # Project and Research Design
 
-## What Was Done
+## Problem
 
 The project evaluates dynamic markdown policies for perishable fresh-retail inventory. It creates a controlled pipeline from operational time series to recovered demand, a perishability environment, learned policies, and a paired held-out comparison against fixed and rule-based alternatives.
 
 The final evaluation population is the locked 60-episode HIGH_RISK_B test set. The policy ladder contains original PPO, balanced recovered PPO, a locked DQN ensemble, fixed markdown policies, random actions, and two simple rules.
 
-## Why It Was Done
+## Project Scope
 
 Observed sales are not always demand. When inventory is unavailable, sales are censored and a pricing policy trained directly on sales can learn from a biased target. Perishable inventory adds a second issue: markdowns may increase sell-through but can reduce unit margin, so a useful policy must be assessed with both sales and accounting consequences.
 
@@ -17,7 +17,7 @@ Observed sales are not always demand. When inventory is unavailable, sales are c
 3. Does a balanced training design improve decision behavior without changing the environment, reward, or action space?
 4. Do learned policies outperform fixed, random, rule-based, and no-markdown baselines on a locked held-out population?
 
-## Implementation
+## Workflow
 
 The implementation follows this sequence:
 
@@ -33,13 +33,13 @@ The implementation follows this sequence:
 
 The experiment separates training, validation, and held-out test populations. Model selection and diagnostic decisions use training or validation artifacts; the held-out test is reserved for the final locked comparison.
 
-## Main Result
+## Main Contribution
 
 The final held-out result is negative for the primary learned-policy claim. `always_0pct` achieved mean normalized profit `0.447999`, while the strongest learned policy, `balanced_recovered_ppo`, achieved `0.435909`. The locked DQN ensemble achieved `0.425721`. Thus the learned policies were useful comparisons but did not beat the no-markdown baseline.
 
 ## Interpretation
 
-The contribution is a transparent decision-quality comparison that keeps the strongest baseline visible. The balanced PPO experiment tests whether action imbalance was limiting learning; it does not assume that a positive markdown is always valuable. The results support a conservative financial policy under the specified semi-synthetic assumptions, not a general claim that markdowns never help.
+The project compares learned and non-learned policies while keeping the strongest baseline visible. The balanced PPO experiment tests whether action imbalance was limiting learning; it does not assume that a positive markdown is always valuable. The results support a conservative financial policy under the specified semi-synthetic assumptions, not a general claim that markdowns never help.
 
 ## Limitations
 

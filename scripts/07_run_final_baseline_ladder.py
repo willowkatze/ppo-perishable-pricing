@@ -3,7 +3,8 @@
 Purpose:
     Evaluate the fixed, random, rule-based, PPO, balanced PPO, and locked DQN
     policies on the same 60 HIGH_RISK_B held-out test episodes. This is a
-    post-hoc descriptive comparison and does not replace the primary conclusion.
+    post-hoc descriptive comparison with always_0pct retained as the primary
+    reference.
 Implementation module:
     src.final_test_baseline_ladder
 Required local inputs:

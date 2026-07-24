@@ -2,13 +2,13 @@
 
 This repository studies dynamic markdown decisions for perishable fresh-retail inventory. The workflow uses FreshRetailNet-50K-informed time series, stockout-aware demand recovery, a semi-synthetic perishability environment, PPO, a DQN comparison, and a locked held-out baseline ladder.
 
-The project asks whether learned markdown policies improve normalized accounting profit on high-risk inventory after waste, stockout, and finite-shelf-life effects are represented. It is a controlled offline decision experiment, not a deployed pricing system.
+The project asks whether learned markdown policies improve normalized accounting profit on high-risk inventory after waste, stockout, and finite-shelf-life effects are represented. It is a controlled reinforcement-learning experiment using a semi-synthetic environment calibrated with historical retail data, not a deployed pricing system.
 
 ## Data and Problem
 
 FreshRetailNet-50K provides the operational fresh-retail setting. Raw parquet files are not committed; the expected local files are described in [data/raw/README.md](data/raw/README.md). The project selects a modeling subset, identifies stockout-censored observations, and estimates a recovered demand signal before pricing experiments.
 
-The final modeling subset contains 29,100 rows from 300 complete store-product sequences, covering 232 stores and 177 SKUs. The recovery summary reports a 13.317% aggregate increase from observed sales to recovered demand, with 40.196% of rows adjusted. These estimates are model-based proxies, not direct observations of latent demand.
+The final modeling subset contains 29,100 rows from 300 complete store-product sequences, covering 232 stores and 177 SKUs. Each complete sequence has exactly 97 daily observations from 2024-03-28 through 2024-07-02. The recovery summary reports a 13.317% aggregate increase from observed sales to recovered demand, with 40.196% of rows adjusted. These estimates are model-based proxies, not direct observations of latent demand.
 
 ## Method Pipeline
 

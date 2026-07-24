@@ -43,7 +43,7 @@ These files explain diagnostics or earlier branches of the analysis but are not 
 
 ## Training Versus Evaluation
 
-Data preparation and demand recovery create the local inputs. The PPO and DQN scripts train models and may be compute-intensive. The locked evaluation scripts read existing model artifacts and fixed manifests. The final baseline ladder is a post-hoc comparison and does not replace the primary DQN or PPO conclusions.
+Data preparation and demand recovery create the local inputs. The PPO and DQN scripts train models and may be compute-intensive. The locked evaluation scripts read existing model artifacts and fixed manifests. The final baseline ladder is a post-hoc comparison; `always_0pct` remains the primary reference.
 
 ## Configs
 

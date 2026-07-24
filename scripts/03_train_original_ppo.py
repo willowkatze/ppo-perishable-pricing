@@ -2,8 +2,7 @@
 
 Purpose:
     Run the original PPO training design for observed/recovered calibration
-    agents. This is retained for reproducibility, not needed to inspect the
-    archived final results.
+    agents. Re-running it is not needed to inspect the archived final results.
 Implementation module:
     src.train_ppo_operational
 Required local inputs:

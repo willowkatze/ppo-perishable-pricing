@@ -1,18 +1,18 @@
 # Results
 
-## What Was Evaluated
+## PPO Diagnostics
 
 The final comparison uses the identical locked 60-episode HIGH_RISK_B held-out test set. The full ladder has 13 policies: always 0%, 5%, 10%, 20%, 30%, and 40% markdown; random uniform; two rule-based policies; original observed PPO; original recovered PPO; balanced recovered PPO; and the locked DQN ensemble.
 
 The primary metric is mean normalized accounting profit. Paired gains are computed episode by episode against `always_0pct`, with episode-level bootstrap intervals in the locked evaluation records.
 
-## PPO Before and After Balancing
+## Balanced PPO Result
 
 The original recovered PPO diagnostics showed an unnecessary-markdown rate of `0.625` and action entropy of `0.3268` in the comparison used to motivate redesign. After scenario-balanced training, the selected 20k balanced checkpoint had unnecessary markdown `0.1948` and action entropy `0.3904`. This indicates improved decision behavior under the validation diagnostics, but it does not imply superior held-out profit.
 
 The balanced PPO redesign is therefore a behavioral improvement experiment, not a guaranteed financial improvement. The final held-out balanced PPO result is `0.435909`, below `always_0pct`.
 
-## Held-Out Policy Ladder
+## Held-Out Baseline Ladder
 
 | Policy | Mean normalized profit | Gain vs always_0pct | Waste rate | Interpretation |
 |---|---:|---:|---:|---|
@@ -42,7 +42,7 @@ The strongest overall policy is `always_0pct`. The strongest learned policy is `
 
 The full ladder is a post-hoc descriptive extension of the primary evaluation. It should not be used to replace the primary conclusion or to claim that a learned policy is superior to the strongest baseline.
 
-## Profit and Waste
+## Profit-Waste Comparison
 
 The selected profit-waste table and figure show that policies can occupy different points on the profit-waste tradeoff. A lower waste rate alone is not enough to establish a better policy because markdown can also reduce normalized accounting profit. The relevant files are `results/tables/final_profit_waste_pareto_frontier.csv` and `results/figures/07_profit_waste_pareto_frontier.png`.
 

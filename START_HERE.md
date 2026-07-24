@@ -4,7 +4,7 @@
 
 This project studies dynamic markdown decisions for perishable fresh-retail inventory. It combines FreshRetailNet-50K-informed data preparation, stockout-aware demand recovery, a semi-synthetic perishability environment, PPO experiments, a DQN comparison, and a locked held-out policy ladder.
 
-The central question is whether a learned markdown policy can improve normalized accounting profit while managing waste on high-risk perishable inventory. The project is an offline, controlled decision experiment; it is not a deployed retail pricing system.
+The central question is whether a learned markdown policy can improve normalized accounting profit while managing waste on high-risk perishable inventory. The project is a controlled reinforcement-learning experiment in a semi-synthetic environment calibrated with historical retail data; it is not a deployed retail pricing system.
 
 ## Main Conclusion
 
