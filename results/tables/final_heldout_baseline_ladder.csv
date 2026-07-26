@@ -1,0 +1,15 @@
+﻿internal_policy_id,policy,policy_type,test_episode_count,mean_normalized_profit,paired_gain_vs_always_0pct,bootstrap_ci_vs_always_0pct,waste_rate,result_summary
+always_0pct,Always 0%,no-markdown baseline,60,0.447999,0.0,"[0.000000, 0.000000]",0.001905,Strongest overall policy on the locked held-out test set.
+always_5pct,Always 5%,fixed-markdown baseline,60,0.398558,-0.049441,"[-0.050000, -0.048495]",0.001442,Positive fixed-markdown baseline; below balanced recovered PPO and always_0pct.
+always_10pct,Always 10%,fixed-markdown baseline,60,0.348732,-0.099267,"[-0.100000, -0.097979]",0.001334,Positive fixed-markdown baseline; below balanced recovered PPO and always_0pct.
+always_20pct,Always 20%,fixed-markdown baseline,60,0.25,-0.197999,"[-0.200000, -0.194176]",0.0,Positive fixed-markdown baseline; below balanced recovered PPO and always_0pct.
+always_30pct,Always 30%,fixed-markdown baseline,60,0.15,-0.297999,"[-0.300000, -0.294176]",0.0,Positive fixed-markdown baseline; below balanced recovered PPO and always_0pct.
+always_40pct,Always 40%,fixed-markdown baseline,60,0.05,-0.397999,"[-0.400000, -0.394176]",0.0,Positive fixed-markdown baseline; below balanced recovered PPO and always_0pct.
+random_uniform,Random uniform,random baseline,60,0.240322,-0.207677,"[-0.231188, -0.184882]",0.00061,Random baseline; below balanced recovered PPO and always_0pct.
+expiry_rule_10pct,Expiry rule 10%,rule-based baseline,60,0.348732,-0.099267,"[-0.100000, -0.097979]",0.001334,Simple rule-based baseline; below balanced recovered PPO and always_0pct.
+inventory_coverage_rule_10pct,Inventory rule 10%,rule-based baseline,60,0.39262,-0.055379,"[-0.058996, -0.051867]",0.001489,Simple rule-based baseline; below balanced recovered PPO and always_0pct.
+original_observed_ppo,Original observed PPO,learned policy,60,0.307872,-0.140127,"[-0.146424, -0.133649]",0.000405,Original PPO variant; below balanced recovered PPO and always_0pct.
+original_recovered_ppo,Original recovered PPO,learned policy,60,0.310856,-0.137143,"[-0.153204, -0.121398]",0.000405,Original PPO variant; below balanced recovered PPO and always_0pct.
+balanced_recovered_ppo,Balanced recovered PPO,learned policy,60,0.435909,-0.012091,"[-0.015736, -0.008696]",0.001643,"Strongest learned policy; beats all positive fixed-markdown, random, rule-based, original PPO, and DQN alternatives, but not always_0pct."
+locked_dqn_ensemble,Locked DQN ensemble,learned policy,60,0.425721,-0.022278,"[-0.027486, -0.017319]",0.001701,Learned value-based comparison; below balanced recovered PPO and always_0pct.
+

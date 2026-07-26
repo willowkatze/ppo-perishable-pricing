@@ -1,179 +1,84 @@
-﻿# Stockout-Aware Dynamic Markdown Decisions for Perishable Retail
+# PPO Perishable Pricing
 
-**Demand Recovery, PPO Diagnostics, Planning, and DQN Evaluation**
+This repository studies dynamic markdown decisions for perishable fresh-retail inventory. The workflow uses FreshRetailNet-50K-informed time series, stockout-aware demand recovery, a semi-synthetic perishability environment, PPO, a DQN comparison, and a locked held-out baseline ladder.
 
-This repository archives a completed reinforcement-learning course project on dynamic markdown decisions for perishable retail products. The project moved from an initial PPO-only prototype to a broader research workflow covering FreshRetailNet-informed demand recovery, a semi-synthetic perishable inventory environment, strong baselines, PPO diagnostics, limited-horizon planning, planning distillation, multi-seed DQN, equal-weight DQN ensembling, statistical-integrity checks, and one locked held-out test evaluation.
+The project asks whether learned markdown policies improve normalized accounting profit on high-risk inventory after waste, stockout, and finite-shelf-life effects are represented. It is a controlled reinforcement-learning experiment using a semi-synthetic environment calibrated with historical retail data, not a deployed pricing system.
 
-The final locked DQN ensemble did **not** outperform the no-markdown baseline on held-out test episodes. Positive validation signals did not generalize, and the project does not claim a successful baseline-beating learned markdown policy.
+## Data and Problem
 
-## 1. Project Overview
+FreshRetailNet-50K provides the operational fresh-retail setting. Raw parquet files are not committed; the expected local files are described in [data/raw/README.md](data/raw/README.md). The project selects a modeling subset, identifies stockout-censored observations, and estimates a recovered demand signal before pricing experiments.
 
-The project studies whether stockout-aware demand recovery can support better markdown decisions for perishable inventory. It uses FreshRetailNet-50K as the operational sales and stockout source, then constructs a semi-synthetic markdown environment because the public data do not include complete batch-level expiration, waste, replenishment, and cost information.
+The final modeling subset contains 29,100 rows from 300 complete store-product sequences, covering 232 stores and 177 SKUs. Each complete sequence has exactly 97 daily observations from 2024-03-28 through 2024-07-02. The recovery summary reports a 13.317% aggregate increase from observed sales to recovered demand, with 40.196% of rows adjusted. These estimates are model-based proxies, not direct observations of latent demand.
 
-## 2. Research Motivation
+## Method Pipeline
 
-Fresh retail sales are censored during stockouts. A naive policy can mistake stockout-limited sales for low demand. The project asks whether recovering latent demand and targeting high-risk perishable states can improve markdown decisions under a transparent accounting model.
+1. Prepare a split-contained FreshRetailNet modeling subset.
+2. Recover demand affected by stockout censoring with an ExtraTrees model.
+3. Fit observed and recovered discount-response artifacts.
+4. Simulate inventory aging, FEFO issuing, markdown actions, demand response, waste, and accounting in the pricing environment.
+5. Train and diagnose original PPO policies.
+6. Train balanced recovered PPO after observing action-collapse diagnostics.
+7. Train and lock a multi-seed DQN ensemble as a value-based comparison.
+8. Evaluate learned policies and fixed, random, and rule-based baselines on the identical 60-episode HIGH_RISK_B held-out test set.
 
-## 3. Research Questions
+## Main Models
 
-1. Can stockout-aware demand recovery change the demand signal used by markdown policies?
-2. Do PPO policies learn useful state-dependent markdown behavior or collapse to simple actions?
-3. Can limited-horizon planning identify positive-markdown opportunities in locked high-risk states?
-4. Can a learned DQN policy or ensemble transfer validation gains to a held-out test split?
+- Original PPO uses observed or recovered calibration under the operational environment.
+- Balanced recovered PPO changes training-scenario exposure while preserving the environment, reward, action space, and validation protocol.
+- The locked DQN ensemble averages Q-values from three STANDARD_DQN seeds and selects the highest-valued action.
+- Baselines include no markdown, fixed markdown levels, uniform random actions, and two simple risk rules.
 
-## 4. Dataset and Data Limitations
+## Compact Final Result
 
-The operational dataset is FreshRetailNet-50K from Dingdong-Inc on Hugging Face. Raw data are not included in this repository. Users must download the dataset separately according to its license and terms.
+| Policy | Mean normalized profit | Gain vs always_0pct |
+|---|---:|---:|
+| `always_0pct` | 0.447999 | 0.000000 |
+| `balanced_recovered_ppo` | 0.435909 | -0.012091 |
+| `locked_dqn_ensemble` | 0.425721 | -0.022278 |
 
-The source data provide detailed sales and stockout information, but do not provide complete batch-level expiration, realized waste, replenishment decisions, or all financial cost components needed for direct markdown-control evaluation. For that reason, perishability, waste, and financial accounting are modeled as semi-synthetic layers calibrated from available fields and documented assumptions.
+`always_0pct` is the strongest overall held-out policy. `balanced_recovered_ppo` is the strongest learned policy, but no learned policy beat `always_0pct`. The complete 13-policy comparison is in [results/tables/final_heldout_baseline_ladder.csv](results/tables/final_heldout_baseline_ladder.csv), with the main visual comparison in [results/figures/heldout_policy_comparison.png](results/figures/heldout_policy_comparison.png).
 
-## 5. Stockout-Aware Demand Recovery
+## Repository Structure
 
-The demand-recovery pipeline estimates latent demand for stockout-affected observations and compares observed-sales and recovered-demand calibration paths. Recovered demand is not ground-truth demand; it is a model-based estimate used for controlled downstream experiments.
+| Directory | Purpose | Important contents |
+|---|---|---|
+| `scripts/` | Numbered command-line entry points for the main workflow. | Data preparation, demand recovery, PPO/DQN training wrappers, locked DQN evaluation, final baseline ladder. |
+| `src/` | Active implementation modules. | FreshRetailNet processing, latent-demand recovery, discount response, scenario generation, pricing environment, PPO/DQN training, evaluation, and reporting. |
+| `configs/` | Version-controlled final specifications, manifests, and locked metadata. | Environment, PPO, DQN, and held-out evaluation records retained in Git. |
+| `results/` | Selected final report artifacts. | Main tables and figures used to interpret the final findings. |
+| `outputs/` | Generated intermediate and diagnostic artifacts. | Local training, validation, manifests, model artifacts, and runtime configuration records. |
+| `docs/` | Main project explanation. | Research design, data, methods, results, conclusions, and reproducibility. |
+| `tests/` | Lightweight code checks. | Environment and PPO pipeline tests; model-dependent tests may skip without local artifacts. |
+| `archive/` | Supporting history and traceability. | Experiment history, audits, intermediate tables, and archived source modules; not required for the main code path. |
+| `data/` | Local data location. | Raw and processed data placeholders; raw files are not committed. |
 
-## 6. Semi-Synthetic Perishable Inventory Environment
+`configs/` and `outputs/configs/` are deliberately different. `configs/` contains version-controlled final records included in Git. `outputs/configs/` contains local runtime-generated copies, checksums, and execution records. Similarly, `outputs/` is the working area for generated intermediate diagnostics, while `results/` contains selected final tables and figures.
 
-The environment simulates inventory aging, sell-through, markdown actions, revenue, accounting profit, and waste under locked assumptions. The environment is designed for comparative policy evaluation, not as a direct operational simulator of Dingdong's internal systems.
+## Setup Quickstart
 
-## 7. State Space
-
-State variables include inventory risk, expiry risk, predicted demand, stockout-aware demand signals, episode timing, and scenario descriptors. High-risk task definitions are locked before final validation and test phases.
-
-## 8. Six Discrete Markdown Actions
-
-Policies choose among six discrete markdown actions. Action 0 corresponds to no markdown. Positive actions correspond to increasing markdown levels. The action space is fixed across PPO, planning, distillation, and DQN experiments.
-
-## 9. Reward and Accounting Assumptions
-
-The primary financial objective uses normalized accounting profit under the semi-synthetic environment. Waste and sell-through are reported as secondary operational metrics. The reward and accounting assumptions are locked before final model comparison and test evaluation.
-
-## 10. Baselines
-
-Baselines include always_0pct, fixed positive markdown policies, expiry-threshold rules, inventory-coverage rules, random policies, and planning/oracle diagnostics. The no-markdown baseline is intentionally retained as a strong conservative benchmark.
-
-## 11. PPO Experiments
-
-PPO was used as an important calibration-sensitivity benchmark, training-pathology diagnostic, and controlled scenario-balanced sampling experiment. PPO was not treated as the final successful model.
-
-## 12. Scenario-Balanced PPO Redesign
-
-Scenario-balanced PPO tested whether sparse positive-markdown opportunities were underrepresented during training. The redesign reduced some collapse symptoms but did not justify claiming a robust baseline-beating PPO policy.
-
-## 13. Limited-Horizon Planning
-
-Limited-horizon planning was evaluated on locked validation episodes to quantify whether dynamic markdown value existed under the environment assumptions. Planning showed modest positive validation value and supported further learned-policy experiments.
-
-## 14. Planning Distillation
-
-Planning labels were generated for high-risk states and used for focused learned-policy development. This phase was diagnostic and validation-locked; it did not use the held-out test split for tuning.
-
-## 15. Multi-Seed DQN
-
-DQN was trained across multiple seeds on the locked high-risk task. Seed-level validation results were audited for pseudo-replication risk and corrected with episode-clustered inference.
-
-## 16. Equal-Weight Q-Value Ensemble
-
-The final candidate before test was an equal-weight Q-value ensemble using selected DQN checkpoints. The ensemble was selected from validation evidence before the held-out test evaluation.
-
-## 17. Validation Protocol
-
-Validation used fixed paired episode manifests. Every policy was compared on identical episodes to avoid distributional advantages. The test split was not used during validation or model selection.
-
-## 18. Statistical-Integrity Correction
-
-An audit found that pooled seed-episode rows could overstate evidence by treating correlated rows as independent. The corrected inference used episode-level clustering and ensemble evaluation.
-
-## 19. Final Held-Out Test
-
-The final locked held-out test used 60 HIGH_RISK_B episodes with 60/60 valid pairings.
-
-| Metric | DQN ensemble vs always_0pct |
-|---|---:|
-| DQN ensemble mean normalized profit | 0.425721 |
-| always_0pct mean normalized profit | 0.447999 |
-| paired mean gain | -0.022278 |
-| paired median gain | -0.017321 |
-| bootstrap 95% CI | [-0.027486, -0.017319] |
-| win / tie / loss | 0.000 / 0.233 / 0.767 |
-| waste-rate difference | -0.000204 |
-| sell-through difference | +0.000204 |
-
-## 20. Main Findings
-
-The project found useful diagnostics and positive validation signals in targeted high-risk states, but the final locked DQN ensemble failed to beat always_0pct on held-out test episodes. The strongest scientific conclusion is about the difficulty of transferring validation markdown opportunities into robust learned policy value.
-
-## 21. What Can Be Claimed
-
-- Stockout-aware recovery changes the downstream demand signal.
-- PPO revealed important collapse and calibration-sensitivity behavior.
-- Limited-horizon planning found modest validation opportunities in locked high-risk states.
-- Multi-seed DQN and ensembling produced validation signals that required strict test confirmation.
-- The final held-out test did not confirm the learned ensemble as better than no markdown.
-
-## 22. What Cannot Be Claimed
-
-- The project cannot claim that PPO or DQN beat the held-out no-markdown baseline.
-- The project cannot claim recovered demand is ground-truth demand.
-- The project cannot claim dynamic markdown is ineffective in general.
-- The project cannot claim the semi-synthetic environment reproduces the retailer's full internal operations.
-
-## 23. Repository Structure
-
-```text
-src/                 source modules for data, environment, PPO, planning, DQN, audits, and reporting
-tests/               lightweight non-training checks
-outputs/tables/      key result tables and audit outputs
-outputs/figures/     report-ready figures
-outputs/configs/     locked protocols, manifests, and reproducibility metadata
-outputs/models/      model metadata and artifact manifest; large binaries excluded by default
-docs/                methodology, result interpretation, limitations, and archive audits
-data/                placeholder directories only; raw data are excluded
-archive/             local legacy work; data and large artifacts excluded from public Git
-```
-
-## 24. Setup
-
-Create a Python environment and install the requirements:
-
-```bash
+```powershell
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
 pip install -r requirements.txt
 ```
 
-Some experiments used reinforcement-learning libraries such as Stable-Baselines3 and PyTorch. Exact local package versions should be recorded in `environment.yml` or `requirements-lock.txt` for reproduction.
+Raw FreshRetailNet files and trained model binaries must be supplied locally before data preparation or training. The numbered commands and their exact inputs are documented in [scripts/README.md](scripts/README.md). Start with [START_HERE.md](START_HERE.md) for the three reading paths.
 
-## 25. Reproduction Instructions
+## Key Files
 
-The repository is archived for inspection and selective reproduction. Do not rerun full training unless necessary.
+- [docs/02_data_and_demand_recovery.md](docs/02_data_and_demand_recovery.md)
+- [docs/03_environment_and_methods.md](docs/03_environment_and_methods.md)
+- [docs/04_results.md](docs/04_results.md)
+- [scripts/README.md](scripts/README.md)
+- [src/latent_demand_recovery.py](src/latent_demand_recovery.py)
+- [src/pricing_env_operational.py](src/pricing_env_operational.py)
+- [src/train_ppo_operational.py](src/train_ppo_operational.py)
+- [src/train_ppo_recovered_redesign.py](src/train_ppo_recovered_redesign.py)
+- [src/train_dqn_high_risk_b.py](src/train_dqn_high_risk_b.py)
+- [src/final_test_baseline_ladder.py](src/final_test_baseline_ladder.py)
+- [results/tables/final_heldout_baseline_ladder.csv](results/tables/final_heldout_baseline_ladder.csv)
+- [results/figures/heldout_policy_comparison.png](results/figures/heldout_policy_comparison.png)
 
-Typical non-training checks:
+## Project Limitations
 
-```bash
-python -m pytest tests
-python src/final_report_figures.py --help
-```
-
-Full experimental reruns are computationally expensive and should follow the documented timeline in `docs/experiment_timeline.md`.
-
-## 26. Data-Access Instructions
-
-Download FreshRetailNet-50K separately from Hugging Face:
-
-`Dingdong-Inc/FreshRetailNet-50K`
-
-Place raw files under the expected local data directory described in `docs/data_and_assumptions.md`. Raw parquet files are intentionally excluded from GitHub.
-
-## 27. Limitations
-
-The main limitations are semi-synthetic perishability/accounting assumptions, model-based recovered demand, limited final test population, validation-to-test generalization failure, and dependence on locked scenario definitions.
-
-## 28. Future Work
-
-Future work should use richer batch-level expiration and replenishment data, externally validate cost assumptions, test broader task populations, and compare learned policies against operational decision rules under realistic constraints.
-
-## 29. Citation
-
-See `CITATION.cff` for this project citation metadata. FreshRetailNet-50K should be cited separately according to the dataset authors' instructions.
-
-## 30. License
-
-See `LICENSE`. Dataset licensing is separate from this repository's code and documentation license.
+The environment is semi-synthetic. Raw data and trained model binaries are excluded from GitHub. Full reproduction therefore requires local data and model artifacts. No learned policy beat `always_0pct` on the locked held-out test set.

@@ -23,6 +23,10 @@ import pandas as pd
 from gymnasium import spaces
 
 
+# ---------------------------------------------------------------------------
+# Paths and fixed experiment settings
+# ---------------------------------------------------------------------------
+
 RANDOM_SEED = 42
 EPSILON = 1e-9
 MAX_SHELF_LIFE = 21
@@ -51,6 +55,36 @@ ACTION_MARKDOWNS = {
     5: 0.40,
 }
 
+_OBSERVATION_NAMES = (
+    "normalized_total_inventory",
+    "inventory_coverage",
+    *[f"remaining_life_bucket_{i}" for i in range(1, MAX_SHELF_LIFE + 1)],
+    "fraction_expiring_today",
+    "fraction_expiring_within_two_days",
+    "weighted_mean_remaining_life",
+    "predicted_zero_markdown_demand",
+    "lag_1_simulated_target",
+    "lag_7_simulated_target",
+    "rolling_7_simulated_mean",
+    "rolling_14_simulated_mean",
+    "simulated_demand_volatility",
+    "day_of_week",
+    "weekend_indicator",
+    "normalized_time_within_episode",
+    "normalized_temperature",
+    "previous_markdown_action",
+    "previous_stockout_indicator",
+    "calibration_mode_indicator",
+    "store_encoding",
+    "product_encoding",
+)
+_LEGACY_OBSERVATION_DIM = 41
+
+
+# ---------------------------------------------------------------------------
+# Artifact compatibility
+# ---------------------------------------------------------------------------
+
 
 @dataclass
 class FittedResponseModel:
@@ -62,6 +96,11 @@ class FittedResponseModel:
     feature_columns: list[str]
     encoders: dict[str, dict[str, int]]
     prediction_cap: float
+
+
+# ---------------------------------------------------------------------------
+# Environment mechanics
+# ---------------------------------------------------------------------------
 
 
 class OperationalPerishablePricingEnv(gym.Env):
@@ -109,20 +148,7 @@ class OperationalPerishablePricingEnv(gym.Env):
         self._validate_modes()
         self._load_artifacts()
         self.action_space = spaces.Discrete(6)
-        obs_dim = len(observation_names())
-        low = np.zeros(obs_dim, dtype=np.float32)
-        high = np.ones(obs_dim, dtype=np.float32)
-        high[0:2] = 10.0
-        high[21:28] = 20.0
-        high[28:30] = 6.0
-        high[30] = 1.0
-        high[31] = 40.0
-        high[32] = 1.0
-        high[33] = 1.0
-        high[34] = 1.0
-        high[35] = 1.0
-        high[36] = 1.0
-        high[37] = 1.0
+        low, high = observation_bounds()
         self.observation_space = spaces.Box(low=low, high=high, dtype=np.float32)
 
         self.np_random = np.random.default_rng(self.random_seed)
@@ -549,16 +575,18 @@ class OperationalPerishablePricingEnv(gym.Env):
             ],
             dtype=np.float32,
         )
+        if obs.shape != (_LEGACY_OBSERVATION_DIM,):
+            raise RuntimeError(
+                f"Observation schema changed: expected {_LEGACY_OBSERVATION_DIM} values in the locked order, got {obs.shape}."
+            )
         obs = np.nan_to_num(obs, nan=0.0, posinf=0.0, neginf=0.0)
         return np.clip(obs, self.observation_space.low, self.observation_space.high).astype(np.float32)
 
     def _predict_zero_safe(self) -> float:
+        """Predict zero-markdown demand, using zero only before episode initialization."""
         if self.current_series.empty or self.horizon == 0:
             return 0.0
-        try:
-            return self._predict_demand(0.0)
-        except Exception:
-            return float(np.mean(self.sim_history[-7:]))
+        return self._predict_demand(0.0)
 
     def _info(
         self,
@@ -638,6 +666,11 @@ class OperationalPerishablePricingEnv(gym.Env):
         return text
 
 
+# ---------------------------------------------------------------------------
+# Artifact and scenario helpers
+# ---------------------------------------------------------------------------
+
+
 def load_response_model(path: Path) -> FittedResponseModel:
     """Load a response model artifact using a compatibility shim if needed."""
     import __main__
@@ -699,30 +732,51 @@ def stable_norm(value: str) -> float:
     return (sum(ord(ch) for ch in str(value)) % 1000) / 1000.0
 
 
+# ---------------------------------------------------------------------------
+# Observation schema and documented limitations
+# ---------------------------------------------------------------------------
+
+
 def observation_names() -> list[str]:
-    return [
-        "normalized_total_inventory",
-        "inventory_coverage",
-        *[f"remaining_life_bucket_{i}" for i in range(1, MAX_SHELF_LIFE + 1)],
-        "fraction_expiring_today",
-        "fraction_expiring_within_two_days",
-        "weighted_mean_remaining_life",
-        "predicted_zero_markdown_demand",
-        "lag_1_simulated_target",
-        "lag_7_simulated_target",
-        "rolling_7_simulated_mean",
-        "rolling_14_simulated_mean",
-        "simulated_demand_volatility",
-        "day_of_week",
-        "weekend_indicator",
-        "normalized_time_within_episode",
-        "normalized_temperature",
-        "previous_markdown_action",
-        "previous_stockout_indicator",
-        "calibration_mode_indicator",
-        "store_encoding",
-        "product_encoding",
-    ]
+    """Return the locked observation order used by saved normalization and model artifacts."""
+    return list(_OBSERVATION_NAMES)
+
+
+def observation_bounds() -> tuple[np.ndarray, np.ndarray]:
+    """Build the legacy bounds by feature name without changing their values."""
+    names = observation_names()
+    if len(names) != _LEGACY_OBSERVATION_DIM or len(set(names)) != len(names):
+        raise RuntimeError("The locked observation schema must contain 41 unique names.")
+    index = {name: position for position, name in enumerate(names)}
+    low = np.zeros(len(names), dtype=np.float32)
+    high = np.ones(len(names), dtype=np.float32)
+
+    bound_groups = {
+        10.0: {"normalized_total_inventory", "inventory_coverage"},
+        20.0: {
+            "remaining_life_bucket_20",
+            "remaining_life_bucket_21",
+            "fraction_expiring_today",
+            "fraction_expiring_within_two_days",
+            "weighted_mean_remaining_life",
+            "predicted_zero_markdown_demand",
+            "lag_1_simulated_target",
+        },
+        6.0: {"lag_7_simulated_target", "rolling_7_simulated_mean"},
+        40.0: {"simulated_demand_volatility"},
+    }
+    for upper_bound, feature_names in bound_groups.items():
+        for feature_name in feature_names:
+            high[index[feature_name]] = upper_bound
+
+    # Saved policies rely on this exact 41-value bound vector.
+    legacy_high = np.asarray(
+        [10.0, 10.0, *([1.0] * 19), *([20.0] * 7), 6.0, 6.0, 1.0, 40.0, *([1.0] * 9)],
+        dtype=np.float32,
+    )
+    if not np.array_equal(high, legacy_high):
+        raise RuntimeError("Named observation bounds no longer match the locked legacy vector.")
+    return low, high
 
 
 def required_limitations() -> list[str]:
@@ -739,4 +793,4 @@ def required_limitations() -> list[str]:
     ]
 
 
-__all__ = ["OperationalPerishablePricingEnv", "ACTION_MARKDOWNS"]
+__all__ = ["OperationalPerishablePricingEnv", "ACTION_MARKDOWNS", "observation_bounds", "observation_names"]

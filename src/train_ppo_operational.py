@@ -1,3 +1,11 @@
+"""Original PPO training and diagnostic pipeline.
+
+This module trains the observed/recovered PPO agents used in the project
+history. It also records input artifact hashes, validation diagnostics,
+checkpoint summaries, and action-distribution diagnostics so later evaluations
+can be tied back to a fixed environment and calibration setup.
+"""
+
 from __future__ import annotations
 
 import argparse
@@ -26,7 +34,14 @@ SRC_DIR = PROJECT_ROOT / "src"
 if str(SRC_DIR) not in sys.path:
     sys.path.insert(0, str(SRC_DIR))
 
-from pricing_env_operational import ACTION_MARKDOWNS, OperationalPerishablePricingEnv  # noqa: E402
+if __package__:
+    from src.pricing_env_operational import ACTION_MARKDOWNS, OperationalPerishablePricingEnv
+else:
+    from pricing_env_operational import ACTION_MARKDOWNS, OperationalPerishablePricingEnv
+
+# ---------------------------------------------------------------------------
+# Paths and fixed experiment settings
+# ---------------------------------------------------------------------------
 
 TABLES_DIR = PROJECT_ROOT / "outputs" / "tables"
 CONFIGS_DIR = PROJECT_ROOT / "outputs" / "configs"
@@ -138,6 +153,11 @@ def write_input_artifact_hashes() -> dict[str, Any]:
     output = CONFIGS_DIR / "ppo_input_artifact_hashes.json"
     output.write_text(json.dumps(hashes, indent=2), encoding="utf-8")
     return hashes
+
+
+# ---------------------------------------------------------------------------
+# Environment and artifact checks
+# ---------------------------------------------------------------------------
 
 
 def audit_environment_compatibility() -> pd.DataFrame:
@@ -292,6 +312,11 @@ def make_experiment_config(selected_lambda: float | None, artifact_hashes: dict[
     return config
 
 
+# ---------------------------------------------------------------------------
+# Environment construction
+# ---------------------------------------------------------------------------
+
+
 def make_env(
     *,
     split: str,
@@ -429,6 +454,11 @@ def terminal_metrics(info: dict[str, Any], episode_return: float, action_counts:
     }
 
 
+# ---------------------------------------------------------------------------
+# Validation and statistics
+# ---------------------------------------------------------------------------
+
+
 def evaluate_model(
     model: PPO,
     *,
@@ -483,6 +513,11 @@ def evaluate_model(
             }
         )
     return pd.DataFrame(rows)
+
+
+# ---------------------------------------------------------------------------
+# Model training
+# ---------------------------------------------------------------------------
 
 
 class TrainingMetricsCallback(CheckpointCallback):
@@ -745,6 +780,11 @@ def train_one_agent(
     eval_df.insert(0, "agent_id", agent.agent_id)
     eval_df.insert(1, "stage", stage)
     return {"summary": summary, "evaluation": eval_df, "learning_curve": learning_curve}
+
+
+# ---------------------------------------------------------------------------
+# Output generation
+# ---------------------------------------------------------------------------
 
 
 def consolidate_outputs(training_records: list[dict[str, Any]]) -> None:

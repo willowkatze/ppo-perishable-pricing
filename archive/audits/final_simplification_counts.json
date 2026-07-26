@@ -1,0 +1,57 @@
+{
+  "primary_docs_before": 18,
+  "primary_docs_after": 6,
+  "audit_files_merged": 13,
+  "experiment_history_files_merged": 18,
+  "redundant_docs_removed": 6,
+  "result_moves": [
+    [
+      "results/tables/demand_recovery_summary.csv",
+      "results/tables/demand_recovery_summary.csv"
+    ],
+    [
+      "results/tables/dqn_heldout_test_summary.csv",
+      "results/tables/dqn_heldout_test_summary.csv"
+    ],
+    [
+      "results/tables/final_heldout_baseline_ladder.csv",
+      "results/tables/final_heldout_baseline_ladder.csv"
+    ],
+    [
+      "results/tables/final_profit_waste_pareto_frontier.csv",
+      "results/tables/final_profit_waste_pareto_frontier.csv"
+    ],
+    [
+      "results/tables/ppo_original_vs_balanced_comparison.csv",
+      "results/tables/ppo_original_vs_balanced_comparison.csv"
+    ],
+    [
+      "results/figures/01_observed_vs_recovered_demand.png",
+      "results/figures/01_observed_vs_recovered_demand.png"
+    ],
+    [
+      "results/figures/02_recovered_demand_adjustment_distribution.png",
+      "results/figures/02_recovered_demand_adjustment_distribution.png"
+    ],
+    [
+      "results/figures/03_original_vs_balanced_ppo_error_decomposition.png",
+      "results/figures/03_original_vs_balanced_ppo_error_decomposition.png"
+    ],
+    [
+      "results/figures/04_ppo_action_collapse_diagnostic.png",
+      "results/figures/04_ppo_action_collapse_diagnostic.png"
+    ],
+    [
+      "results/figures/06_learned_policies_vs_fixed_markdown.png",
+      "results/figures/06_learned_policies_vs_fixed_markdown.png"
+    ],
+    [
+      "results/figures/07_profit_waste_pareto_frontier.png",
+      "results/figures/07_profit_waste_pareto_frontier.png"
+    ],
+    [
+      "results/figures/heldout_policy_comparison.png",
+      "results/figures/heldout_policy_comparison.png"
+    ]
+  ]
+}

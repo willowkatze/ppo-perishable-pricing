@@ -1,0 +1,6 @@
+method,category,evaluation_split,sample_size,mean_normalized_profit,paired_gain_vs_always_0pct,waste_difference,strongest_learned_policy,strongest_overall_policy,interpretation
+always_0pct,STRONG_NO_MARKDOWN,locked held-out HIGH_RISK_B test,60,0.4479993306199982,0.0,,balanced_recovered_ppo,always_0pct,Strongest overall policy on the locked held-out test population.
+balanced_recovered_ppo,LEARNED_POLICY,locked held-out HIGH_RISK_B test,60,0.4359085234475656,-0.012090807172432544,,balanced_recovered_ppo,always_0pct,"Strongest learned policy; beat positive fixed-markdown, random, rule-based, original PPO, and DQN alternatives, but did not beat always_0pct."
+locked_dqn_ensemble,LEARNED_POLICY,locked held-out HIGH_RISK_B test,60,0.42572130058655044,-0.022278030033447582,-0.000204,balanced_recovered_ppo,always_0pct,DQN ensemble did not beat always_0pct on held-out test; paired gain was negative.
+original_observed_ppo,LEARNED_POLICY,locked held-out HIGH_RISK_B test,60,0.30787219328701776,-0.1401271373329805,,balanced_recovered_ppo,always_0pct,Original PPO benchmark below balanced recovered PPO and always_0pct.
+original_recovered_ppo,LEARNED_POLICY,locked held-out HIGH_RISK_B test,60,0.3108558546753095,-0.13714347594468856,,balanced_recovered_ppo,always_0pct,Recovered PPO remained below balanced recovered PPO and always_0pct.
