@@ -1,4 +1,8 @@
-"""Validate the operational pricing environment before PPO training."""
+"""文件作用：实验顺序 05A，在 RL 训练前验证 pricing environment。
+研究目的：确认 API、库存守恒、accounting、action effect 和 split isolation 有效。
+主要输入：OperationalPerishablePricingEnv 及已生成的数据、模型和情景配置。
+主要输出：环境验证表、敏感性结果、reward scale 和 readiness status。
+该模块只运行固定 policy rollout，不训练 PPO 或 DQN。"""
 
 from __future__ import annotations
 
@@ -37,13 +41,17 @@ REWARD_SCALE_PATH = TABLES_DIR / "pricing_env_reward_scale_diagnostic.csv"
 ENV_CONFIG_PATH = CONFIGS_DIR / "pricing_env_operational_config.json"
 
 
+# 创建本模块需要的输出目录。
 def ensure_dirs() -> None:
     TABLES_DIR.mkdir(parents=True, exist_ok=True)
     CONFIGS_DIR.mkdir(parents=True, exist_ok=True)
     FIGURES_DIR.mkdir(parents=True, exist_ok=True)
 
 
+# 调用 reset 和 step，检查返回结构、状态维度和 action space。
 def run_api_checks() -> pd.DataFrame:
+    # Gymnasium 与 Stable-Baselines3 checker 验证 reset/step 返回类型和 space 一致性；
+    # 通过该检查后，agent 才能可靠接收 state、action、reward 和 termination signal。
     """Run Gymnasium and optional SB3 API checks."""
     rows = []
     env = OperationalPerishablePricingEnv(split="train", calibration_mode="recovered_calibration", reward_mode="financial")
@@ -66,6 +74,7 @@ def run_api_checks() -> pd.DataFrame:
     return output
 
 
+# 把固定验证策略转换为当前状态下的 action id。
 def policy_action(policy: str, env: OperationalPerishablePricingEnv) -> int:
     if policy == "always_0pct":
         return 0
@@ -88,6 +97,7 @@ def policy_action(policy: str, env: OperationalPerishablePricingEnv) -> int:
     raise ValueError(policy)
 
 
+# 运行一个完整 episode，并记录每步库存、销量、浪费和奖励。
 def rollout(
     split: str,
     calibration_mode: str,
@@ -134,6 +144,7 @@ def rollout(
     return final, steps
 
 
+# 对预设策略和场景组合批量运行 episode。
 def run_rollouts() -> tuple[pd.DataFrame, pd.DataFrame, list[dict[str, Any]]]:
     policies = [
         "always_0pct",
@@ -171,7 +182,10 @@ def run_rollouts() -> tuple[pd.DataFrame, pd.DataFrame, list[dict[str, Any]]]:
     return results, steps_df, [paired_options]
 
 
+# 检查库存守恒、利润恒等式和 reward 累加误差。
 def accounting_validation(rollouts: pd.DataFrame, steps: pd.DataFrame) -> pd.DataFrame:
+    # 同时检查库存守恒、负库存、超卖、采购成本重复计费、非有限 reward 和 split 越界。
+    # 任一机械错误都应阻止训练，因为 agent 可能利用模拟漏洞获得虚假高 reward。
     summary = {
         "maximum_step_conservation_error": float(steps["step_conservation_error"].max()),
         "maximum_episode_conservation_error": float(rollouts.get("episode_conservation_error", pd.Series([0.0])).max()),
@@ -188,6 +202,7 @@ def accounting_validation(rollouts: pd.DataFrame, steps: pd.DataFrame) -> pd.Dat
     return output
 
 
+# 检查 episode 日期是否超出当前数据 split。
 def split_boundary_violations(steps: pd.DataFrame) -> int:
     dates = pd.to_datetime(steps["date"])
     violations = 0
@@ -201,7 +216,11 @@ def split_boundary_violations(steps: pd.DataFrame) -> int:
     return violations
 
 
+# 从同一环境状态执行不同动作并比较即时结果。
 def action_effect_audit() -> pd.DataFrame:
+    # 对同一个 state 做 snapshot，再分别执行六个 action，确保比较只改变 markdown。
+    # 如果不同 action 对 demand、revenue 或 waste 完全没有影响，RL 任务将是退化的；
+    # restore_env_state 防止前一个 action 的库存转移污染下一个 action。
     rows = []
     env = OperationalPerishablePricingEnv(split="validation", calibration_mode="recovered_calibration", reward_mode="sustainability")
     for idx in range(20):
@@ -231,6 +250,7 @@ def action_effect_audit() -> pd.DataFrame:
     return output
 
 
+# 复制环境内部状态，供多个动作从同一起点执行。
 def env_state_snapshot(env: OperationalPerishablePricingEnv) -> dict[str, Any]:
     return {
         "current_step": env.current_step,
@@ -252,11 +272,13 @@ def env_state_snapshot(env: OperationalPerishablePricingEnv) -> dict[str, Any]:
     }
 
 
+# 将环境恢复到之前保存的状态。
 def restore_env_state(env: OperationalPerishablePricingEnv, state: dict[str, Any]) -> None:
     for key, value in state.items():
         setattr(env, key, value.copy() if isinstance(value, np.ndarray) else list(value) if isinstance(value, list) else dict(value) if isinstance(value, dict) else value)
 
 
+# 检查不同动作是否产生可区分的需求或奖励。
 def non_degeneracy(action_effects: pd.DataFrame) -> pd.DataFrame:
     preferred = action_effects.loc[action_effects.groupby("state_id")["raw_financial_contribution"].idxmax()].copy()
     dist = preferred["action"].value_counts(normalize=True).reindex(range(6), fill_value=0.0)
@@ -282,6 +304,7 @@ def non_degeneracy(action_effects: pd.DataFrame) -> pd.DataFrame:
     return output
 
 
+# 从同一 episode 比较 observed 和 recovered calibration 的输出。
 def calibration_transmission() -> pd.DataFrame:
     rows = []
     policies = ["always_0pct", "always_20pct", "expiry_threshold_rule"]
@@ -321,6 +344,7 @@ def calibration_transmission() -> pd.DataFrame:
     return output
 
 
+# 改变保质期、库存覆盖和成本场景并汇总结果。
 def scenario_sensitivity() -> pd.DataFrame:
     grid = pd.read_csv(PROJECT_ROOT / "outputs" / "tables" / "perishability_core_scenario_grid.csv")
     rows = []
@@ -336,6 +360,7 @@ def scenario_sensitivity() -> pd.DataFrame:
     return output
 
 
+# 统计 step reward 和 episode return 的范围。
 def reward_scale(steps: pd.DataFrame, rollouts: pd.DataFrame) -> pd.DataFrame:
     rows = []
     for reward_mode, group in steps.groupby("reward_mode"):
@@ -360,6 +385,7 @@ def reward_scale(steps: pd.DataFrame, rollouts: pd.DataFrame) -> pd.DataFrame:
     return output
 
 
+# 根据当前参数构建 figures。
 def create_figures(steps: pd.DataFrame, rollouts: pd.DataFrame, action_effects: pd.DataFrame, nondeg: pd.DataFrame, sensitivity: pd.DataFrame) -> None:
     sample = steps.iloc[: min(len(steps), 20)].copy()
     fig, ax = plt.subplots(figsize=(10, 5))
@@ -389,14 +415,17 @@ def create_figures(steps: pd.DataFrame, rollouts: pd.DataFrame, action_effects: 
     plot_bar(pd.Series({"step": steps["step_conservation_error"].max(), "episode": rollouts.get("episode_conservation_error", pd.Series([0])).max()}), "Conservation-error summary", "conservation_error_summary.png")
 
 
+# 根据现有表格绘制 bar 图。
 def plot_bar(series: pd.Series, title: str, filename: str) -> None:
     fig, ax = plt.subplots(figsize=(9, 5)); series.plot(kind="bar", ax=ax); ax.set_title(title); plt.xticks(rotation=30, ha="right"); savefig(filename)
 
 
+# 调整布局并把当前图保存到主图目录。
 def savefig(filename: str) -> None:
     plt.tight_layout(); plt.savefig(FIGURES_DIR / filename, dpi=160); plt.close()
 
 
+# 汇总接口、核算和动作检查结果，生成环境状态。
 def final_status(api: pd.DataFrame, accounting: pd.DataFrame, nondeg: pd.DataFrame, calibration: pd.DataFrame) -> str:
     api_ok = api.loc[api["checker"].eq("gymnasium"), "status"].iloc[0] == "pass"
     acc = accounting.iloc[0]
@@ -422,6 +451,7 @@ def final_status(api: pd.DataFrame, accounting: pd.DataFrame, nondeg: pd.DataFra
     return "PRICING_ENV_REQUIRES_REVISION"
 
 
+# 打印环境检查结果和失败项。
 def print_report(status: str, api: pd.DataFrame, accounting: pd.DataFrame, nondeg: pd.DataFrame, calibration: pd.DataFrame, reward: pd.DataFrame) -> None:
     print("\nOperational pricing environment validation report")
     print("API check status:", api.to_dict(orient="records"))
@@ -446,6 +476,7 @@ def print_report(status: str, api: pd.DataFrame, accounting: pd.DataFrame, nonde
     print(status)
 
 
+# 返回环境或实验结果需要同时报告的限制列表。
 def required_limitations() -> list[str]:
     return [
         "shelf life and inventory age are simulated",
@@ -460,6 +491,7 @@ def required_limitations() -> list[str]:
     ]
 
 
+# 汇总本次运行生成的文件路径。
 def created_files() -> list[Path]:
     return [
         API_VALIDATION_PATH, ROLLOUT_RESULTS_PATH, PAIRED_POLICY_PATH, ACCOUNTING_VALIDATION_PATH,
@@ -469,6 +501,9 @@ def created_files() -> list[Path]:
 
 
 def run() -> str:
+    # 所有门槛均为训练前检查：API -> rollout/accounting -> action non-degeneracy
+    # -> calibration transmission -> scenario/reward sensitivity。
+    # 只有状态为 READY 时才进入 PPO/DQN 阶段。
     ensure_dirs()
     api = run_api_checks()
     rollouts, steps, _paired = run_rollouts()

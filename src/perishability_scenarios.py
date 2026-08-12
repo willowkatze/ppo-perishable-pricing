@@ -1,10 +1,8 @@
-"""Perishability and economic scenario layer for later markdown RL experiments.
-
-FreshRetailNet does not observe shelf life, expiration dates, realized waste,
-procurement cost, disposal cost, or carbon impact. This module therefore builds
-transparent semi-synthetic scenario assumptions and validates them with a small
-deterministic FEFO simulation. It does not implement Gymnasium or PPO.
-"""
+"""文件作用：实验顺序 04，定义易腐库存与经济参数的 semi-synthetic scenarios。
+研究目的：补充 FreshRetailNet 未记录的 shelf life、库存年龄、waste 和成本变量。
+主要输入：recovered demand、response curves 和数据中的商品/库存特征。
+主要输出：scenario grid、变量来源表、FEFO 检查和环境 master config。
+该模块不训练 RL；模拟变量必须与真实观测变量明确区分。"""
 
 from __future__ import annotations
 
@@ -77,6 +75,7 @@ class Scenario:
     lambda_waste: float
 
 
+# 创建本模块需要的输出目录。
 def ensure_dirs() -> None:
     """Create output directories."""
     TABLES_DIR.mkdir(parents=True, exist_ok=True)
@@ -84,6 +83,7 @@ def ensure_dirs() -> None:
     FIGURES_DIR.mkdir(parents=True, exist_ok=True)
 
 
+# 读取 inputs 数据并返回统一结构。
 def load_inputs() -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
     """Load recovered data and discount-response artifacts."""
     if not DATA_PATH.exists():
@@ -106,6 +106,7 @@ def load_inputs() -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
     return data, curves, support
 
 
+# 把常见布尔值写法统一转换为布尔序列。
 def as_bool(series: pd.Series) -> pd.Series:
     """Convert mixed bool-like values to bool."""
     if pd.api.types.is_bool_dtype(series):
@@ -178,6 +179,9 @@ def product_metadata_audit(data: pd.DataFrame) -> pd.DataFrame:
 
 def variable_source_registry() -> pd.DataFrame:
     """Separate observed, model-estimated, derived, and assumed variables."""
+    # 逐项登记 observed、derived、model-estimated 和 simulated 变量。
+    # 这是项目可解释性的关键边界：最终 waste/profit 来自受控情景，
+    # 不能表述为 FreshRetailNet 直接提供的真实报废量或零售商利润。
     rows = [
         ("date", "FreshRetailNet processing", "observed", "Calendar date from dt/timestamp.", "low", "Operational time index only."),
         ("store_id", "FreshRetailNet processing", "observed", "Anonymized store identifier.", "low", "Grouping key; no store semantics inferred."),
@@ -266,6 +270,9 @@ def markdown_action_audit(data: pd.DataFrame) -> pd.DataFrame:
 
 
 def shelf_life_scenarios() -> pd.DataFrame:
+    # 数据没有 expiration date，因此使用 short/medium/long 三类离散假设，
+    # 并提供 sensitivity level。目的不是猜测单个 SKU 的真实保质期，
+    # 而是检验 policy 在不同易腐速度下是否保持一致结论。
     """Create neutral shelf-life assumption classes and designs."""
     rows = []
     specs = {
@@ -345,6 +352,7 @@ def product_assignments(data: pd.DataFrame) -> pd.DataFrame:
     return output
 
 
+# 根据稳定哈希把标识映射到固定索引。
 def stable_index(value: str, modulo: int) -> int:
     """Stable deterministic pseudo-hash."""
     return sum(ord(ch) for ch in value) % modulo
@@ -434,6 +442,7 @@ def reward_scenarios() -> pd.DataFrame:
     return output
 
 
+# 将 config specs 写入对应输出文件。
 def write_config_specs() -> None:
     """Write transition, accounting, and reward specifications."""
     transition = {
@@ -495,6 +504,9 @@ def write_config_specs() -> None:
 
 def scenario_grids() -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
     """Create core, sensitivity, and stress-test grids."""
+    # core grid 组合 shelf life、inventory coverage、age profile 和 cost assumptions；
+    # sensitivity/stress grid 用于检查结论是否依赖单一参数设定。
+    # scenario_id 被训练、validation 和最终 paired evaluation 共同引用。
     core_specs = []
     sid = 0
     for shelf in ["short_shelf_life", "medium_shelf_life", "long_shelf_life"]:
@@ -638,6 +650,10 @@ def simulate_policy(
     curves: pd.DataFrame,
 ) -> tuple[dict[str, Any], list[dict[str, Any]]]:
     """Run deterministic FEFO validation simulation for one series/scenario/policy."""
+    # 该小型 deterministic simulation 在正式 Gymnasium 环境之前检查 accounting identity
+    # 和 FEFO 方向是否合理。库存按 remaining-life bucket 保存，销售优先扣减最临期批次，
+    # 日末 bucket 0 计为 expired waste，再将剩余库存年龄前移。
+    # 输出只用于 scenario readiness，不用于训练最终 policy。
     shelf = shelf_life_days(str(scenario["shelf_life_class"]))
     initial_demand = float(series["recovered_demand"].mean() if "recovered" in str(scenario["demand_target"]) else series["observed_sales_demand"].mean())
     total_inventory = initial_demand * coverage_midpoint(str(scenario["inventory_coverage"]))
@@ -803,6 +819,7 @@ def run_pre_environment_checks(data: pd.DataFrame, curves: pd.DataFrame, core_gr
     return validation, identity, sensitivity
 
 
+# 根据当前参数构建 figures。
 def create_figures(
     shelf: pd.DataFrame,
     inventory: pd.DataFrame,
@@ -824,6 +841,7 @@ def create_figures(
     plot_identity(identity)
 
 
+# 根据现有表格绘制 shelf life 图。
 def plot_shelf_life(shelf: pd.DataFrame) -> None:
     fig, ax = plt.subplots(figsize=(8, 5))
     pivot = shelf.pivot(index="shelf_life_class", columns="scenario_level", values="shelf_life_days")
@@ -834,6 +852,7 @@ def plot_shelf_life(shelf: pd.DataFrame) -> None:
     savefig("shelf_life_scenario_overview.png")
 
 
+# 根据现有表格绘制 age profiles 图。
 def plot_age_profiles() -> None:
     fig, ax = plt.subplots(figsize=(8, 5))
     shelf = 7
@@ -847,6 +866,7 @@ def plot_age_profiles() -> None:
     savefig("inventory_age_profile_examples.png")
 
 
+# 根据现有表格绘制 economic 图。
 def plot_economic(economic: pd.DataFrame) -> None:
     fig, ax = plt.subplots(figsize=(9, 5))
     rows = economic.loc[economic["scenario_type"].isin(["margin", "disposal"])]
@@ -857,6 +877,7 @@ def plot_economic(economic: pd.DataFrame) -> None:
     savefig("economic_scenario_comparison.png")
 
 
+# 根据现有表格绘制 policy metric 图。
 def plot_policy_metric(validation: pd.DataFrame, metric: str, title: str, filename: str) -> None:
     summary = validation.groupby("policy")[metric].mean().sort_values(ascending=False)
     fig, ax = plt.subplots(figsize=(10, 5))
@@ -867,6 +888,7 @@ def plot_policy_metric(validation: pd.DataFrame, metric: str, title: str, filena
     savefig(filename)
 
 
+# 根据现有表格绘制 profit waste 图。
 def plot_profit_waste(validation: pd.DataFrame) -> None:
     fig, ax = plt.subplots(figsize=(7, 5))
     ax.scatter(validation["waste_rate"], validation["accounting_profit"], alpha=0.4, s=16)
@@ -876,6 +898,7 @@ def plot_profit_waste(validation: pd.DataFrame) -> None:
     savefig("profit_versus_waste_scatter.png")
 
 
+# 根据现有表格绘制 observed recovered comparison 图。
 def plot_observed_recovered_comparison(validation: pd.DataFrame) -> None:
     summary = validation.groupby(["demand_target", "policy"])["accounting_profit"].mean().reset_index()
     fig, ax = plt.subplots(figsize=(10, 5))
@@ -888,6 +911,7 @@ def plot_observed_recovered_comparison(validation: pd.DataFrame) -> None:
     savefig("observed_vs_recovered_scenario_comparison.png")
 
 
+# 根据现有表格绘制 sensitivity 图。
 def plot_sensitivity(sensitivity: pd.DataFrame, group_col: str, title: str, filename: str) -> None:
     summary = sensitivity.groupby(group_col)["mean_profit"].mean().sort_values()
     fig, ax = plt.subplots(figsize=(8, 5))
@@ -898,6 +922,7 @@ def plot_sensitivity(sensitivity: pd.DataFrame, group_col: str, title: str, file
     savefig(filename)
 
 
+# 根据现有表格绘制 identity 图。
 def plot_identity(identity: pd.DataFrame) -> None:
     summary = identity[["inventory_conservation_pass", "no_negative_inventory", "procurement_cost_charged_once", "waste_nonnegative"]].mean()
     fig, ax = plt.subplots(figsize=(9, 5))
@@ -909,6 +934,7 @@ def plot_identity(identity: pd.DataFrame) -> None:
     savefig("accounting_identity_validation_summary.png")
 
 
+# 调整布局并把当前图保存到主图目录。
 def savefig(filename: str) -> None:
     """Save current figure."""
     plt.tight_layout()
@@ -916,6 +942,7 @@ def savefig(filename: str) -> None:
     plt.close()
 
 
+# 将 master config 写入对应输出文件。
 def write_master_config(core: pd.DataFrame) -> None:
     """Save master scenario configuration."""
     config = {
@@ -950,11 +977,13 @@ def write_master_config(core: pd.DataFrame) -> None:
     write_json(MASTER_CONFIG_PATH, config)
 
 
+# 将字典以缩进 JSON 格式写入文件。
 def write_json(path: Path, payload: dict[str, Any]) -> None:
     """Write JSON with stable formatting."""
     path.write_text(json.dumps(payload, indent=2, default=str), encoding="utf-8")
 
 
+# 返回该模块对应的数据和模型限制说明。
 def limitations() -> list[str]:
     """Required limitations."""
     return [
@@ -1033,6 +1062,7 @@ def print_report(status: str, core: pd.DataFrame, validation: pd.DataFrame, iden
     print(status)
 
 
+# 汇总本次运行生成的文件路径。
 def created_files() -> list[Path]:
     """Return expected created files."""
     return [
@@ -1060,6 +1090,9 @@ def created_files() -> list[Path]:
 
 def run() -> str:
     """Run full perishability scenario calibration."""
+    # pipeline：变量来源审计 -> shelf/inventory/economic assumptions
+    # -> scenario grids -> deterministic FEFO 检查 -> master config。
+    # pricing_env_operational.py 读取这里锁定的情景，而不在训练中临时改变参数。
     ensure_dirs()
     data, curves, _support = load_inputs()
     product_audit = product_metadata_audit(data)

@@ -1,3 +1,9 @@
+"""文件作用：实验顺序 06A，评估原始 PPO 和固定/规则 baseline。
+研究目的：在固定 episode 上比较 observed/recovered PPO 的利润、浪费和 action behavior。
+主要输入：PPO checkpoint、VecNormalize、pricing environment 和 evaluation manifest。
+主要输出：policy summary、paired comparison 和 PPO 诊断图。
+该模块不调用 model.learn()；最终 test 结论由独立锁定脚本产生。"""
+
 from __future__ import annotations
 
 import json
@@ -33,12 +39,17 @@ from train_ppo_operational import (  # noqa: E402
 )
 
 
+# 创建评估表格和图形的输出目录。
 def ensure_eval_dirs() -> None:
     for directory in [TABLES_DIR, CONFIGS_DIR, FIGURES_DIR]:
         directory.mkdir(parents=True, exist_ok=True)
 
 
+# 从指定 split 固定 store、product、起始日期和 scenario。
 def create_episode_manifest(split: str, episodes: int, scenario_id: str, seed: int) -> pd.DataFrame:
+    # 先把 store-product-start date 固定成 manifest，再让每个 policy 逐行复用。
+    # 这消除不同 policy 随机抽到不同 episode 的混杂，并为 paired statistics
+    # 提供稳定的 episode_id。
     env = OperationalPerishablePricingEnv(split=split, scenario_id=scenario_id, random_seed=seed, deterministic_demand=True)
     rows: list[dict[str, Any]] = []
     seen: set[tuple[str, str, str]] = set()
@@ -68,6 +79,7 @@ def create_episode_manifest(split: str, episodes: int, scenario_id: str, seed: i
     return manifest
 
 
+# 优先读取现有 manifest；不存在时再创建。
 def load_or_create_manifest(split: str, episodes: int = 20, scenario_id: str = DEFAULT_SCENARIO_ID) -> pd.DataFrame:
     path = CONFIGS_DIR / f"ppo_{split}_episode_manifest.csv"
     if path.exists():
@@ -76,6 +88,7 @@ def load_or_create_manifest(split: str, episodes: int = 20, scenario_id: str = D
     return create_episode_manifest(split, episodes, scenario_id, seed)
 
 
+# 根据固定、随机或规则基线返回 action id。
 def baseline_action(policy_id: str, obs: np.ndarray, info: dict[str, Any], rng: np.random.Generator) -> int:
     if policy_id == "always_0pct":
         return 0
@@ -108,6 +121,7 @@ def baseline_action(policy_id: str, obs: np.ndarray, info: dict[str, Any], rng: 
     raise ValueError(f"Unknown baseline policy: {policy_id}")
 
 
+# 在一条 manifest 记录上运行策略并保存 episode 指标。
 def run_episode(
     *,
     env: OperationalPerishablePricingEnv,
@@ -168,6 +182,7 @@ def run_episode(
     return metrics
 
 
+# 依次运行所有非学习基线策略。
 def evaluate_baselines(
     *,
     manifest: pd.DataFrame,
@@ -198,6 +213,7 @@ def evaluate_baselines(
     return baseline_df
 
 
+# 加载 PPO checkpoint 及其 VecNormalize。
 def load_trained_policy(agent_id: str, seed: int) -> tuple[PPO | None, VecNormalize | None]:
     agent_dir = MODELS_DIR / agent_id / f"seed_{seed}"
     model_path = agent_dir / "best_model.zip"
@@ -212,6 +228,7 @@ def load_trained_policy(agent_id: str, seed: int) -> tuple[PPO | None, VecNormal
     return model, vecnorm
 
 
+# 冻结模型，在固定 manifest 上运行 observed/recovered PPO。
 def evaluate_trained_policies(manifest: pd.DataFrame, selected_lambda: float | None) -> pd.DataFrame:
     rows: list[dict[str, Any]] = []
     for agent_id, (calibration_mode, reward_mode) in PRIMARY_AGENTS.items():
@@ -256,6 +273,7 @@ def evaluate_trained_policies(manifest: pd.DataFrame, selected_lambda: float | N
     return pd.DataFrame(rows)
 
 
+# 按策略汇总利润、浪费、售罄率和动作占比。
 def summarize_policy_results(results: pd.DataFrame) -> pd.DataFrame:
     if results.empty:
         return pd.DataFrame()
@@ -279,7 +297,10 @@ def summarize_policy_results(results: pd.DataFrame) -> pd.DataFrame:
     return results.groupby(["policy_id", "agent_id", "split"], dropna=False)[numeric_cols].mean().reset_index()
 
 
+# 按 episode 对齐策略和基线并计算配对差值。
 def paired_comparisons(results: pd.DataFrame) -> pd.DataFrame:
+    # 所有差值先按 episode_id 对齐，主要参照是 always_0pct。
+    # 同时保留 win/tie/loss 和分位数，避免平均回报掩盖少数 episode 的大额损失。
     rows: list[dict[str, Any]] = []
     if results.empty:
         return pd.DataFrame()
@@ -330,6 +351,7 @@ def paired_comparisons(results: pd.DataFrame) -> pd.DataFrame:
     return pd.DataFrame(rows)
 
 
+# 汇总 seed 差异、动作分布和 calibration 差异。
 def extra_diagnostics(results: pd.DataFrame) -> None:
     if results.empty:
         for name in [
@@ -366,6 +388,7 @@ def extra_diagnostics(results: pd.DataFrame) -> None:
     support.to_csv(TABLES_DIR / "ppo_support_generalization_audit.csv", index=False)
 
 
+# 根据评估汇总表生成比较图。
 def save_figures(results: pd.DataFrame, comparisons: pd.DataFrame) -> None:
     FIGURES_DIR.mkdir(parents=True, exist_ok=True)
     if results.empty:
@@ -415,7 +438,11 @@ def save_figures(results: pd.DataFrame, comparisons: pd.DataFrame) -> None:
         plt.close(fig)
 
 
+# 加载现有模型并运行历史评估流程。
 def run_evaluation_stage(config: dict[str, Any] | None = None) -> str:
+    # 这是保留的历史评估入口：它会建立 validation 与 test manifest 并汇总模型表现。
+    # 最终 held-out 结论不采用这里的 test 输出，而采用候选锁定后的独立评估脚本。
+    # 本函数只加载既有模型并 rollout，不训练 PPO。
     ensure_eval_dirs()
     if config is None:
         config_path = CONFIGS_DIR / "ppo_operational_experiment_config.json"

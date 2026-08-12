@@ -1,8 +1,8 @@
-"""Evaluate the locked 13-policy baseline ladder on held-out test episodes.
-
-The ladder is a post-hoc descriptive analysis. Its primary reference remains
-the paired comparison between the locked DQN ensemble and ``always_0pct``.
-"""
+"""文件作用：实验顺序 10，在锁定 held-out test 上比较完整的 13-policy ladder。
+研究目的：判断 learned policy 是否真正超过强基线，而非只超过较弱固定折扣策略。
+主要输入：60 个 HIGH_RISK_B test episodes、锁定 PPO/DQN 模型和规则阈值。
+主要输出：policy 汇总、paired comparison、profit-waste frontier 和最终图表。
+这是 post-hoc descriptive analysis，主要结论仍以 DQN 对 always_0pct 为准。"""
 
 from __future__ import annotations
 
@@ -69,6 +69,9 @@ LEARNED_POLICIES = [
     "locked_dqn_ensemble",
 ]
 
+# baseline ladder 从简单固定折扣逐步增加到规则和 learned policy。
+# always_0pct 是重要的强基线：只有超过“不打折”，才能声称模型创造了额外财务价值；
+# 其他固定折扣用于解释模型至少避免了哪些明显不合适的 markdown 策略。
 POLICY_ORDER = BASELINES + LEARNED_POLICIES
 
 HIERARCHY = {
@@ -103,17 +106,20 @@ PPO_CONFIGS = {
 }
 
 
+# 绑定 PPO checkpoint 与对应的 VecNormalize。
 @dataclass
 class PPOMember:
     policy_id: str
     model: Any
     vecnormalize: VecNormalize
 
+    # 标准化 observation 后调用 PPO，并返回离散 action id。
     def action(self, obs: np.ndarray) -> int:
         norm_obs = self.vecnormalize.normalize_obs(obs.astype(np.float32)[None, :])[0]
         action, _ = self.model.predict(norm_obs, deterministic=True)
         return int(action)
 
+    # 关闭内部环境并释放资源。
     def close(self) -> None:
         self.vecnormalize.close()
 
@@ -123,11 +129,13 @@ class PPOMember:
 # ---------------------------------------------------------------------------
 
 
+# 检查输入文件是否存在，缺失时直接报错。
 def require_file(path: Path) -> None:
     if not path.exists():
         raise FileNotFoundError(f"Required locked artifact not found: {path}")
 
 
+# 查找给定折扣率对应的环境 action id。
 def action_for_markdown(markdown: float) -> int:
     for action, value in ACTION_MARKDOWNS.items():
         if abs(float(value) - markdown) <= 1e-12:
@@ -135,12 +143,14 @@ def action_for_markdown(markdown: float) -> int:
     raise ValueError(f"Locked action space does not contain markdown={markdown}")
 
 
+# 读取最终比较使用的 HIGH_RISK_B 阈值。
 def load_high_risk_definition() -> dict[str, Any]:
     path = CONFIGS_DIR / "final_locked_dqn_ensemble.json"
     require_file(path)
     return json.loads(path.read_text(encoding="utf-8")).get("high_risk_b_definition", {})
 
 
+# 加载最终比较需要的 PPO checkpoint 和归一化文件。
 def load_ppo_members(first_scenario: str) -> dict[str, PPOMember]:
     members: dict[str, PPOMember] = {}
     missing: list[str] = []
@@ -167,6 +177,7 @@ def load_ppo_members(first_scenario: str) -> dict[str, PPOMember]:
     return members
 
 
+# 根据策略名称返回固定、随机或规则基线动作。
 def fixed_or_rule_action(policy_id: str, obs: np.ndarray, step: int, episode_index: int, thresholds: dict[str, float]) -> int:
     obs_names = observation_names()
     idx = {name: i for i, name in enumerate(obs_names)}
@@ -197,6 +208,7 @@ def fixed_or_rule_action(policy_id: str, obs: np.ndarray, step: int, episode_ind
 # ---------------------------------------------------------------------------
 
 
+# 在一个 held-out episode 上运行指定策略并记录结果和逐步状态。
 def evaluate_episode(
     policy_id: str,
     episode: pd.Series,
@@ -204,6 +216,9 @@ def evaluate_episode(
     dqn_members: list[Any] | None,
     ppo_members: dict[str, PPOMember],
 ) -> tuple[dict[str, Any], pd.DataFrame]:
+    # 对单个锁定 test episode 运行一个 policy，直到库存清空或 horizon 结束。
+    # policy 只读取当前 state；函数同时保存 episode 结果和逐步 state-action 记录，
+    # 后者用于 action entropy 与 state-dependence 诊断。
     env = make_env("test", str(episode["scenario_id"]), BOOTSTRAP_SEED)
     obs, _ = reset_env(env, int(episode["episode_index"]))
     actions: list[int] = []
@@ -272,7 +287,11 @@ def evaluate_episode(
 # ---------------------------------------------------------------------------
 
 
+# 对完整 episode 重采样，计算配对差值的置信区间。
 def bootstrap_ci(values: pd.Series) -> tuple[float, float]:
+    # bootstrap 的独立单位是完整 episode，而不是 episode 内的每个 step。
+    # 这样保留同一 episode 上 policy 与 baseline 的配对结构，避免把相关的时间步
+    # 错当成大量独立样本而得到过窄的置信区间。
     arr = values.dropna().astype(float).to_numpy()
     if len(arr) == 0:
         return np.nan, np.nan
@@ -283,13 +302,17 @@ def bootstrap_ci(values: pd.Series) -> tuple[float, float]:
     return float(np.percentile(samples, 2.5)), float(np.percentile(samples, 97.5))
 
 
+# 按 episode id 对齐策略和参照，返回 normalized profit 差值。
 def paired_diff(results: pd.DataFrame, policy_id: str, ref_id: str) -> pd.Series:
+    # normalized profit = episode accounting profit / initial inventory。
+    # 先按 episode_id 配对再相减，可控制商品、情景和起始库存的 episode-level 差异。
     a = results.loc[results["policy_id"].eq(policy_id), ["episode_id", "normalized_profit"]]
     b = results.loc[results["policy_id"].eq(ref_id), ["episode_id", "normalized_profit"]]
     merged = a.merge(b, on="episode_id", suffixes=("_policy", "_ref"))
     return merged["normalized_profit_policy"].astype(float) - merged["normalized_profit_ref"].astype(float)
 
 
+# 解析动作序列并计算各 action 的使用占比。
 def action_distribution(sequences: pd.Series) -> dict[str, float]:
     actions: list[int] = []
     for seq in sequences.dropna():
@@ -301,6 +324,7 @@ def action_distribution(sequences: pd.Series) -> dict[str, float]:
     return {f"action_{i}_share": float(counts.get(i, 0.0)) for i in ACTION_MARKDOWNS}
 
 
+# 根据动作占比和熵判断策略是否随状态改变。
 def state_dependence_label(policy_rows: pd.DataFrame) -> str:
     dist = action_distribution(policy_rows["action_sequence"])
     entropy_values = policy_rows["action_entropy"].astype(float)
@@ -310,7 +334,11 @@ def state_dependence_label(policy_rows: pd.DataFrame) -> str:
     return "STATE_DEPENDENT"
 
 
+# 按策略汇总利润、浪费、售罄率、下行风险和动作指标。
 def summarize(results: pd.DataFrame) -> pd.DataFrame:
+    # 同时报告 profit、waste、sell-through、下行风险和 action behavior，
+    # 因为平均回报相近的 policy 可能在浪费或极端 episode 损失上完全不同。
+    # 所有结论保留 always_0pct、random 和 always_10pct 三个参照。
     rows = []
     for policy_id in POLICY_ORDER:
         if policy_id not in set(results["policy_id"]):
@@ -352,6 +380,7 @@ def summarize(results: pd.DataFrame) -> pd.DataFrame:
     return pd.DataFrame(rows)
 
 
+# 对每一对策略计算 episode 级配对差值和置信区间。
 def pairwise(results: pd.DataFrame) -> pd.DataFrame:
     rows = []
     evaluated = [p for p in POLICY_ORDER if p in set(results["policy_id"])]
@@ -376,11 +405,15 @@ def pairwise(results: pd.DataFrame) -> pd.DataFrame:
     return pd.DataFrame(rows)
 
 
+# 把两两比较表转换为策略增益矩阵。
 def gain_matrix(pairwise_df: pd.DataFrame) -> pd.DataFrame:
     return pairwise_df.pivot(index="policy_a", columns="policy_b", values="mean_gain_a_minus_b").reset_index()
 
 
+# 检查每个策略是否覆盖相同数量的 held-out episodes。
 def validate_complete_ladder(results: pd.DataFrame, expected_episodes: int) -> None:
+    # 任一 policy 或 episode 缺失都会使比较不再完全配对，因此在写最终表前直接失败，
+    # 不允许静默跳过加载失败但可能表现较差的模型。
     """Reject incomplete final tables before any result artifact is written."""
     observed = set(results["policy_id"].astype(str))
     missing = [policy for policy in POLICY_ORDER if policy not in observed]
@@ -394,6 +427,7 @@ def validate_complete_ladder(results: pd.DataFrame, expected_episodes: int) -> N
         )
 
 
+# 标记利润更高且浪费更低的非支配策略。
 def pareto_frontier(summary: pd.DataFrame) -> pd.DataFrame:
     evaluated = summary.loc[summary["evaluation_status"].eq("EVALUATED")].copy()
     frontier = []
@@ -416,6 +450,7 @@ def pareto_frontier(summary: pd.DataFrame) -> pd.DataFrame:
 # ---------------------------------------------------------------------------
 
 
+# 根据最终汇总、矩阵和两两比较表生成图。
 def make_figures(summary: pd.DataFrame, matrix: pd.DataFrame, pairwise_df: pd.DataFrame) -> None:
     FIGURES_DIR.mkdir(parents=True, exist_ok=True)
     evaluated = summary.loc[summary["evaluation_status"].eq("EVALUATED")].copy()
@@ -482,12 +517,14 @@ def make_figures(summary: pd.DataFrame, matrix: pd.DataFrame, pairwise_df: pd.Da
     plt.close(fig)
 
 
+# 打印最强总体策略、最强学习策略和基线比较结果。
 def final_report(summary: pd.DataFrame, frontier: pd.DataFrame) -> None:
     evaluated = summary.loc[summary["evaluation_status"].eq("EVALUATED")].copy()
     strongest_overall = evaluated.sort_values("mean_normalized_profit", ascending=False).iloc[0]
     learned = evaluated.loc[evaluated["baseline_hierarchy"].eq("LEARNED_POLICY")].sort_values("mean_normalized_profit", ascending=False)
     strongest_learned = learned.iloc[0]
 
+    # 列出指定学习策略平均利润超过的基线。
     def beaten_by(policy_id: str) -> list[str]:
         if policy_id not in set(evaluated["policy_id"]):
             return []
@@ -521,6 +558,8 @@ def main() -> None:
     TABLES_DIR.mkdir(parents=True, exist_ok=True)
     FIGURES_DIR.mkdir(parents=True, exist_ok=True)
 
+    # test manifest 在模型和阈值锁定后才读取，且必须恰好包含预注册的 60 个 episode。
+    # 本脚本不训练、不调参，也不根据 test 结果删除表现较差的 baseline。
     manifest = pd.read_csv(MANIFEST_PATH).sort_values(["scenario_id", "episode_index"]).reset_index(drop=True)
     if len(manifest) != 60:
         raise ValueError(f"Expected locked 60-episode test manifest, found {len(manifest)}")

@@ -1,8 +1,8 @@
-"""Build final report figures from existing output tables.
-
-This module is reporting-only: it reads selected intermediate outputs and
-creates publication figures without retraining models or changing metrics.
-"""
+"""文件作用：报告阶段 11，从锁定输出表生成最终报告图表。
+研究目的：把训练行为、policy comparison 和 profit-waste trade-off 可视化。
+主要输入：既有 PPO/DQN、oracle 和 sustainability CSV/JSON artifacts。
+主要输出：final_report figures、figure inventory、selection 和解释文档。
+该模块只读取已有指标，不训练模型、不重算 environment rollout。"""
 
 from __future__ import annotations
 
@@ -38,16 +38,19 @@ SELECTED_STEP = 22288
 COLLAPSE_THRESHOLD = 0.99
 
 
+# 创建本模块需要的输出目录。
 def ensure_dirs() -> None:
     for path in [TABLES, FIGURES, APPENDIX, DOCS]:
         path.mkdir(parents=True, exist_ok=True)
 
 
+# 读取 CSV 文件，并在文件缺失时停止运行。
 def read_csv(name: str) -> pd.DataFrame:
     path = TABLES / name
     return pd.read_csv(path) if path.exists() else pd.DataFrame()
 
 
+# 将绝对路径转换为项目根目录下的相对路径。
 def rel(path: Path) -> str:
     try:
         return str(path.relative_to(PROJECT_ROOT))
@@ -55,6 +58,7 @@ def rel(path: Path) -> str:
         return str(path)
 
 
+# 调整布局并把当前图保存到主图目录。
 def savefig(name: str) -> str:
     path = FIGURES / name
     plt.tight_layout()
@@ -63,6 +67,7 @@ def savefig(name: str) -> str:
     return rel(path)
 
 
+# 调整布局并把当前图保存到附录图目录。
 def savefig_appendix(name: str) -> str:
     path = APPENDIX / name
     plt.tight_layout()
@@ -71,7 +76,11 @@ def savefig_appendix(name: str) -> str:
     return rel(path)
 
 
+# 检查每张图需要的输入表是否存在，并记录字段覆盖。
 def artifact_inventory() -> pd.DataFrame:
+    # 先登记每张图可用的 source artifact、agent、seed 和 timestep coverage。
+    # 该清单用于防止图表来源不明或把缺少字段的日志误当最终证据，
+    # 但不会改变任何已有 metric。
     patterns = [
         "outputs/tables/ppo_*.csv",
         "outputs/tables/ppo_*.json",
@@ -135,7 +144,11 @@ def artifact_inventory() -> pd.DataFrame:
     return inventory
 
 
+# 按 agent 和 timestep 合并训练日志、验证指标和动作诊断。
 def consolidate_training_curve() -> pd.DataFrame:
+    # 将 checkpoint validation、action diagnostics 和 trainer logs 按 agent/timestep 合并。
+    # selected/collapse marker 来自已完成的 validation 选择，不在绘图阶段重新挑模型。
+    # 缺失的训练诊断保留为 NaN，不能凭图形需要虚构数据点。
     ckpt = read_csv("ppo_checkpoint_level_evaluation.csv")
     action_diag = read_csv("ppo_checkpoint_action_diagnostics.csv")
     selected = read_csv("ppo_checkpoint_model_selection.csv")
@@ -194,6 +207,7 @@ def consolidate_training_curve() -> pd.DataFrame:
     return curve
 
 
+# 绘制 validation return、选定 checkpoint 和退化标记。
 def plot_validation_curve(curve: pd.DataFrame) -> str:
     fig, ax = plt.subplots(figsize=(9, 5))
     for agent, group in curve.groupby("agent"):
@@ -214,6 +228,7 @@ def plot_validation_curve(curve: pd.DataFrame) -> str:
     return savefig("figure_ppo_validation_return_over_training.png")
 
 
+# 绘制各 checkpoint 的动作占比。
 def plot_action_distribution(curve: pd.DataFrame, agent: str, filename: str) -> str:
     group = curve.loc[curve["agent"].eq(agent)].sort_values("timestep")
     fig, ax = plt.subplots(figsize=(9, 5))
@@ -243,6 +258,7 @@ def plot_action_distribution(curve: pd.DataFrame, agent: str, filename: str) -> 
     return savefig(filename)
 
 
+# 绘制 checkpoint 对应的经验动作熵。
 def plot_entropy(curve: pd.DataFrame) -> str:
     fig, ax = plt.subplots(figsize=(9, 5))
     for agent, group in curve.groupby("agent"):
@@ -261,6 +277,7 @@ def plot_entropy(curve: pd.DataFrame) -> str:
     return savefig("figure_policy_entropy_and_collapse.png")
 
 
+# 绘制 PPO 与基线的 normalized profit 对比。
 def plot_ppo_vs_baselines() -> str:
     summary = read_csv("ppo_financial_paired_validation_summary.csv")
     comparisons = read_csv("ppo_financial_paired_policy_comparisons.csv")
@@ -290,6 +307,7 @@ def plot_ppo_vs_baselines() -> str:
     return savefig("figure_ppo_vs_baselines_normalized_profit.png")
 
 
+# 绘制选定策略的动作分布。
 def plot_selected_policy_distribution() -> str:
     selection = read_csv("ppo_checkpoint_model_selection.csv")
     fig, ax = plt.subplots(figsize=(8, 5))
@@ -306,6 +324,7 @@ def plot_selected_policy_distribution() -> str:
     return savefig("figure_observed_vs_recovered_selected_policy.png")
 
 
+# 绘制风险状态与正折扣机会的分布。
 def plot_opportunity_map() -> str:
     oracle = read_csv("financial_markdown_oracle_diagnostic.csv")
     rec = oracle.loc[oracle["calibration_mode"].eq("recovered_calibration")]
@@ -326,6 +345,7 @@ def plot_opportunity_map() -> str:
     return savefig("figure_financial_markdown_opportunity_map.png")
 
 
+# 绘制 PPO 动作与诊断动作之间的错误类型。
 def plot_ppo_oracle_errors() -> str:
     ppo = read_csv("financial_markdown_ppo_regret.csv")
     rows = []
@@ -348,6 +368,7 @@ def plot_ppo_oracle_errors() -> str:
     return savefig("figure_ppo_vs_oracle_error_decomposition.png")
 
 
+# 绘制各候选动作的诊断价值。
 def plot_oracle_action_values() -> str:
     values = read_csv("financial_markdown_multistep_action_values.csv")
     oracle = read_csv("financial_markdown_oracle_diagnostic.csv")
@@ -375,6 +396,7 @@ def plot_oracle_action_values() -> str:
     return savefig("figure_oracle_action_values_by_state.png")
 
 
+# 绘制各策略的利润与浪费位置。
 def plot_profit_waste_tradeoff() -> str:
     tradeoff = read_csv("sustainability_tradeoff_vs_always_zero.csv")
     rec = tradeoff.loc[tradeoff["calibration_mode"].eq("recovered_calibration")]
@@ -391,6 +413,7 @@ def plot_profit_waste_tradeoff() -> str:
     return savefig("figure_empirical_profit_waste_tradeoff.png")
 
 
+# 绘制策略减少浪费时的财务变化。
 def plot_waste_efficiency() -> str:
     eff = read_csv("sustainability_waste_reduction_efficiency.csv")
     rec = eff.loc[eff["calibration_mode"].eq("recovered_calibration")].copy()
@@ -410,6 +433,7 @@ def plot_waste_efficiency() -> str:
     return savefig("figure_waste_reduction_efficiency.png")
 
 
+# 生成附录使用的补充诊断图。
 def plot_appendix_diagnostics(curve: pd.DataFrame) -> list[str]:
     files = []
     metrics = {
@@ -435,6 +459,7 @@ def plot_appendix_diagnostics(curve: pd.DataFrame) -> list[str]:
     return files
 
 
+# 根据现有结果写入每张图的简短说明。
 def write_interpretation(figures: list[str]) -> None:
     entries = [
         ("PPO Validation Return Over Training", "final_ppo_training_curve_data.csv", "timesteps", "mean validation return", "Checkpoint 22288 is marked; later recovered checkpoints show conservatism/collapse.", "Training improved early but longer training did not monotonically improve decision quality.", "This does not prove test-set generalization.", "Validation return over training with validation-only model selection.", "Use this to explain why checkpoint selection matters."),
@@ -479,6 +504,7 @@ def write_interpretation(figures: list[str]) -> None:
     (DOCS / "final_figure_interpretation.md").write_text("\n".join(lines), encoding="utf-8")
 
 
+# 生成主文图和附录图的选择清单。
 def figure_selection_table() -> pd.DataFrame:
     rows = [
         ("outputs/figures/final_report/figure_ppo_validation_return_over_training.png", "PPO training", "main_text", 1, "Checkpoint selection and non-monotonic training.", "outputs/tables/final_ppo_training_curve_data.csv"),
@@ -497,6 +523,8 @@ def figure_selection_table() -> pd.DataFrame:
 
 
 def main() -> None:
+    # 图表生成顺序固定读取既有表并输出 PNG/说明文档；
+    # 不调用训练或 environment evaluation，因此不会改变 locked scientific results。
     ensure_dirs()
     inventory = artifact_inventory()
     curve = consolidate_training_curve()

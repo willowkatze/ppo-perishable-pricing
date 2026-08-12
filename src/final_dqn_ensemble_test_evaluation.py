@@ -1,13 +1,8 @@
-"""
-Final locked STANDARD_DQN equal-weight ensemble test evaluation.
-
-This is a one-time held-out test script. It writes and hashes the final
-candidate specification and test protocol before constructing or reading the
-test split. It does not train, retrain, tune, or select any model.
-
-Run from project root:
-    python -u src/final_dqn_ensemble_test_evaluation.py
-"""
+"""文件作用：实验顺序 09，对锁定 DQN ensemble 进行一次 held-out test。
+研究目的：在不再调参或选模型的条件下检验 learned policy 能否超过 always_0pct。
+主要输入：三 seed 锁定 checkpoint、各自 VecNormalize、HIGH_RISK_B test population。
+主要输出：60-episode paired test、bootstrap CI、行为诊断和最终状态。
+候选、协议与 hash 必须在首次读取 test split 前写入。"""
 
 from __future__ import annotations
 
@@ -25,6 +20,7 @@ import pandas as pd
 if __package__:
     from src.dqn_statistical_audit_and_ensemble import SELECTED, ensemble_action, load_members
     from src.high_risk_b_planning_distillation import feature_row_from_obs, is_high_risk_b
+    from src.pricing_env_operational import ACTION_MARKDOWNS
     from src.train_dqn_high_risk_b import (
         BASELINE_POLICY,
         BOOTSTRAP_SEED,
@@ -48,6 +44,7 @@ if __package__:
 else:
     from dqn_statistical_audit_and_ensemble import SELECTED, ensemble_action, load_members
     from high_risk_b_planning_distillation import feature_row_from_obs, is_high_risk_b
+    from pricing_env_operational import ACTION_MARKDOWNS
     from train_dqn_high_risk_b import (
         BASELINE_POLICY,
         BOOTSTRAP_SEED,
@@ -80,26 +77,73 @@ DEFAULT_MAX_TEST_EPISODES_TOTAL = 60
 PARTIAL_TEST_MANIFEST = MANIFESTS_DIR / "high_risk_b_final_test_manifest.partial.csv"
 FINAL_TEST_MANIFEST = MANIFESTS_DIR / "high_risk_b_final_test_manifest.csv"
 
+REQUIRED_NUMERICAL_COLUMNS = (
+    "normalized_profit",
+    "revenue",
+    "waste_rate",
+    "sell_through",
+    "physical_waste_units",
+    "action_entropy",
+    "episode_conservation_error",
+    "raw_financial_sum_error",
+)
+OPTIONAL_DIAGNOSTIC_COLUMNS = ("raw_accounting_profit", "average_markdown", "runtime_seconds")
 
+
+# 从环境常量生成写入 lock 文件的动作映射。
+def serialized_action_mapping() -> dict[str, float]:
+    """Return lock metadata from the environment's runtime action mapping."""
+    return {str(action): float(markdown) for action, markdown in ACTION_MARKDOWNS.items()}
+
+
+# 将 episode 的 action 序列转换为平均折扣率。
+def average_markdown_from_actions(actions: list[int]) -> float:
+    """Calculate an episode mean from the action indices actually executed."""
+    if not actions:
+        return np.nan
+    return float(np.mean([ACTION_MARKDOWNS[int(action)] for action in actions]))
+
+
+# 检查主指标和核算字段是否全部为有限数值。
+def required_numerical_valid(results: pd.DataFrame) -> bool:
+    """Validate fields required for the primary endpoint and accounting checks."""
+    if any(column not in results.columns for column in REQUIRED_NUMERICAL_COLUMNS):
+        return False
+    return bool(np.isfinite(results.loc[:, REQUIRED_NUMERICAL_COLUMNS].to_numpy(dtype=float)).all())
+
+
+# 检查可选的原始利润、平均折扣和运行时间是否完整。
+def optional_diagnostics_complete(results: pd.DataFrame) -> bool:
+    """Report optional-field completeness without invalidating the locked endpoint."""
+    if any(column not in results.columns for column in OPTIONAL_DIAGNOSTIC_COLUMNS):
+        return False
+    return bool(np.isfinite(results.loc[:, OPTIONAL_DIAGNOSTIC_COLUMNS].to_numpy(dtype=float)).all())
+
+
+# 创建本模块需要的输出目录。
 def ensure_dirs() -> None:
     for path in [TABLES_DIR, CONFIGS_DIR, MANIFESTS_DIR, FIGURES_DIR, DOCS_DIR]:
         path.mkdir(parents=True, exist_ok=True)
 
 
+# 检查输入文件是否存在，缺失时直接报错。
 def require_file(path: Path) -> None:
     if not path.exists():
         raise FileNotFoundError(f"Required file not found: {path}")
 
 
+# 读取 CSV 文件，并在文件缺失时停止运行。
 def read_csv(path: Path) -> pd.DataFrame:
     require_file(path)
     return pd.read_csv(path)
 
 
+# 返回当前 UTC 时间字符串。
 def now_timestamp() -> str:
     return pd.Timestamp.utcnow().isoformat()
 
 
+# 读取一个场景中可用的 test episode 数量。
 def infer_episode_count(env: Any, fallback: int = DEFAULT_MAX_TEST_EPISODES_PER_SCENARIO) -> int:
     for attr in ["n_episodes", "num_episodes", "episode_count"]:
         if hasattr(env, attr):
@@ -115,6 +159,7 @@ def infer_episode_count(env: Any, fallback: int = DEFAULT_MAX_TEST_EPISODES_PER_
     return fallback
 
 
+# 整理三个锁定 ensemble 成员的模型和归一化路径。
 def selected_component_paths() -> list[dict[str, Any]]:
     rows = []
     for seed, step in SELECTED.items():
@@ -136,6 +181,7 @@ def selected_component_paths() -> list[dict[str, Any]]:
     return rows
 
 
+# 读取锁定的 HIGH_RISK_B 阈值。
 def load_high_risk_definition() -> dict[str, Any]:
     locked = read_csv(TABLES_DIR / "final_task_locked_population_definition.csv")
     row = locked.loc[locked["population_id"].astype(str).eq(POPULATION_ID)]
@@ -144,7 +190,11 @@ def load_high_risk_definition() -> dict[str, Any]:
     return row.iloc[0].to_dict()
 
 
+# 在读取 test 数据前写入 ensemble 成员、动作映射和文件摘要。
 def write_candidate_lock() -> tuple[Path, Path, dict[str, Any]]:
+    # 在接触 test split 前冻结 component checkpoint、ensemble rule、baseline、
+    # success criterion 和 artifact hash。这样 test 结果不能反向改变候选组成，
+    # 保持 held-out evaluation 的一次性含义。
     lock_path = CONFIGS_DIR / "final_locked_dqn_ensemble.json"
     hashes_path = CONFIGS_DIR / "final_locked_dqn_ensemble_hashes.json"
     if lock_path.exists() and hashes_path.exists():
@@ -170,7 +220,7 @@ def write_candidate_lock() -> tuple[Path, Path, dict[str, Any]]:
         "high_risk_b_definition": locked_def,
         "calibration_mode": CALIBRATION_MODE,
         "locked_baseline": BASELINE_POLICY,
-        "action_mapping": {"0": 0.0, "1": 0.05, "2": 0.10, "3": 0.15, "4": 0.20, "5": 0.30},
+        "action_mapping": serialized_action_mapping(),
         "reward_mode": REWARD_MODE,
         "lambda_waste": LAMBDA_WASTE,
         "accounting_version": "existing pricing_env_operational normalized accounting profit",
@@ -198,6 +248,7 @@ def write_candidate_lock() -> tuple[Path, Path, dict[str, Any]]:
     return lock_path, hashes_path, candidate
 
 
+# 写入主指标、bootstrap 设置和状态判定规则。
 def write_protocol() -> Path:
     path = CONFIGS_DIR / "final_test_evaluation_protocol.json"
     if path.exists():
@@ -231,6 +282,7 @@ def write_protocol() -> Path:
     return path
 
 
+# 从环境中读取一个 test episode 的 store、product 和起始日期。
 def test_episode_metadata(env: Any, episode_index: int, scenario_id: str) -> dict[str, Any]:
     info = getattr(env, "last_info", {}) or {}
     store_id = getattr(env, "store_id", "")
@@ -251,11 +303,13 @@ def test_episode_metadata(env: Any, episode_index: int, scenario_id: str) -> dic
     }
 
 
+# 将已选 test episodes 写入 partial manifest。
 def save_manifest_checkpoint(rows: list[dict[str, Any]]) -> None:
     if rows:
         pd.DataFrame(rows).drop_duplicates(subset=["scenario_id", "episode_index"]).to_csv(PARTIAL_TEST_MANIFEST, index=False)
 
 
+# 按锁定规则选择 held-out episodes，并支持从 partial manifest 继续。
 def build_test_manifest(
     locked_def: dict[str, Any],
     *,
@@ -332,6 +386,7 @@ def build_test_manifest(
     return manifest
 
 
+# 汇总 test manifest 的 episode 数量和 scenario 覆盖。
 def population_audit(manifest: pd.DataFrame) -> pd.DataFrame:
     validation = load_validation_manifest()
     rows = [
@@ -350,7 +405,11 @@ def population_audit(manifest: pd.DataFrame) -> pd.DataFrame:
     return out
 
 
+# 在同一 episode 上运行 ensemble 或 always-zero 并记录指标。
 def evaluate_policy_episode(policy_id: str, episode: pd.Series, members: list[Any] | None = None) -> tuple[dict[str, Any], pd.DataFrame]:
+    # ensemble 和 always_0pct 在同一 scenario/episode_index 上分别 rollout。
+    # ensemble action 来自三个 seed 的 mean Q-value argmax；环境实际 accounting
+    # 决定利润和浪费，Q-value 本身不作为测试结果。
     env = make_env("test", str(episode["scenario_id"]), BOOTSTRAP_SEED)
     obs, _ = reset_env(env, int(episode["episode_index"]))
     actions: list[int] = []
@@ -390,11 +449,11 @@ def evaluate_policy_episode(policy_id: str, episode: pd.Series, members: list[An
         "episode_index": int(episode["episode_index"]),
         "policy_id": policy_id,
         "normalized_profit": safe_float(final_info.get("normalized_accounting_profit")),
-        "raw_accounting_profit": safe_float(final_info.get("raw_accounting_profit")),
+        "raw_accounting_profit": safe_float(final_info.get("accounting_profit")),
         "revenue": safe_float(final_info.get("cumulative_revenue")),
         "waste_rate": safe_float(final_info.get("final_waste_rate")),
         "sell_through": safe_float(final_info.get("final_sell_through_rate")),
-        "average_markdown": safe_float(final_info.get("average_markdown")),
+        "average_markdown": average_markdown_from_actions(actions),
         "physical_waste_units": safe_float(final_info.get("cumulative_waste")),
         "action_sequence": "|".join(str(a) for a in actions),
         "action_entropy": action_entropy(actions),
@@ -405,7 +464,10 @@ def evaluate_policy_episode(policy_id: str, episode: pd.Series, members: list[An
     return row, pd.DataFrame(state_rows)
 
 
+# 对 episode 级配对差值进行 bootstrap 并返回区间端点。
 def bootstrap_summary(diff: pd.Series) -> tuple[float, float]:
+    # 先对每个 episode 计算 ensemble - always-zero，再以完整 episode 重采样；
+    # 这保留 paired design，并避免把 episode 内相关步骤当成独立样本。
     values = diff.dropna().astype(float).to_numpy()
     if len(values) == 0:
         return np.nan, np.nan
@@ -416,6 +478,7 @@ def bootstrap_summary(diff: pd.Series) -> tuple[float, float]:
     return float(np.percentile(samples, 2.5)), float(np.percentile(samples, 97.5))
 
 
+# 解析动作序列并计算各 action 的使用占比。
 def action_distribution(sequences: pd.Series) -> dict[str, float]:
     actions: list[int] = []
     for seq in sequences.dropna():
@@ -427,6 +490,7 @@ def action_distribution(sequences: pd.Series) -> dict[str, float]:
     return {f"action_{i}_share": float(counts.get(i, 0.0)) for i in range(6)}
 
 
+# 按 episode 配对两种策略并汇总利润、风险和动作指标。
 def summarize_test(results: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame]:
     ens = results.loc[results["policy_id"].eq("STANDARD_DQN_EQUAL_WEIGHT_Q_ENSEMBLE")]
     base = results.loc[results["policy_id"].eq(BASELINE_POLICY)]
@@ -460,7 +524,8 @@ def summarize_test(results: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame]:
                 "zero_action_share": float((pd.Series(actions) == 0).mean()) if actions else np.nan,
                 "positive_action_share": float((pd.Series(actions) > 0).mean()) if actions else np.nan,
                 "accounting_valid_rate": accounting_valid_rate,
-                "numerical_valid": bool(np.isfinite(results.select_dtypes(include=[np.number])).all().all()),
+                "numerical_valid": required_numerical_valid(results),
+                "optional_diagnostics_complete": optional_diagnostics_complete(results),
                 "test_episode_count": int(len(merged)),
                 **ens_dist,
             }
@@ -483,6 +548,7 @@ def summarize_test(results: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame]:
     return summary, pairing
 
 
+# 根据配对、数值、核算和主指标返回最终状态。
 def final_status(summary: pd.DataFrame, pairing: pd.DataFrame) -> str:
     row = summary.iloc[0]
     if not pairing["pairing_status"].eq("PAIRED_VALID").all() or safe_float(row["accounting_valid_rate"]) < 1.0 or not bool(row["numerical_valid"]):
@@ -494,6 +560,7 @@ def final_status(summary: pd.DataFrame, pairing: pd.DataFrame) -> str:
     return "FINAL_DQN_MODEL_BEATS_BASELINE_ON_TEST"
 
 
+# 根据 held-out 汇总表生成比较图。
 def make_figures(results: pd.DataFrame, summary: pd.DataFrame) -> None:
     FIGURES_DIR.mkdir(parents=True, exist_ok=True)
     ens = results.loc[results["policy_id"].eq("STANDARD_DQN_EQUAL_WEIGHT_Q_ENSEMBLE")]
@@ -573,6 +640,7 @@ def make_figures(results: pd.DataFrame, summary: pd.DataFrame) -> None:
     plt.close(fig)
 
 
+# 将 held-out 协议和汇总结果写入说明文档。
 def write_final_doc(status: str, candidate: dict[str, Any], manifest: pd.DataFrame, summary: pd.DataFrame) -> None:
     row = summary.iloc[0].to_dict()
     text = f"""# Final DQN Ensemble Test Decision
@@ -613,6 +681,7 @@ and no post-test tuning was performed by this script.
     (DOCS_DIR / "final_dqn_ensemble_test_decision.md").write_text(text, encoding="utf-8")
 
 
+# 解析命令行参数和运行规模选项。
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Final locked DQN ensemble held-out test evaluation.")
     parser.add_argument("--max-test-episodes-per-scenario", type=int, default=DEFAULT_MAX_TEST_EPISODES_PER_SCENARIO)
@@ -623,6 +692,8 @@ def parse_args() -> argparse.Namespace:
 
 
 def main() -> None:
+    # 执行顺序不能交换：先锁候选和 protocol，再创建 test manifest，最后统一评估。
+    # 本入口没有 model.learn()；运行时间来自 test environment rollouts 和绘图。
     args = parse_args()
     start = time.perf_counter()
     ensure_dirs()

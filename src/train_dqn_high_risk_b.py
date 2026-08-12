@@ -1,26 +1,8 @@
-"""Train and validate DQN candidates for the locked HIGH_RISK_B task.
-
-Training uses HIGH_RISK_B episodes from the train split, and model selection
-uses the fixed validation manifest. This module does not access the held-out
-test split.
-
-Run from project root:
-    python -u src/train_dqn_high_risk_b.py
-
-Fast smoke run:
-    python -u src/train_dqn_high_risk_b.py --timesteps 5000 --seeds 42
-
-Main outputs:
-    outputs/tables/dqn_environment_compatibility_audit.csv
-    outputs/tables/dqn_training_population_audit.csv
-    outputs/tables/dqn_checkpoint_validation_episode_results.csv
-    outputs/tables/dqn_checkpoint_validation_summary.csv
-    outputs/tables/dqn_final_candidate_comparison.csv
-    outputs/tables/dqn_seed_stability.csv
-    outputs/configs/dqn_locked_candidate.json
-    outputs/configs/dqn_locked_candidate_hashes.json
-    outputs/figures/dqn_final_candidate/
-"""
+"""文件作用：实验顺序 08，在锁定 HIGH_RISK_B 任务上训练并选择 DQN checkpoint。
+研究目的：用 value-based RL 检验 PPO 的负结果是否来自算法形式而非任务本身。
+主要输入：HIGH_RISK_B train episodes、固定 validation manifest、同一 pricing environment。
+主要输出：DQN checkpoint、VecNormalize、配对验证表、稳定性与候选锁定记录。
+该模块不读取 held-out test；test 只在最终锁定后由独立脚本使用。"""
 
 from __future__ import annotations
 
@@ -89,6 +71,7 @@ PLANNING_HORIZON = 3
 # ---------------------------------------------------------------------------
 
 
+# 保存一个固定验证 episode 的标识和场景信息。
 @dataclass(frozen=True)
 class EvalEpisode:
     scenario_id: str
@@ -97,6 +80,7 @@ class EvalEpisode:
     episode_id: str
 
 
+# 保存 DQN 学习率、target update 和稳定性设置。
 @dataclass(frozen=True)
 class DQNConfig:
     config_id: str
@@ -121,21 +105,25 @@ DQN_CONFIGS = [
 ]
 
 
+# 创建本模块需要的输出目录。
 def ensure_dirs() -> None:
     for path in [TABLES_DIR, CONFIGS_DIR, MANIFESTS_DIR, MODELS_DIR, FIGURES_DIR, DOCS_DIR]:
         path.mkdir(parents=True, exist_ok=True)
 
 
+# 检查输入文件是否存在，缺失时直接报错。
 def require_file(path: Path) -> None:
     if not path.exists():
         raise FileNotFoundError(f"Required file not found: {path}")
 
 
+# 读取 CSV 文件，并在文件缺失时停止运行。
 def read_csv(path: Path) -> pd.DataFrame:
     require_file(path)
     return pd.read_csv(path)
 
 
+# 将输入转换为有限浮点数；无效值使用默认值。
 def safe_float(value: Any, default: float = np.nan) -> float:
     try:
         if pd.isna(value):
@@ -145,6 +133,7 @@ def safe_float(value: Any, default: float = np.nan) -> float:
         return default
 
 
+# 计算文件的 SHA-256 摘要。
 def sha256(path: Path) -> str | None:
     if not path.exists():
         return None
@@ -155,6 +144,7 @@ def sha256(path: Path) -> str | None:
     return h.hexdigest()
 
 
+# 根据动作占比计算经验熵。
 def action_entropy(actions: list[int] | pd.Series) -> float:
     s = pd.Series(actions)
     if s.empty:
@@ -168,6 +158,7 @@ def action_entropy(actions: list[int] | pd.Series) -> float:
 # ---------------------------------------------------------------------------
 
 
+# 对完整 episode 重采样，计算配对差值的置信区间。
 def bootstrap_ci(diff: pd.Series) -> tuple[float, float]:
     values = diff.dropna().astype(float).to_numpy()
     if len(values) == 0:
@@ -179,6 +170,7 @@ def bootstrap_ci(diff: pd.Series) -> tuple[float, float]:
     return float(np.percentile(samples, 2.5)), float(np.percentile(samples, 97.5))
 
 
+# 根据当前参数构建 env。
 def make_env(split: str, scenario_id: str, seed: int) -> OperationalPerishablePricingEnv:
     return OperationalPerishablePricingEnv(
         split=split,
@@ -196,6 +188,7 @@ def reset_env(env: OperationalPerishablePricingEnv, episode_index: int) -> tuple
     return env.reset(seed=30_000 + int(episode_index), options={"episode_index": int(episode_index)})
 
 
+# 读取 HIGH_RISK_B 训练 episode，并排除非训练 split。
 def load_training_episode_table() -> pd.DataFrame:
     labels_path = TABLES_DIR / "high_risk_b_planning_training_labels.csv"
     if not labels_path.exists():
@@ -215,6 +208,7 @@ def load_training_episode_table() -> pd.DataFrame:
     return episodes
 
 
+# 读取固定的 HIGH_RISK_B validation episodes。
 def load_validation_manifest() -> pd.DataFrame:
     manifest_path = MANIFESTS_DIR / "high_risk_b_expanded_validation_manifest.csv"
     if not manifest_path.exists():
@@ -234,8 +228,12 @@ def load_validation_manifest() -> pd.DataFrame:
     return manifest
 
 
+# 按场景从 HIGH_RISK_B 训练 episode 中抽样，并转交原环境执行。
 class HighRiskBTrainingEnv(gym.Env):
     metadata = {"render_modes": ["ansi"], "render_fps": 1}
+
+    # HIGH_RISK_B 聚焦高库存且临期风险较高的 episode，因为这些状态更可能存在
+    # markdown opportunity。按 scenario 先均衡抽样，避免样本较多的情景支配 replay buffer。
 
     def __init__(self, eligible_episodes: pd.DataFrame, seed: int, scenario_balanced: bool = True) -> None:
         super().__init__()
@@ -252,6 +250,7 @@ class HighRiskBTrainingEnv(gym.Env):
         self.observation_space = first.observation_space
         self.current_env = first
 
+    # 选择新的 episode 并重置内部状态。
     def reset(self, *, seed: int | None = None, options: dict[str, Any] | None = None):
         if seed is not None:
             self.rng = np.random.default_rng(seed)
@@ -270,17 +269,21 @@ class HighRiskBTrainingEnv(gym.Env):
         self.current_env = self.envs[scenario_id]
         return self.current_env.reset(seed=seed, options={"episode_index": episode_index})
 
+    # 执行一个 action，并返回下一状态、reward 和终止信息。
     def step(self, action: int):
         return self.current_env.step(int(action))
 
+    # 返回内部环境的文本渲染结果。
     def render(self):
         return self.current_env.render()
 
+    # 关闭内部环境并释放资源。
     def close(self) -> None:
         for env in self.envs.values():
             env.close()
 
 
+# 创建 DQN 训练环境并启用 observation normalization。
 def make_vec_env(eligible: pd.DataFrame, seed: int, n_envs: int, monitor_dir: Path) -> VecNormalize:
     def make_one(offset: int):
         def _factory():
@@ -302,6 +305,7 @@ def make_vec_env(eligible: pd.DataFrame, seed: int, n_envs: int, monitor_dir: Pa
 # ---------------------------------------------------------------------------
 
 
+# 用固定动作运行一个有步数上限的 episode。
 def bounded_termination_rollout(env: gym.Env, action: int = 0, max_steps: int | None = None) -> dict[str, Any]:
     """Run one bounded episode and report whether Gymnasium termination is reachable."""
     horizon = max(1, int(getattr(env, "horizon", 0)))
@@ -333,6 +337,7 @@ def bounded_termination_rollout(env: gym.Env, action: int = 0, max_steps: int | 
     }
 
 
+# 检查环境状态、动作、终止和核算字段。
 def audit_environment_compatibility() -> pd.DataFrame:
     rows: list[dict[str, Any]] = []
     train_episodes = load_training_episode_table()
@@ -389,6 +394,7 @@ def audit_environment_compatibility() -> pd.DataFrame:
     return audit
 
 
+# 统计 DQN 训练 episode、scenario 和风险状态覆盖。
 def training_population_audit(episodes: pd.DataFrame) -> pd.DataFrame:
     rows: list[dict[str, Any]] = []
     rows.append({"metric": "eligible_training_episodes", "value": int(len(episodes)), "notes": "from training HIGH_RISK_B planning labels"})
@@ -428,7 +434,11 @@ def training_population_audit(episodes: pd.DataFrame) -> pd.DataFrame:
 # ---------------------------------------------------------------------------
 
 
+# 返回 Q-network、replay buffer、探索率和 target update 参数。
 def dqn_params(config: DQNConfig) -> dict[str, Any]:
+    # DQN 学习每个 state-action 的 Q-value（预期折扣累计 reward），执行时选择最大 Q-value
+    # 对应的离散 markdown action。epsilon-greedy 只用于训练探索，deterministic validation
+    # 使用网络当前认为价值最高的 action。
     return {
         "learning_rate": config.learning_rate,
         "buffer_size": 50_000,
@@ -446,7 +456,10 @@ def dqn_params(config: DQNConfig) -> dict[str, Any]:
     }
 
 
+# 按 timestep 保存 Q-network、VecNormalize 和训练状态。
 class DQNCheckpointCallback(BaseCallback):
+    """按真实 timesteps 同步保存 DQN 权重、normalization 状态和恢复训练信息。"""
+
     def __init__(self, checkpoint_every: int, checkpoint_dir: Path, vecnormalize_path: Path, run_state_path: Path) -> None:
         super().__init__(verbose=0)
         self.checkpoint_every = max(1, int(checkpoint_every))
@@ -455,11 +468,13 @@ class DQNCheckpointCallback(BaseCallback):
         self.run_state_path = run_state_path
         self.saved_steps: set[int] = set()
 
+    # 在每个训练 step 更新回调状态，并按设定间隔保存结果。
     def _on_step(self) -> bool:
         if self.num_timesteps > 0 and self.num_timesteps % self.checkpoint_every == 0:
             self._save_checkpoint(int(self.num_timesteps))
         return True
 
+    # 保存当前 DQN 模型、归一化状态和进度 JSON。
     def _save_checkpoint(self, step: int) -> None:
         if step in self.saved_steps:
             return
@@ -481,7 +496,11 @@ class DQNCheckpointCallback(BaseCallback):
         print(f"DQN checkpoint saved: {model_path.relative_to(PROJECT_ROOT)}", flush=True)
 
 
+# 创建或恢复 DQN，并继续训练到目标 timestep。
 def train_one(config: DQNConfig, seed: int, timesteps: int, checkpoint_every: int, n_envs: int, resume: bool) -> dict[str, Any]:
+    # 训练仅从 train split 的 HIGH_RISK_B episode 采样。replay buffer 中的
+    # (state, action, reward, next_state) transition 用于更新 Q-network；
+    # checkpoint 与 VecNormalize 必须成对保存，否则验证时 observation 尺度会不一致。
     eligible = load_training_episode_table()
     run_dir = MODELS_DIR / config.config_id / f"seed_{seed}"
     checkpoint_dir = run_dir / "checkpoints"
@@ -538,16 +557,19 @@ def train_one(config: DQNConfig, seed: int, timesteps: int, checkpoint_every: in
     }
 
 
+# 从 DQN checkpoint 文件名解析 timestep。
 def checkpoint_step(path: Path) -> int:
     match = re.search(r"(\d+)_steps", path.stem)
     return int(match.group(1)) if match else 0
 
 
+# 返回最近的 DQN checkpoint。
 def latest_checkpoint(checkpoint_dir: Path) -> Path | None:
     candidates = sorted(checkpoint_dir.glob("dqn_*_steps.zip"), key=lambda p: (checkpoint_step(p), p.stat().st_mtime))
     return candidates[-1] if candidates else None
 
 
+# 列出 checkpoint 及其对应的归一化文件。
 def checkpoint_records(config_ids: list[str], seeds: list[int]) -> pd.DataFrame:
     rows = []
     for config_id in config_ids:
@@ -580,6 +602,7 @@ def checkpoint_records(config_ids: list[str], seeds: list[int]) -> pd.DataFrame:
     return pd.DataFrame(rows)
 
 
+# 加载 checkpoint 对应的 observation normalization。
 def load_vecnormalize(path: Path, validation_scenario: str, seed: int) -> VecNormalize | None:
     if not path.exists():
         return None
@@ -595,7 +618,11 @@ def load_vecnormalize(path: Path, validation_scenario: str, seed: int) -> VecNor
 # ---------------------------------------------------------------------------
 
 
+# 在固定 episode 上执行 argmax-Q 策略并保存逐步动作。
 def evaluate_dqn_episode(record: pd.Series, episode: EvalEpisode) -> tuple[dict[str, Any], pd.DataFrame]:
+    # 验证阶段固定 episode 并使用 deterministic action；每个 checkpoint 面对完全相同的
+    # scenario 和 episode_index。输出既包含 episode-level profit/waste，也保留逐步 action，
+    # 便于检查策略是否依赖 state 或坍缩为单一折扣。
     model_path = Path(str(record["model_path"]))
     vec_path = Path(str(record["vecnormalize_path"]))
     model = DQN.load(model_path, env=None)
@@ -660,6 +687,7 @@ def evaluate_dqn_episode(record: pd.Series, episode: EvalEpisode) -> tuple[dict[
     return row, pd.DataFrame(states)
 
 
+# 读取 baseline、PPO 和规划策略的验证结果。
 def load_reference_validation_results() -> pd.DataFrame:
     path = TABLES_DIR / "high_risk_b_distilled_validation_episode_results.csv"
     require_file(path)
@@ -696,6 +724,7 @@ def load_reference_validation_results() -> pd.DataFrame:
     return refs
 
 
+# 按 episode 对齐策略与基线并计算配对指标。
 def compare_policy(policy: pd.DataFrame, baseline: pd.DataFrame) -> dict[str, Any]:
     merged = policy.merge(baseline, on="episode_id", suffixes=("_policy", "_baseline"))
     if merged.empty:
@@ -732,6 +761,7 @@ def compare_policy(policy: pd.DataFrame, baseline: pd.DataFrame) -> dict[str, An
     }
 
 
+# 汇总 DQN 的利润、浪费、动作熵和状态依赖。
 def summarize_results(results: pd.DataFrame, states: pd.DataFrame) -> pd.DataFrame:
     baseline = results.loc[results["policy_id"].eq(BASELINE_POLICY)]
     rows = []
@@ -773,6 +803,7 @@ def summarize_results(results: pd.DataFrame, states: pd.DataFrame) -> pd.DataFra
     return summary
 
 
+# 在同一 validation manifest 上评估全部 DQN checkpoints。
 def evaluate_checkpoints(config_ids: list[str], seeds: list[int]) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
     manifest_df = load_validation_manifest()
     episodes = [
@@ -813,6 +844,7 @@ def evaluate_checkpoints(config_ids: list[str], seeds: list[int]) -> tuple[pd.Da
     return combined, dqn_states, summary
 
 
+# 比较不同 seed 的验证表现和动作选择。
 def seed_stability(summary: pd.DataFrame) -> pd.DataFrame:
     dqn = summary.loc[summary["model_family"].eq("DQN")].copy()
     if dqn.empty:
@@ -847,7 +879,11 @@ def seed_stability(summary: pd.DataFrame) -> pd.DataFrame:
     return stability
 
 
+# 按固定验证规则选择 DQN 候选模型。
 def select_candidate(summary: pd.DataFrame, stability: pd.DataFrame) -> tuple[pd.DataFrame, str]:
+    # 候选锁定不是“平均 profit 最大即可”：还要求相对 always_0pct 为正、胜率、
+    # waste、accounting validity、state dependence、无 collapse 以及跨 seed 稳定。
+    # 这些条件在 validation 上预先应用，之后才允许进行一次 held-out test。
     dqn = summary.loc[summary["model_family"].eq("DQN")].copy()
     if dqn.empty:
         candidate = pd.DataFrame()
@@ -902,6 +938,7 @@ def select_candidate(summary: pd.DataFrame, stability: pd.DataFrame) -> tuple[pd
 # ---------------------------------------------------------------------------
 
 
+# 根据 DQN 验证表生成性能和动作图。
 def make_figures(summary: pd.DataFrame, results: pd.DataFrame) -> None:
     FIGURES_DIR.mkdir(parents=True, exist_ok=True)
     dqn = summary.loc[summary["model_family"].eq("DQN")].copy()
@@ -993,6 +1030,7 @@ def make_figures(summary: pd.DataFrame, results: pd.DataFrame) -> None:
         plt.close(fig)
 
 
+# 解析命令行参数和运行规模选项。
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Final validation-locked DQN experiment for HIGH_RISK_B.")
     parser.add_argument("--mode", choices=["audit", "train", "evaluate", "all"], default="all")

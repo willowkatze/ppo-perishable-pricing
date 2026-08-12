@@ -1,10 +1,8 @@
-"""Scenario-balanced PPO redesign training for recovered financial calibration.
-
-This module keeps the environment, reward, action space, and validation
-manifest fixed while changing only training-scenario sampling and one stable
-hyperparameter variant. The goal is to test decision precision, not to force a
-policy to beat the no-markdown baseline.
-"""
+"""文件作用：实验顺序 07，训练 scenario-balanced recovered-demand PPO。
+研究目的：检验稀少的正折扣机会是否在原训练分布中代表不足，并缓解 action collapse。
+主要输入：既有有效训练情景、同一 pricing environment、锁定 validation manifest。
+主要输出：sampling weights、两种 PPO checkpoint、行为诊断和 validation 比较。
+本实验不改变 data、reward、action space 或 validation distribution。"""
 
 from __future__ import annotations
 
@@ -67,6 +65,8 @@ PPO_BASE_PARAMS = {
     "vf_coef": 0.50,
     "max_grad_norm": 0.50,
 }
+# BALANCED 只改变训练情景采样；BALANCED_STABLE 再降低 learning rate 并提高 entropy bonus。
+# 两者共享原环境与 validation，因此差异可解释为训练设计，而不是 reward 或任务被改写。
 VARIANTS = {
     "balanced": {
         "variant": "BALANCED",
@@ -82,6 +82,7 @@ VARIANTS = {
 BASELINES = ["always_0pct", "expiry_threshold_rule", "inventory_coverage_rule"]
 
 
+# 保存一个平衡 PPO variant 的采样方式和参数覆盖。
 @dataclass(frozen=True)
 class VariantSpec:
     variant: str
@@ -89,17 +90,20 @@ class VariantSpec:
     ppo_overrides: dict[str, Any]
 
 
+# 创建本模块需要的输出目录。
 def ensure_dirs() -> None:
     for path in [TABLES_DIR, CONFIGS_DIR, MODELS_DIR, FIGURES_DIR]:
         path.mkdir(parents=True, exist_ok=True)
 
 
+# 同步设置 Python、NumPy 和模型训练使用的随机种子。
 def set_seed(seed: int) -> None:
     random.seed(seed)
     np.random.seed(seed)
     torch.manual_seed(seed)
 
 
+# 将输入转换为有限浮点数；无效值使用默认值。
 def safe_float(value: Any) -> float:
     try:
         numeric = float(value)
@@ -108,6 +112,7 @@ def safe_float(value: Any) -> float:
     return numeric if np.isfinite(numeric) else 0.0
 
 
+# 根据动作占比计算经验熵。
 def action_entropy(action_shares: dict[int, float]) -> float:
     entropy = 0.0
     for share in action_shares.values():
@@ -116,6 +121,7 @@ def action_entropy(action_shares: dict[int, float]) -> float:
     return float(entropy)
 
 
+# 读取已标记为有效 trade-off 的训练场景。
 def load_meaningful_scenarios() -> pd.DataFrame:
     path = TABLES_DIR / "sustainability_scenario_audit.csv"
     audit = pd.read_csv(path)
@@ -127,7 +133,11 @@ def load_meaningful_scenarios() -> pd.DataFrame:
 # ---------------------------------------------------------------------------
 
 
+# 根据库存、保质期和浪费特征计算场景抽样权重。
 def scenario_sampling_weights(scenarios: pd.DataFrame) -> pd.DataFrame:
+    # 对高库存、短保质期和 always-zero 已产生浪费的情景提高抽样概率，
+    # 让 PPO 在训练中更常看到“正折扣可能有价值”的状态；这里不提供 oracle action 标签，
+    # 因此仍是 reinforcement learning，而不是把规划结果当监督标签。
     rows: list[dict[str, Any]] = []
     for _, row in scenarios.iterrows():
         weight = 1.0
@@ -158,6 +168,7 @@ def scenario_sampling_weights(scenarios: pd.DataFrame) -> pd.DataFrame:
 # ---------------------------------------------------------------------------
 
 
+# 在 reset 时按权重选择训练场景，并把 step 转交原环境。
 class ScenarioBalancedEnv(gym.Env):
     metadata = {"render_modes": ["ansi"], "render_fps": 1}
 
@@ -183,7 +194,10 @@ class ScenarioBalancedEnv(gym.Env):
         self.current_env = first_env
         self.current_scenario_id = first_env.scenario_id
 
+    # 选择新的 episode 并重置内部状态。
     def reset(self, *, seed: int | None = None, options: dict[str, Any] | None = None):
+        # 每个 episode 按已保存的 normalized weight 选择训练情景；
+        # validation 不经过这个 wrapper，仍使用原来的固定分布和 manifest。
         if seed is not None:
             self.rng = np.random.default_rng(seed)
         probs = self.weights["normalized_sampling_weight"].to_numpy(dtype=float)
@@ -193,13 +207,16 @@ class ScenarioBalancedEnv(gym.Env):
         episode_index = int(self.rng.integers(0, 10_000))
         return self.current_env.reset(seed=seed, options={"episode_index": episode_index})
 
+    # 执行一个 action，并返回下一状态、reward 和终止信息。
     def step(self, action: int):
         return self.current_env.step(action)
 
+    # 返回内部环境的文本渲染结果。
     def render(self):
         return self.current_env.render()
 
 
+# 创建多个场景平衡环境并启用 observation normalization。
 def make_balanced_vec_env(weights: pd.DataFrame, seed: int, monitor_dir: Path) -> VecNormalize:
     def make_one(offset: int):
         def _factory():
@@ -220,12 +237,14 @@ def policy_kwargs() -> dict[str, Any]:
     return {"net_arch": {"pi": [128, 128], "vf": [128, 128]}, "activation_fn": torch.nn.Tanh}
 
 
+# 定期保存 PPO checkpoint 和 VecNormalize。
 class VecNormalizeCheckpointCallback(CheckpointCallback):
     def __init__(self, *args: Any, vec_path: Path, run_state_path: Path, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)
         self.vec_path = vec_path
         self.run_state_path = run_state_path
 
+    # 在每个训练 step 更新回调状态，并按设定间隔保存结果。
     def _on_step(self) -> bool:
         result = super()._on_step()
         if self.n_calls % max(self.save_freq, 1) == 0:
@@ -245,6 +264,7 @@ class VecNormalizeCheckpointCallback(CheckpointCallback):
         return result
 
 
+# 根据状态计算固定或规则基线动作。
 def action_for_baseline(policy_id: str, obs: np.ndarray) -> int:
     if policy_id == "always_0pct":
         return 0
@@ -274,6 +294,7 @@ def action_for_baseline(policy_id: str, obs: np.ndarray) -> int:
 # ---------------------------------------------------------------------------
 
 
+# 在固定 manifest 上运行模型并收集 episode 指标。
 def evaluate_policy_on_manifest(
     *,
     model: PPO | None,
@@ -282,6 +303,9 @@ def evaluate_policy_on_manifest(
     manifest: pd.DataFrame,
     scenario_id: str = DEFAULT_SCENARIO_ID,
 ) -> pd.DataFrame:
+    # 所有 redesigned checkpoint 和 baseline 逐行读取同一 manifest，
+    # store-product-start date 完全配对。这样 paired gain 反映 policy 差异，
+    # 而不是随机抽到不同 episode 所造成的波动。
     rows: list[dict[str, Any]] = []
     env = OperationalPerishablePricingEnv(
         split="validation",
@@ -338,6 +362,7 @@ def evaluate_policy_on_manifest(
     return pd.DataFrame(rows)
 
 
+# 读取 manifest 数据并返回统一结构。
 def load_manifest() -> pd.DataFrame:
     path = CONFIGS_DIR / "ppo_validation_episode_manifest.csv"
     if path.exists():
@@ -346,6 +371,7 @@ def load_manifest() -> pd.DataFrame:
     return pd.DataFrame(rows)
 
 
+# 根据动作占比和熵标记策略是否依赖状态。
 def state_dependence_classification(zero_share: float, entropy: float) -> str:
     if zero_share >= 0.98 and entropy <= 0.05:
         return "ZERO_ACTION_COLLAPSE"
@@ -354,6 +380,7 @@ def state_dependence_classification(zero_share: float, entropy: float) -> str:
     return "STATE_DEPENDENT_POLICY" if entropy > 0.05 else "UNSTABLE_POLICY"
 
 
+# 对齐已有动作价值表，计算策略动作与诊断最优动作的价值差。
 def evaluate_oracle_regret(model: PPO, vecnorm: VecNormalize, policy_id: str) -> pd.DataFrame:
     states = pd.read_csv(TABLES_DIR / "financial_markdown_oracle_diagnostic.csv")
     action_values = pd.read_csv(TABLES_DIR / "financial_markdown_multistep_action_values.csv")
@@ -401,7 +428,11 @@ def evaluate_oracle_regret(model: PPO, vecnorm: VecNormalize, policy_id: str) ->
     return pd.DataFrame(rows)
 
 
+# 汇总单个 checkpoint 的利润、动作错误和策略退化指标。
 def evaluate_checkpoint(model_path: Path, vec_path: Path, variant: str, timestep: int, manifest: pd.DataFrame) -> dict[str, Any]:
+    # checkpoint 不仅按 mean profit 排序，还审计 oracle regret、unnecessary markdown、
+    # zero-action share 和 empirical entropy。这样可避免把最后一个或表面回报最高、
+    # 但已经坍缩为单一动作的 policy 自动选为最终模型。
     raw_env = DummyVecEnv(
         [
             lambda: OperationalPerishablePricingEnv(
@@ -453,6 +484,7 @@ def evaluate_checkpoint(model_path: Path, vec_path: Path, variant: str, timestep
     return result
 
 
+# 保存两个训练 variant 的采样和参数差异。
 def training_design_audit(weights: pd.DataFrame) -> None:
     diagnostics = pd.read_csv(TABLES_DIR / "ppo_training_diagnostics.csv") if (TABLES_DIR / "ppo_training_diagnostics.csv").exists() else pd.DataFrame()
     oracle = pd.read_csv(TABLES_DIR / "financial_markdown_oracle_diagnostic.csv")
@@ -491,6 +523,7 @@ def training_design_audit(weights: pd.DataFrame) -> None:
     pd.DataFrame(rows).to_csv(TABLES_DIR / "ppo_training_design_audit.csv", index=False)
 
 
+# 比较重加权前后的训练状态分布。
 def state_balance_audit(weights: pd.DataFrame) -> None:
     oracle = pd.read_csv(TABLES_DIR / "financial_markdown_oracle_diagnostic.csv")
     high_risk_oracle = oracle["positive_markdown_financially_preferred"].mean()
@@ -533,6 +566,7 @@ def state_balance_audit(weights: pd.DataFrame) -> None:
 # ---------------------------------------------------------------------------
 
 
+# 按 variant 配置训练 PPO，并保存模型、归一化状态和元数据。
 def train_variant(spec: VariantSpec, timesteps: int) -> dict[str, Any]:
     started = time.perf_counter()
     set_seed(SEED)
@@ -571,6 +605,7 @@ def train_variant(spec: VariantSpec, timesteps: int) -> dict[str, Any]:
     return metadata
 
 
+# 列出一个 variant 的 checkpoint 和 final model 路径。
 def checkpoint_paths(variant: str) -> list[tuple[int, Path]]:
     variant_dir = MODELS_DIR / variant.lower() / f"seed_{SEED}"
     paths: list[tuple[int, Path]] = []
@@ -588,6 +623,7 @@ def checkpoint_paths(variant: str) -> list[tuple[int, Path]]:
     return sorted(paths, key=lambda item: item[0])
 
 
+# 对两个 variant 的所有 checkpoint 运行固定验证。
 def evaluate_variants() -> pd.DataFrame:
     manifest = load_manifest()
     rows: list[dict[str, Any]] = []
@@ -613,6 +649,7 @@ def evaluate_variants() -> pd.DataFrame:
     return results
 
 
+# 按利润容差、动作价值差和退化指标选择 checkpoint。
 def compare_and_select(results: pd.DataFrame) -> pd.DataFrame:
     original = {
         "policy_id": "recovered_financial__checkpoint_22288",
@@ -660,6 +697,7 @@ def compare_and_select(results: pd.DataFrame) -> pd.DataFrame:
 # ---------------------------------------------------------------------------
 
 
+# 根据 checkpoint 汇总表生成训练重设计图。
 def plot_results(results: pd.DataFrame, selection: pd.DataFrame) -> None:
     if results.empty:
         return
@@ -720,6 +758,7 @@ def plot_results(results: pd.DataFrame, selection: pd.DataFrame) -> None:
     plt.close(fig)
 
 
+# 打印选定 checkpoint 和主要验证指标。
 def final_report(selection: pd.DataFrame, runtime_seconds: float) -> str:
     best = selection.loc[selection["selected_best_policy"]].iloc[0] if not selection.loc[selection["selected_best_policy"]].empty else selection.iloc[0]
     outcome = str(selection["comparison_outcome"].dropna().iloc[0]) if "comparison_outcome" in selection else "REDESIGN_NO_MEANINGFUL_IMPROVEMENT"
@@ -767,6 +806,7 @@ def final_report(selection: pd.DataFrame, runtime_seconds: float) -> str:
     return status
 
 
+# 解析命令行参数和运行规模选项。
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Controlled PPO training-redesign experiment for recovered_financial.")
     parser.add_argument("--mode", choices=["audit", "train", "evaluate", "all"], default="audit")
