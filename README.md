@@ -4,6 +4,18 @@ This repository studies dynamic markdown decisions for perishable fresh-retail i
 
 The project asks whether learned markdown policies improve normalized accounting profit on high-risk inventory after waste, stockout, and finite-shelf-life effects are represented. It is a controlled reinforcement-learning experiment using a semi-synthetic environment calibrated with historical retail data, not a deployed pricing system.
 
+## Source Code
+
+[`src/`](src/) is the central and most important source-code directory in this repository. It contains the complete Python implementation of the experimental pipeline: data preparation, stockout-aware demand recovery, markdown-response calibration, perishability scenarios, the Gymnasium pricing environment, PPO and DQN training, locked evaluation, and final reporting.
+
+The Python modules include concise Chinese comments and module-level descriptions to make the implementation easier to inspect. The same folder also contains three detailed reading aids:
+
+- [`src/技术文档.md`](src/技术文档.md): the main technical guide, including the pipeline, module responsibilities, inputs, outputs, implementation logic, and interpretation boundaries.
+- [`src/实验记录_.docx`](src/实验记录_.docx): the experiment log organized by development stage, with direct references to the relevant files and functions.
+- [`src/环境设置.docx`](src/环境设置.docx): the detailed environment specification covering the 41-dimensional state, six markdown actions, FEFO inventory flow, reward/accounting, and PPO/DQN environment wrappers.
+
+For source-code review, begin with [`src/技术文档.md`](src/技术文档.md), then inspect [`src/pricing_env_operational.py`](src/pricing_env_operational.py) and follow the recommended reading order in the guide.
+
 ## Data and Problem
 
 FreshRetailNet-50K provides the operational fresh-retail setting. Raw parquet files are not committed; the expected local files are described in [data/raw/README.md](data/raw/README.md). The project selects a modeling subset, identifies stockout-censored observations, and estimates a recovered demand signal before pricing experiments.
@@ -43,7 +55,7 @@ The final modeling subset contains 29,100 rows from 300 complete store-product s
 | Directory | Purpose | Important contents |
 |---|---|---|
 | `scripts/` | Numbered command-line entry points for the main workflow. | Data preparation, demand recovery, PPO/DQN training wrappers, locked DQN evaluation, final baseline ladder. |
-| `src/` | Active implementation modules. | FreshRetailNet processing, latent-demand recovery, discount response, scenario generation, pricing environment, PPO/DQN training, evaluation, and reporting. |
+| `src/` | **Primary source-code directory and recommended starting point for code inspection.** | Complete Python implementation, Chinese code comments, `技术文档.md`, `实验记录_.docx`, and `环境设置.docx`. |
 | `configs/` | Version-controlled final specifications, manifests, and locked metadata. | Environment, PPO, DQN, and held-out evaluation records retained in Git. |
 | `results/` | Selected final report artifacts. | Main tables and figures used to interpret the final findings. |
 | `outputs/` | Generated intermediate and diagnostic artifacts. | Local training, validation, manifests, model artifacts, and runtime configuration records. |
@@ -66,6 +78,9 @@ Raw FreshRetailNet files and trained model binaries must be supplied locally bef
 
 ## Key Files
 
+- [src/技术文档.md](src/技术文档.md)
+- [src/实验记录_.docx](src/实验记录_.docx)
+- [src/环境设置.docx](src/环境设置.docx)
 - [docs/02_data_and_demand_recovery.md](docs/02_data_and_demand_recovery.md)
 - [docs/03_environment_and_methods.md](docs/03_environment_and_methods.md)
 - [docs/04_results.md](docs/04_results.md)
@@ -82,3 +97,4 @@ Raw FreshRetailNet files and trained model binaries must be supplied locally bef
 ## Project Limitations
 
 The environment is semi-synthetic. Raw data and trained model binaries are excluded from GitHub. Full reproduction therefore requires local data and model artifacts. No learned policy beat `always_0pct` on the locked held-out test set.
+
