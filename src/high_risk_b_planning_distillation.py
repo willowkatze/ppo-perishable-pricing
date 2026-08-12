@@ -1,32 +1,8 @@
-"""
-Focused learned-policy development for the locked HIGH_RISK_B task.
-
-This script trains compact planning-distilled policies only. It does not:
-- use the test split
-- retrain PPO
-- train DQN by default
-- change the locked HIGH_RISK_B definition
-- change environment mechanics, reward, accounting, response models, or actions
-
-Run from project root:
-    python src/high_risk_b_planning_distillation.py
-
-Useful runtime controls:
-    python src/high_risk_b_planning_distillation.py --max-train-episodes-per-scenario 80
-    python src/high_risk_b_planning_distillation.py --max-training-labels 1500
-    python src/high_risk_b_planning_distillation.py --max-label-runtime-minutes 90
-
-Outputs:
-    outputs/tables/high_risk_b_planning_training_labels.csv
-    outputs/tables/high_risk_b_planning_training_labels.partial.csv
-    outputs/tables/planning_distillation_leakage_audit.csv
-    outputs/tables/planning_distillation_training_metrics.csv
-    outputs/tables/high_risk_b_final_candidate_comparison.csv
-    outputs/tables/high_risk_b_distilled_validation_episode_results.csv
-    outputs/configs/final_high_risk_b_candidate.json
-    outputs/configs/final_high_risk_b_candidate_hashes.json
-    outputs/figures/planning_distillation/
-"""
+"""文件作用：补充实验 08B，将有限视野 planning decision 蒸馏为轻量 policy。
+研究目的：检验动态机会存在时，监督式 policy approximation 能否复制 planning value。
+主要输入：锁定 HIGH_RISK_B train episodes、环境 rollout 和有限 action sequences。
+主要输出：planning labels、leakage audit、distilled model 与 validation comparison。
+本模块不读取 test，也不改变环境、reward、action 或 HIGH_RISK_B 定义。"""
 
 from __future__ import annotations
 
@@ -97,6 +73,7 @@ LABELS_PATH = TABLES_DIR / "high_risk_b_planning_training_labels.csv"
 PARTIAL_LABELS_PATH = TABLES_DIR / "high_risk_b_planning_training_labels.partial.csv"
 
 
+# 保存一个 validation episode 的标识和场景信息。
 @dataclass(frozen=True)
 class EvalEpisode:
     scenario_id: str
@@ -105,21 +82,25 @@ class EvalEpisode:
     episode_id: str
 
 
+# 创建本模块需要的输出目录。
 def ensure_dirs() -> None:
     for path in [TABLES_DIR, CONFIGS_DIR, MANIFESTS_DIR, FIGURES_DIR, MODELS_DIR, DOCS_DIR]:
         path.mkdir(parents=True, exist_ok=True)
 
 
+# 检查输入文件是否存在，缺失时直接报错。
 def require_file(path: Path) -> None:
     if not path.exists():
         raise FileNotFoundError(f"Required file not found: {path}")
 
 
+# 读取 CSV 文件，并在文件缺失时停止运行。
 def read_csv(path: Path) -> pd.DataFrame:
     require_file(path)
     return pd.read_csv(path)
 
 
+# 将输入转换为有限浮点数；无效值使用默认值。
 def safe_float(value: Any, default: float = np.nan) -> float:
     try:
         if pd.isna(value):
@@ -129,6 +110,7 @@ def safe_float(value: Any, default: float = np.nan) -> float:
         return default
 
 
+# 计算文件的 SHA-256 摘要。
 def sha256(path: Path) -> str | None:
     if not path.exists():
         return None
@@ -139,6 +121,7 @@ def sha256(path: Path) -> str | None:
     return h.hexdigest()
 
 
+# 创建 recovered-calibration 的 HIGH_RISK_B 环境。
 def make_env(split: str, scenario_id: str, calibration_mode: str, seed: int = BOOTSTRAP_SEED) -> OperationalPerishablePricingEnv:
     return OperationalPerishablePricingEnv(
         split=split,
@@ -152,10 +135,12 @@ def make_env(split: str, scenario_id: str, calibration_mode: str, seed: int = BO
     )
 
 
+# 按 episode index 重置环境并返回初始状态。
 def reset_env(env: OperationalPerishablePricingEnv, episode_index: int) -> tuple[np.ndarray, dict[str, Any]]:
     return env.reset(seed=30_000 + int(episode_index), options={"episode_index": int(episode_index)})
 
 
+# 读取场景可用 episode 数量。
 def infer_episode_count(env: OperationalPerishablePricingEnv, fallback: int) -> int:
     for attr in ["n_episodes", "num_episodes", "episode_count"]:
         if hasattr(env, attr):
@@ -171,6 +156,7 @@ def infer_episode_count(env: OperationalPerishablePricingEnv, fallback: int) -> 
     return fallback
 
 
+# 从 observation 中提取分类模型使用的风险特征。
 def feature_row_from_obs(obs: np.ndarray, scenario_id: str, episode_index: int, step_index: int) -> dict[str, float | int | str]:
     obs = np.asarray(obs, dtype=float)
     inventory_coverage = safe_float(obs[1]) if obs.shape[0] > 1 else np.nan
@@ -198,6 +184,7 @@ def feature_row_from_obs(obs: np.ndarray, scenario_id: str, episode_index: int, 
     return row
 
 
+# 根据库存覆盖和临期比例判断状态是否属于 HIGH_RISK_B。
 def is_high_risk_b(row: dict[str, Any], locked: pd.Series) -> bool:
     coverage = safe_float(row.get("inventory_coverage"))
     expiring = safe_float(row.get("fraction_expiring_within_two_days"))
@@ -211,6 +198,7 @@ def is_high_risk_b(row: dict[str, Any], locked: pd.Series) -> bool:
     )
 
 
+# 从当前状态执行一条候选动作序列并返回累计价值。
 def simulate_sequence(env: OperationalPerishablePricingEnv, sequence: tuple[int, ...]) -> float:
     sim = copy.deepcopy(env)
     total = 0.0
@@ -225,7 +213,11 @@ def simulate_sequence(env: OperationalPerishablePricingEnv, sequence: tuple[int,
     return total
 
 
+# 枚举候选序列，返回最佳首个动作及与次优动作的差值。
 def planning_action_and_margin(env: OperationalPerishablePricingEnv, horizon: int = PLANNING_HORIZON) -> tuple[int, float, float, int]:
+    # 从当前 state 复制环境并枚举有限 horizon 的 action sequence，
+    # 选择累计 normalized profit 最高序列的第一个 action。它是诊断性 planner，
+    # 不使用真实未来销量标签，也不改变原环境的 accounting。
     remaining = max(1, int(getattr(env, "horizon", horizon)) - int(getattr(env, "current_step", 0)))
     local_horizon = min(horizon, remaining)
     first_action_values: dict[int, float] = {a: -np.inf for a in ACTION_SPACE}
@@ -242,6 +234,7 @@ def planning_action_and_margin(env: OperationalPerishablePricingEnv, horizon: in
     return int(best_action), float(best_value), float(best_value - second_value), sequence_count
 
 
+# 读取锁定的 HIGH_RISK_B 阈值和场景范围。
 def load_locked_definition() -> pd.Series:
     locked = read_csv(TABLES_DIR / "final_task_locked_population_definition.csv")
     row = locked.loc[locked["population_id"].eq("HIGH_RISK_B")]
@@ -250,10 +243,12 @@ def load_locked_definition() -> pd.Series:
     return row.iloc[0]
 
 
+# 从锁定定义中提取需要处理的 scenario id。
 def scenario_ids_from_locked(locked: pd.Series) -> list[str]:
     return [x for x in str(locked["scenario_ids"]).split("|") if x]
 
 
+# 将当前规划标签和进度写入 partial CSV。
 def save_label_checkpoint(rows: list[dict[str, Any]], start: float, total_sequences: int, path: Path) -> None:
     if not rows:
         return
@@ -263,6 +258,7 @@ def save_label_checkpoint(rows: list[dict[str, Any]], start: float, total_sequen
     checkpoint.to_csv(path, index=False)
 
 
+# 在训练 episodes 上生成规划首动作标签。
 def build_training_labels(
     max_episodes_per_scenario: int,
     checkpoint_every_episodes: int,
@@ -368,6 +364,7 @@ def build_training_labels(
     return df
 
 
+# 统计标签数量、动作分布和规划差值。
 def audit_training_labels(labels: pd.DataFrame) -> None:
     duplicates = int(labels.duplicated(subset=[c for c in labels.columns if c.startswith("obs_")]).sum())
     rows = [
@@ -382,7 +379,11 @@ def audit_training_labels(labels: pd.DataFrame) -> None:
     pd.DataFrame(rows).to_csv(TABLES_DIR / "high_risk_b_planning_training_label_summary.csv", index=False)
 
 
+# 核对标签只来自 train split。
 def leakage_audit(labels: pd.DataFrame) -> pd.DataFrame:
+    # 检查 label 的 split、日期和 episode namespace，防止 validation/test 状态
+    # 进入蒸馏训练；同时记录 feature 是否包含 planning outcome 等不可部署信息。
+    # 未通过审计时不应锁定 distilled candidate。
     groups = labels["group_id"].astype(str)
     unique_groups = sorted(groups.unique())
     n_splits = min(5, len(unique_groups))
@@ -412,10 +413,12 @@ def leakage_audit(labels: pd.DataFrame) -> pd.DataFrame:
     return audit
 
 
+# 返回蒸馏分类器使用的特征列。
 def feature_columns(labels: pd.DataFrame) -> list[str]:
     return [c for c in labels.columns if c.startswith("obs_")] + FEATURE_NAMES
 
 
+# 根据动作类别频率计算训练样本权重。
 def sample_weights(labels: pd.DataFrame, weighted: bool) -> np.ndarray | None:
     if not weighted:
         return None
@@ -425,6 +428,7 @@ def sample_weights(labels: pd.DataFrame, weighted: bool) -> np.ndarray | None:
     return 1.0 + margin / (np.nanmedian(margin[margin > 0]) if np.any(margin > 0) else 1.0)
 
 
+# 按名称创建随机森林或梯度提升分类器。
 def make_model(family: str, weighted: bool, seed: int):
     if family == "RandomForestClassifier":
         return RandomForestClassifier(
@@ -446,6 +450,7 @@ def make_model(family: str, weighted: bool, seed: int):
     raise ValueError(family)
 
 
+# 计算正折扣类别的 precision、recall 和命中率。
 def positive_metrics(y_true: np.ndarray, y_pred: np.ndarray) -> tuple[float, float]:
     true_pos = y_true > 0
     pred_pos = y_pred > 0
@@ -454,7 +459,11 @@ def positive_metrics(y_true: np.ndarray, y_pred: np.ndarray) -> tuple[float, flo
     return precision, recall
 
 
+# 按 episode 分组切分数据并比较候选分类器。
 def grouped_training_eval(labels: pd.DataFrame) -> tuple[pd.DataFrame, dict[str, Any]]:
+    # 按 episode 分组切分训练和内部验证，避免同一 episode 的相邻 state 同时出现在两侧。
+    # 比较树模型/加权版本时同时关注 overall accuracy 和 positive-markdown recall，
+    # 因为类别不平衡下只预测 action 0 也可能得到较高准确率。
     leakage_audit(labels)
     cols = feature_columns(labels)
     labels = labels.dropna(subset=cols + ["planning_action"]).copy()
@@ -522,6 +531,7 @@ def grouped_training_eval(labels: pd.DataFrame) -> tuple[pd.DataFrame, dict[str,
     return metrics, {"model": final_model, "metadata": meta, "model_path": str(model_path)}
 
 
+# 读取固定 validation episodes。
 def load_validation_manifest() -> pd.DataFrame:
     manifest_path = MANIFESTS_DIR / "high_risk_b_expanded_validation_manifest.csv"
     if not manifest_path.exists():
@@ -532,6 +542,7 @@ def load_validation_manifest() -> pd.DataFrame:
     return manifest[["scenario_id", "calibration_mode", "episode_index", "episode_id"]].drop_duplicates()
 
 
+# 在一个固定 episode 上运行蒸馏策略并记录结果。
 def evaluate_policy_episode(episode: EvalEpisode, policy_id: str, model_bundle: dict[str, Any] | None) -> tuple[dict[str, Any], pd.DataFrame]:
     env = make_env("validation", episode.scenario_id, episode.calibration_mode)
     obs, _ = reset_env(env, episode.episode_index)
@@ -580,6 +591,7 @@ def evaluate_policy_episode(episode: EvalEpisode, policy_id: str, model_bundle: 
     return row, pd.DataFrame(state_rows)
 
 
+# 根据动作占比计算经验熵。
 def action_entropy(series: pd.Series | list[int]) -> float:
     s = pd.Series(series)
     if s.empty:
@@ -588,6 +600,7 @@ def action_entropy(series: pd.Series | list[int]) -> float:
     return float(-(probs * np.log(probs)).sum())
 
 
+# 对完整 episode 重采样，计算配对差值的置信区间。
 def bootstrap_ci(diff: pd.Series) -> tuple[float, float]:
     values = diff.dropna().astype(float).to_numpy()
     if len(values) == 0:
@@ -599,6 +612,7 @@ def bootstrap_ci(diff: pd.Series) -> tuple[float, float]:
     return float(np.percentile(means, 2.5)), float(np.percentile(means, 97.5))
 
 
+# 按 episode 对齐蒸馏策略和基线并计算配对指标。
 def compare_policy(results: pd.DataFrame, policy_id: str) -> dict[str, Any]:
     policy = results.loc[results["policy_id"].eq(policy_id)]
     baseline = results.loc[results["policy_id"].eq(BASELINE_POLICY)]
@@ -634,6 +648,7 @@ def compare_policy(results: pd.DataFrame, policy_id: str) -> dict[str, Any]:
     }
 
 
+# 在固定 validation manifest 上评估选定分类器。
 def validate_distilled_model(model_bundle: dict[str, Any]) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
     manifest = load_validation_manifest()
     rows = []
@@ -670,6 +685,7 @@ def validate_distilled_model(model_bundle: dict[str, Any]) -> tuple[pd.DataFrame
     return results, states, comparison
 
 
+# 保存选定分类器、特征和验证摘要。
 def lock_candidate(model_bundle: dict[str, Any], comparison: pd.DataFrame) -> str:
     selected = comparison.loc[comparison["eligible_for_final_lock"].astype(bool)]
     if selected.empty:
@@ -709,6 +725,7 @@ def lock_candidate(model_bundle: dict[str, Any], comparison: pd.DataFrame) -> st
     return status
 
 
+# 根据标签和验证结果生成蒸馏实验图。
 def make_figures(results: pd.DataFrame, states: pd.DataFrame, comparison: pd.DataFrame) -> None:
     FIGURES_DIR.mkdir(parents=True, exist_ok=True)
     fig, ax = plt.subplots(figsize=(8, 4.5))
@@ -790,6 +807,7 @@ def make_figures(results: pd.DataFrame, states: pd.DataFrame, comparison: pd.Dat
     plt.close(fig)
 
 
+# 将训练标签、模型选择和验证结果写入说明文件。
 def write_doc(status: str, comparison: pd.DataFrame, metrics: pd.DataFrame) -> None:
     DOCS_DIR.mkdir(parents=True, exist_ok=True)
     best = comparison.loc[comparison["policy_id"].eq("planning_distilled_policy")]
@@ -818,6 +836,9 @@ The final locked candidate config is saved in
 
 
 def main() -> None:
+    # 该补充实验会生成 planning labels 并训练 distilled classifier，计算量可能较大；
+    # 但不会调用 PPO/DQN 的 model.learn()，也不会访问 held-out test。
+    # 最终候选仍须通过固定 validation comparison 才能进入后续锁定流程。
     parser = argparse.ArgumentParser()
     parser.add_argument("--max-train-episodes-per-scenario", type=int, default=80)
     parser.add_argument("--checkpoint-every-episodes", type=int, default=5)

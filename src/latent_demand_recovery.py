@@ -1,10 +1,8 @@
-"""Stockout-aware latent-demand recovery for FreshRetailNet modeling subset.
-
-This module validates the existing modeling subset, builds leakage-safe
-time-series features, evaluates recovery models with artificial censoring,
-selects a model using validation data only,
-and saves a recovered-demand dataset for later demand modeling and RL work.
-"""
+"""文件作用：实验顺序 02，对 FreshRetailNet 销量进行 stockout-aware demand recovery。
+研究目的：修正缺货时 observed sales 低估 latent demand 的问题，为环境提供需求信号。
+主要输入：预处理后的 modeling subset、库存/缺货标记及时间序列特征。
+主要输出：recovered-demand parquet、已选模型、验证表和诊断图。
+模型选择只使用 validation，test 仅用于锁定流程中的独立报告。"""
 
 from __future__ import annotations
 
@@ -66,6 +64,7 @@ EXPECTED_DATE_MAX = "2024-07-02"
 # ---------------------------------------------------------------------------
 
 
+# 把估计器、特征列和模型名称一起保存；恢复阶段因此能按训练时相同的特征结构推断。
 @dataclass
 class FittedModel:
     """Container for a fitted recovery model."""
@@ -76,9 +75,11 @@ class FittedModel:
     kind: str
 
 
+# 使用历史平均销量作为简单基线，与机器学习模型进行比较。
 class SeasonalHistoricalBaseline:
     """Transparent hierarchical historical-mean demand baseline."""
 
+    # 保存按商品和星期统计的历史均值，供后续预测查询。
     def __init__(self) -> None:
         self.global_mean_: float = 0.0
         self.series_dow_: dict[tuple[str, str, int], float] = {}
@@ -95,6 +96,7 @@ class SeasonalHistoricalBaseline:
         self.sku_ = clean.groupby("sku_id", dropna=False)[target_col].mean().to_dict()
         return self
 
+    # 按商品、门店和星期逐级查找历史平均销量。
     def predict(self, frame: pd.DataFrame) -> np.ndarray:
         preds: list[float] = []
         for row in frame[["store_id", "sku_id", "day_of_week"]].itertuples(index=False):
@@ -112,6 +114,7 @@ class SeasonalHistoricalBaseline:
         return np.asarray(preds, dtype=float)
 
 
+# 创建恢复数据、模型、表格和图片的输出目录。
 def ensure_dirs() -> None:
     """Create output directories."""
     OUTPUT_PATH.parent.mkdir(parents=True, exist_ok=True)
@@ -120,6 +123,7 @@ def ensure_dirs() -> None:
     FIGURES_DIR.mkdir(parents=True, exist_ok=True)
 
 
+# 读取 modeling subset 并检查 schema、split 和时间顺序；需求恢复只能在输入与锁定数据定义一致时继续。
 def load_and_validate_subset() -> pd.DataFrame:
     """Load and validate the modeling subset without modifying it."""
     if not INPUT_PATH.exists():
@@ -189,6 +193,7 @@ def load_and_validate_subset() -> pd.DataFrame:
     return data.sort_values(["store_id", "sku_id", "timestamp"]).reset_index(drop=True)
 
 
+# 把等价列名统一为内部 schema；这样后续逻辑不依赖数据导出时的命名差异。(统一名字
 def normalize_input_columns(data: pd.DataFrame) -> pd.DataFrame:
     """Normalize aliases while preserving original modeling-subset columns."""
     output = data.copy()
@@ -215,6 +220,7 @@ def normalize_input_columns(data: pd.DataFrame) -> pd.DataFrame:
     return output
 
 
+# 将不同格式的真假值统一转换为布尔类型。
 def as_bool(series: pd.Series) -> pd.Series:
     """Convert mixed bool-like values to bool."""
     if pd.api.types.is_bool_dtype(series):
@@ -234,9 +240,13 @@ def as_bool(series: pd.Series) -> pd.Series:
 # ---------------------------------------------------------------------------
 
 
+# 根据库存和销量关系标记 likely-censored observations；因为 stockout 时 observed sales 只是 true demand 的下界。
 def create_censoring_labels(data: pd.DataFrame) -> pd.DataFrame:
     """Create transparent censoring and training-eligibility labels."""
     output = data.copy()
+    # observed sales 是 ``min(true demand, available inventory)`` 的结果；缺货时只能看见
+    # 被库存上限截断的销量，不能把它直接当作 true demand。这里使用可观察的库存信号
+    # 标记 possible stockout，而不声称已经知道真实的 latent demand。
     output["ambiguous_inventory_state"] = output["stock_hour6_22_cnt"].isna()
     output["possible_stockout"] = output["possible_stockout_flag"].astype(bool)
     output["confirmed_or_likely_uncensored"] = (
@@ -267,6 +277,7 @@ def create_censoring_labels(data: pd.DataFrame) -> pd.DataFrame:
     return output
 
 
+# 构造时间、价格、促销和历史销售特征；只使用决策时点可获得的信息估计 latent demand。
 def engineer_features(data: pd.DataFrame) -> pd.DataFrame:
     """Create leakage-safe features using only current or previous-period data."""
     output = data.sort_values(["store_id", "sku_id", "timestamp"]).copy()
@@ -325,6 +336,7 @@ def feature_columns() -> list[str]:
     ]
 
 
+# 只在 training split 学习类别编码；避免 validation/test 中的类别信息影响训练表示。
 def fit_encoders(train: pd.DataFrame) -> dict[str, dict[str, int]]:
     """Fit stable ordinal encoders on training data only."""
     encoders = {}
@@ -334,6 +346,7 @@ def fit_encoders(train: pd.DataFrame) -> dict[str, dict[str, int]]:
     return encoders
 
 
+# 把固定 training encoder 应用于其他 split；未知类别使用保留编码，避免重新拟合造成 leakage。
 def apply_encoders(data: pd.DataFrame, encoders: dict[str, dict[str, int]]) -> pd.DataFrame:
     """Apply fitted encoders; unknown categories map to zero."""
     output = data.copy()
@@ -342,6 +355,7 @@ def apply_encoders(data: pd.DataFrame, encoders: dict[str, dict[str, int]]) -> p
     return output
 
 
+# 按固定列顺序生成数值矩阵，并填补缺失或非有限值。
 def prepare_model_matrix(data: pd.DataFrame, columns: list[str]) -> pd.DataFrame:
     """Return numeric feature matrix with simple train-safe missing handling."""
     frame = data.reindex(columns=columns).copy()
@@ -357,7 +371,11 @@ def prepare_model_matrix(data: pd.DataFrame, columns: list[str]) -> pd.DataFrame
 # ---------------------------------------------------------------------------
 
 
+# 只用 likely-uncensored training rows 拟合候选需求模型；这些行的销量更接近可观察的 true demand。
 def train_models(features: pd.DataFrame, train_mask: pd.Series) -> dict[str, FittedModel]:
+    # 输入 X 是只由当前及过去可用信息构成的需求、库存、日历和编码特征；
+    # 输出 y 是 likely-uncensored 行中的 observed sales。ExtraTrees 用非线性树集合
+    # 学习正常供货状态下的需求关系，再用于估计缺货行本来可能出现的需求。
     """Train simple benchmark recovery models on likely uncensored train rows."""
     train = features.loc[train_mask].copy()
     columns = feature_columns()
@@ -394,6 +412,7 @@ def train_models(features: pd.DataFrame, train_mask: pd.Series) -> dict[str, Fit
     return models
 
 
+# 使用已拟合的需求恢复模型生成推断结果；不在预测阶段重新拟合参数。
 def predict_model(fitted: FittedModel, frame: pd.DataFrame) -> np.ndarray:
     """Predict non-negative demand from a fitted model."""
     if fitted.kind == "baseline":
@@ -403,7 +422,11 @@ def predict_model(fitted: FittedModel, frame: pd.DataFrame) -> np.ndarray:
     return np.maximum(np.asarray(pred, dtype=float), 0.0)
 
 
+# 在人为遮蔽且真值已知的销量上检验恢复模型；真实 stockout 没有可直接观察的 latent-demand 标签。
 def artificial_censoring_validation(features: pd.DataFrame, models: dict[str, FittedModel]) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
+    # 真实缺货行的未满足需求不可观测，因此不能直接计算恢复误差。
+    # 这里从本来未缺货的样本人工制造销量上限，再比较预测值和已知原始销量，
+    # 用同一实验条件公平比较 seasonal baseline、HGB 和 ExtraTrees。
     """Validate models with pseudo-stockout artificial censoring."""
     frames = []
     rng = np.random.default_rng(RANDOM_SEED)
@@ -476,6 +499,7 @@ def artificial_censoring_validation(features: pd.DataFrame, models: dict[str, Fi
     return predictions, metrics, by_segment
 
 
+# 计算候选模型在人工截断样本上的误差；模型选择依据可验证预测表现，而不是恢复量大小。
 def calculate_validation_metrics(predictions: pd.DataFrame) -> pd.DataFrame:
     """Calculate artificial-censoring metrics by model/scenario/split."""
     rows = []
@@ -485,13 +509,14 @@ def calculate_validation_metrics(predictions: pd.DataFrame) -> pd.DataFrame:
     return pd.DataFrame(rows)
 
 
+# 按截断严重度和业务分组检查误差；平均指标可能掩盖高风险区域的失败。
 def calculate_segment_metrics(predictions: pd.DataFrame) -> pd.DataFrame:
     """Calculate validation metrics by important segments."""
     rows = []
     segment_specs = {
-        "promotion_status": predictions["activity_flag"].map({0: "non_promotion", 1: "promotion"}),
-        "markdown_group": predictions["markdown_group"],
-        "sales_volume_group": predictions["sales_volume_group"],
+        "promotion_status": predictions["activity_flag"].map({0: "non_promotion", 1: "promotion"}),#按照有没有促销分组。
+        "markdown_group": predictions["markdown_group"],#按照折扣程度分。
+        "sales_volume_group": predictions["sales_volume_group"],#按照销量规模分。
     }
     for segment_name, labels in segment_specs.items():
         tmp = predictions.copy()
@@ -544,7 +569,10 @@ def metric_row(prefix: dict[str, Any], group: pd.DataFrame) -> dict[str, Any]:
     return row
 
 
+# 按预先定义的验证指标选择恢复模型；选择过程不读取 held-out test。
 def select_recovery_model(metrics: pd.DataFrame) -> str:
+    # 模型选择严格基于 validation，避免根据 test 表现反向挑选模型。
+    # score 同时考虑 MAE、系统性 bias 和低估率，因为持续低估会把缺货截断继续带入环境。
     """Select preferred model using validation metrics only."""
     validation = metrics.loc[metrics["time_split"].eq("validation")].copy()
     if validation.empty:
@@ -575,6 +603,7 @@ def select_recovery_model(metrics: pd.DataFrame) -> str:
     return selected
 
 
+# 用选定模型在允许的训练样本上重新拟合最终 estimator；提高可用训练信息量但保持模型类型锁定。
 def fit_final_model(features: pd.DataFrame, selected_model: str) -> FittedModel:
     """Refit selected model on train+validation likely uncensored rows."""
     trainval_mask = features["time_split"].isin(["train", "validation"]) & features["confirmed_or_likely_uncensored"]
@@ -587,7 +616,11 @@ def fit_final_model(features: pd.DataFrame, selected_model: str) -> FittedModel:
 # ---------------------------------------------------------------------------
 
 
+# 对可能缺货的记录补充潜在需求，正常记录保持原始销量。
 def recover_demand(features: pd.DataFrame, fitted: FittedModel) -> pd.DataFrame:
+    # 非缺货行保留 observed sales；possible-stockout 行使用
+    # 缺货记录取 observed sales 与模型预测的较大值。
+    # 使用训练分布上限裁剪极端预测，并保留对应标记。
     """Recover demand for possible-stockout observations."""
     output = features.copy()
     raw_prediction = predict_model(fitted, output)
@@ -620,6 +653,7 @@ def recover_demand(features: pd.DataFrame, fitted: FittedModel) -> pd.DataFrame:
     return output
 
 
+# 统计恢复记录数、恢复幅度、裁剪和外推标记。
 def recovery_diagnostics(recovered: pd.DataFrame) -> dict[str, Any]:
     """Save recovery summary tables."""
     observed_total = float(recovered["observed_sales_demand"].sum())
@@ -646,6 +680,7 @@ def recovery_diagnostics(recovered: pd.DataFrame) -> dict[str, Any]:
     return {row["metric"]: row["value"] for row in summary_rows}
 
 
+# 按业务分组保存恢复前后的需求汇总。
 def save_group_summary(data: pd.DataFrame, group_cols: list[str], path: Path) -> None:
     """Save recovery diagnostics by group."""
     summary = (
@@ -667,6 +702,7 @@ def save_group_summary(data: pd.DataFrame, group_cols: list[str], path: Path) ->
     summary.to_csv(path, index=False)
 
 
+# 用不同截断上限和缺货标记重复计算恢复指标。
 def robustness_checks(features: pd.DataFrame, recovered: pd.DataFrame, selected_model: str) -> pd.DataFrame:
     """Run concise sensitivity checks for definitions, caps, and models."""
     rows = []
@@ -725,6 +761,7 @@ def robustness_checks(features: pd.DataFrame, recovered: pd.DataFrame, selected_
 # ---------------------------------------------------------------------------
 
 
+# 根据当前参数构建 figures。
 def create_figures(recovered: pd.DataFrame, validation_predictions: pd.DataFrame, validation_metrics: pd.DataFrame) -> None:
     """Create matplotlib-only diagnostic figures."""
     plot_distribution_comparison(recovered)
@@ -738,6 +775,7 @@ def create_figures(recovered: pd.DataFrame, validation_predictions: pd.DataFrame
     plot_performance_by_severity(validation_metrics)
 
 
+# 根据现有表格绘制 distribution comparison 图。
 def plot_distribution_comparison(data: pd.DataFrame) -> None:
     fig, ax = plt.subplots(figsize=(9, 5))
     cap = data["recovered_demand"].quantile(0.99)
@@ -750,6 +788,7 @@ def plot_distribution_comparison(data: pd.DataFrame) -> None:
     savefig("observed_vs_recovered_distribution.png")
 
 
+# 根据现有表格绘制 predicted vs true 图。
 def plot_predicted_vs_true(predictions: pd.DataFrame) -> None:
     sample = predictions.loc[predictions["time_split"].eq("test")].sample(
         n=min(4_000, len(predictions.loc[predictions["time_split"].eq("test")])),
@@ -765,6 +804,7 @@ def plot_predicted_vs_true(predictions: pd.DataFrame) -> None:
     savefig("artificial_censoring_predicted_vs_true.png")
 
 
+# 根据现有表格绘制 error by model 图。
 def plot_error_by_model(metrics: pd.DataFrame) -> None:
     summary = metrics.groupby("model")["mae"].mean().sort_values()
     fig, ax = plt.subplots(figsize=(8, 5))
@@ -775,6 +815,7 @@ def plot_error_by_model(metrics: pd.DataFrame) -> None:
     savefig("recovery_error_by_model.png")
 
 
+# 根据现有表格绘制 recovery amount by flag 图。
 def plot_recovery_amount_by_flag(data: pd.DataFrame, column: str, filename: str) -> None:
     groups = [group["demand_recovery_amount"].clip(upper=data["demand_recovery_amount"].quantile(0.99)).to_numpy() for _, group in data.groupby(column)]
     labels = [str(key) for key, _ in data.groupby(column)]
@@ -785,6 +826,7 @@ def plot_recovery_amount_by_flag(data: pd.DataFrame, column: str, filename: str)
     savefig(filename)
 
 
+# 根据现有表格绘制 aggregate over time 图。
 def plot_aggregate_over_time(data: pd.DataFrame) -> None:
     daily = data.groupby(data["timestamp"].dt.floor("D")).agg(
         observed=("observed_sales_demand", "sum"),
@@ -800,6 +842,7 @@ def plot_aggregate_over_time(data: pd.DataFrame) -> None:
     savefig("aggregate_observed_vs_recovered_over_time.png")
 
 
+# 根据现有表格绘制 example series 图。
 def plot_example_series(data: pd.DataFrame) -> None:
     candidates = data.loc[data["demand_recovery_amount"].gt(EPSILON)].groupby(["store_id", "sku_id"]).size().sort_values(ascending=False)
     if candidates.empty:
@@ -821,6 +864,7 @@ def plot_example_series(data: pd.DataFrame) -> None:
     savefig("example_store_product_recovered_series.png")
 
 
+# 根据现有表格绘制 recovery ratio 图。
 def plot_recovery_ratio(data: pd.DataFrame) -> None:
     ratio = data["demand_recovery_ratio"].replace([np.inf, -np.inf], np.nan).dropna().clip(upper=20)
     fig, ax = plt.subplots(figsize=(9, 5))
@@ -831,6 +875,7 @@ def plot_recovery_ratio(data: pd.DataFrame) -> None:
     savefig("recovery_ratio_distribution.png")
 
 
+# 根据现有表格绘制 performance by severity 图。
 def plot_performance_by_severity(metrics: pd.DataFrame) -> None:
     summary = metrics.groupby(["censoring_severity", "model"])["mae"].mean().reset_index()
     fig, ax = plt.subplots(figsize=(10, 5))
@@ -844,6 +889,7 @@ def plot_performance_by_severity(metrics: pd.DataFrame) -> None:
     savefig("model_performance_by_censoring_severity.png")
 
 
+# 调整布局并把当前图保存到主图目录。
 def savefig(filename: str) -> None:
     """Save the current matplotlib figure."""
     plt.tight_layout()
@@ -851,6 +897,7 @@ def savefig(filename: str) -> None:
     plt.close()
 
 
+# 把连续折扣率转换为报告使用的折扣组。
 def markdown_group(markdown: pd.Series) -> pd.Series:
     """Create markdown exposure groups."""
     return pd.cut(
@@ -861,12 +908,14 @@ def markdown_group(markdown: pd.Series) -> pd.Series:
     ).astype(str)
 
 
+# 按分位数把连续变量标记为低、中、高三组。
 def quantile_label(values: pd.Series, low: str, medium: str, high: str) -> pd.Series:
     """Return duplicate-safe tertile labels."""
     clean = pd.to_numeric(values, errors="coerce").rank(method="first")
     return pd.qcut(clean, q=3, labels=[low, medium, high]).astype(str)
 
 
+# 将模型、encoder、特征顺序和预测上限保存为一个文件。
 def save_model_bundle(fitted: FittedModel, encoders: dict[str, dict[str, int]], cap: float) -> None:
     """Save fitted model and preprocessing artifacts."""
     bundle = {
@@ -881,6 +930,7 @@ def save_model_bundle(fitted: FittedModel, encoders: dict[str, dict[str, int]], 
     joblib.dump(bundle, MODEL_PATH)
 
 
+# 返回该模块对应的数据和模型限制说明。
 def limitations() -> list[str]:
     """Important methodological limitations."""
     return [
@@ -894,6 +944,7 @@ def limitations() -> list[str]:
     ]
 
 
+# 根据验证指标和恢复检查生成运行状态。
 def final_status(validation_metrics: pd.DataFrame, recovered: pd.DataFrame, selected_model: str) -> str:
     """Return final status after validation checks."""
     has_validation = not validation_metrics.empty
@@ -911,6 +962,7 @@ def final_status(validation_metrics: pd.DataFrame, recovered: pd.DataFrame, sele
     return "LATENT_DEMAND_RECOVERY_REQUIRES_REVISION"
 
 
+# 在终端打印模型选择、恢复范围和输出路径。
 def print_report(status: str, selected_model: str, validation_metrics: pd.DataFrame, recovered: pd.DataFrame, summary: dict[str, Any]) -> None:
     """Print final console report."""
     validation = validation_metrics.loc[
@@ -941,6 +993,7 @@ def print_report(status: str, selected_model: str, validation_metrics: pd.DataFr
     print(status)
 
 
+# 从完整指标表提取模型选择需要的列。
 def compact_metrics(metrics: pd.DataFrame) -> dict[str, float]:
     """Summarize metrics for console output."""
     if metrics.empty:
@@ -954,6 +1007,7 @@ def compact_metrics(metrics: pd.DataFrame) -> dict[str, float]:
     }
 
 
+# 保存模型名称、特征、数据范围和输出文件信息。
 def save_metadata(status: str, selected_model: str, checks: dict[str, Any], summary: dict[str, Any]) -> None:
     """Save run metadata and limitations."""
     metadata = {
@@ -974,6 +1028,9 @@ def save_metadata(status: str, selected_model: str, checks: dict[str, Any], summ
 
 
 def run() -> str:
+    # pipeline 顺序固定为：数据验证 -> censoring labels -> leakage-safe features
+    # -> 人工截断验证和模型选择 -> train+validation 重拟合 -> demand recovery。
+    # 保存的 recovered_demand 随后由 discount_response 和 pricing environment 读取。
     """Run the full latent-demand recovery workflow."""
     ensure_dirs()
     data = load_and_validate_subset()

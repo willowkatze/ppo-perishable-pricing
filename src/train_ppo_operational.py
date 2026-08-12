@@ -1,10 +1,8 @@
-"""Original PPO training and diagnostic pipeline.
-
-This module trains the observed/recovered PPO agents used in the project
-history. It also records input artifact hashes, validation diagnostics,
-checkpoint summaries, and action-distribution diagnostics so later evaluations
-can be tied back to a fixed environment and calibration setup.
-"""
+"""文件作用：实验顺序 06，训练 original observed/recovered PPO 并保存 checkpoint。
+研究目的：比较 stockout demand recovery 是否改变动态 markdown policy 的行为与价值。
+主要输入：OperationalPerishablePricingEnv、PPO 配置、固定 train/validation split。
+主要输出：PPO 模型、VecNormalize 状态、checkpoint、验证和 action 诊断表。
+该模块会训练模型；最终结论不直接采用最后一步，而由 validation 选择 checkpoint。"""
 
 from __future__ import annotations
 
@@ -96,6 +94,7 @@ LIMITATIONS = [
 ]
 
 
+# 保存一个 PPO 任务的 calibration、reward mode 和 seed。
 @dataclass(frozen=True)
 class AgentSpec:
     agent_id: str
@@ -103,17 +102,20 @@ class AgentSpec:
     reward_mode: str
 
 
+# 创建本模块需要的输出目录。
 def ensure_dirs() -> None:
     for directory in [TABLES_DIR, CONFIGS_DIR, MODELS_DIR, FIGURES_DIR]:
         directory.mkdir(parents=True, exist_ok=True)
 
 
+# 同步设置 Python、NumPy 和 PyTorch 的随机种子。
 def set_global_seed(seed: int) -> None:
     random.seed(seed)
     np.random.seed(seed)
     torch.manual_seed(seed)
 
 
+# 计算输入文件的 SHA-256 摘要。
 def sha256_file(path: Path) -> str | None:
     if not path.exists():
         return None
@@ -124,6 +126,7 @@ def sha256_file(path: Path) -> str | None:
     return digest.hexdigest()
 
 
+# 返回 PPO 训练需要记录摘要的输入文件。
 def artifact_paths() -> dict[str, Path]:
     return {
         "pricing_env_operational.py": SRC_DIR / "pricing_env_operational.py",
@@ -140,6 +143,7 @@ def artifact_paths() -> dict[str, Path]:
     }
 
 
+# 计算输入文件摘要并写入配置记录。
 def write_input_artifact_hashes() -> dict[str, Any]:
     hashes = {
         name: {
@@ -160,6 +164,7 @@ def write_input_artifact_hashes() -> dict[str, Any]:
 # ---------------------------------------------------------------------------
 
 
+# 在训练前检查状态维度、动作空间、终止条件和核算字段。
 def audit_environment_compatibility() -> pd.DataFrame:
     signature = inspect.signature(OperationalPerishablePricingEnv.__init__)
     actual = set(signature.parameters)
@@ -219,6 +224,7 @@ def audit_environment_compatibility() -> pd.DataFrame:
     return audit
 
 
+# 从已有校准表读取可用的 waste 权重。
 def choose_sustainability_lambda() -> tuple[float | None, pd.DataFrame]:
     source = TABLES_DIR / "pricing_env_reward_scale_diagnostic.csv"
     candidates = [0.10, 0.25, 0.50, 1.00]
@@ -252,10 +258,12 @@ def choose_sustainability_lambda() -> tuple[float | None, pd.DataFrame]:
     return selected, table
 
 
+# 返回训练后需要额外检查的场景列表。
 def robustness_scenarios() -> list[str]:
     return ["core_005", "core_008", "core_014", "core_007", "core_009", "sensitivity_023"]
 
 
+# 汇总环境参数、PPO 参数、seed 和输出路径并写入配置。
 def make_experiment_config(selected_lambda: float | None, artifact_hashes: dict[str, Any]) -> dict[str, Any]:
     config = {
         "created_at": pd.Timestamp.utcnow().isoformat(),
@@ -317,6 +325,7 @@ def make_experiment_config(selected_lambda: float | None, artifact_hashes: dict[
 # ---------------------------------------------------------------------------
 
 
+# 按 split、scenario、calibration 和 reward mode 创建环境。
 def make_env(
     *,
     split: str,
@@ -328,6 +337,8 @@ def make_env(
     seed: int,
     monitor_dir: Path | None = None,
 ) -> gym.Env:
+    # 该工厂把同一个业务环境接入 Stable-Baselines3：agent 接收 observation，
+    # 输出离散 action，环境执行库存转移后返回 normalized financial reward。
     env = OperationalPerishablePricingEnv(
         split=split,
         calibration_mode=calibration_mode,
@@ -342,6 +353,7 @@ def make_env(
     return Monitor(env, filename=str(monitor_dir / f"monitor_{seed}.csv") if monitor_dir else None)
 
 
+# 创建并行训练环境，并启用 observation normalization。
 def make_vec_env(
     *,
     n_envs: int,
@@ -354,6 +366,9 @@ def make_vec_env(
     seed: int,
     monitor_dir: Path,
 ) -> VecNormalize:
+    # 只标准化 observation，不标准化 reward。这样网络输入尺度稳定，
+    # 同时日志中的 reward 仍与环境定义的 normalized accounting profit 可核对。
+    # 并行环境提高采样速度，但每个环境使用不同 seed。
     return VecNormalize(
         make_raw_vec_env(
             n_envs=n_envs,
@@ -372,6 +387,7 @@ def make_vec_env(
     )
 
 
+# 创建不更新归一化统计的评估环境。
 def make_raw_vec_env(
     *,
     n_envs: int,
@@ -402,10 +418,12 @@ def make_raw_vec_env(
     return DummyVecEnv(env_fns)
 
 
+# 返回 actor 和 critic 的网络结构。
 def policy_kwargs() -> dict[str, Any]:
     return {"net_arch": {"pi": [128, 128], "vf": [128, 128]}, "activation_fn": torch.nn.Tanh}
 
 
+# 返回 PPO 超参数，并按并行环境数调整 rollout 长度。
 def ppo_params(overrides: dict[str, Any] | None = None, n_envs: int = 4) -> dict[str, Any]:
     params = PPO_BASE_PARAMS.copy()
     if overrides:
@@ -415,6 +433,7 @@ def ppo_params(overrides: dict[str, Any] | None = None, n_envs: int = 4) -> dict
     return params
 
 
+# 根据运行阶段生成需要训练的 agent 列表。
 def make_agent_specs(stage: str, selected_lambda: float | None) -> list[AgentSpec]:
     if stage == "smoke":
         return [AgentSpec("recovered_financial", "recovered_calibration", "financial")]
@@ -424,7 +443,9 @@ def make_agent_specs(stage: str, selected_lambda: float | None) -> list[AgentSpe
     return specs
 
 
+# 从 episode 末端 info 提取利润、浪费和动作占比。
 def terminal_metrics(info: dict[str, Any], episode_return: float, action_counts: dict[int, int]) -> dict[str, Any]:
+    # 将指标转换为有限浮点数；非有限值返回空值。
     def finite_float(value: Any, default: float = 0.0) -> float:
         try:
             numeric = float(value)
@@ -459,6 +480,7 @@ def terminal_metrics(info: dict[str, Any], episode_return: float, action_counts:
 # ---------------------------------------------------------------------------
 
 
+# 冻结归一化统计，在固定 validation episodes 上运行模型。
 def evaluate_model(
     model: PPO,
     *,
@@ -472,6 +494,9 @@ def evaluate_model(
     episodes: int,
     deterministic_policy: bool = True,
 ) -> pd.DataFrame:
+    # validation 使用确定性 policy 和独立环境；训练时保存的 VecNormalize 统计只用于
+    # observation 转换，不再更新。每个 episode 汇总利润、浪费和 action distribution，
+    # 用于识别“回报较高但动作坍缩”等只看平均 return 看不到的问题。
     rows: list[dict[str, Any]] = []
     env = OperationalPerishablePricingEnv(
         split=split,
@@ -520,7 +545,10 @@ def evaluate_model(
 # ---------------------------------------------------------------------------
 
 
+# 在训练过程中保存日志、模型和归一化状态。
 class TrainingMetricsCallback(CheckpointCallback):
+    """定期保存模型、observation normalization 和训练状态，支持中断后恢复和训练过程检查。"""
+
     def __init__(
         self,
         save_freq: int,
@@ -535,6 +563,7 @@ class TrainingMetricsCallback(CheckpointCallback):
         self.vecnormalize_path = vecnormalize_path
         self.run_state_path = run_state_path
 
+    # 从 logger 读取最新训练指标，并按间隔写入记录。
     def _on_step(self) -> bool:
         result = super()._on_step()
         if self.n_calls % max(self.save_freq, 1) == 0:
@@ -565,6 +594,7 @@ class TrainingMetricsCallback(CheckpointCallback):
         return result
 
 
+# 从 checkpoint 文件名解析 timestep。
 def checkpoint_step(path: Path) -> int:
     stem = path.stem
     parts = stem.split("_")
@@ -577,6 +607,7 @@ def checkpoint_step(path: Path) -> int:
     return -1
 
 
+# 按 timestep 找到最近保存的模型。
 def latest_checkpoint(checkpoint_dir: Path, stage: str, agent_id: str) -> Path | None:
     candidates = sorted(
         checkpoint_dir.glob(f"{stage}_{agent_id}_*_steps.zip"),
@@ -586,6 +617,7 @@ def latest_checkpoint(checkpoint_dir: Path, stage: str, agent_id: str) -> Path |
     return candidates[0] if candidates else None
 
 
+# 将当前训练进度和 checkpoint 路径写入 JSON。
 def write_run_state(agent_dir: Path, payload: dict[str, Any]) -> None:
     state_path = agent_dir / "run_state.json"
     existing: dict[str, Any] = {}
@@ -599,6 +631,7 @@ def write_run_state(agent_dir: Path, payload: dict[str, Any]) -> None:
     state_path.write_text(json.dumps(existing, indent=2), encoding="utf-8")
 
 
+# 创建或恢复 PPO，执行训练并保存模型与 validation 结果。
 def train_one_agent(
     *,
     agent: AgentSpec,
@@ -611,6 +644,9 @@ def train_one_agent(
     checkpoint_every: int = 5_000,
     resume: bool = False,
 ) -> dict[str, Any]:
+    # PPO 的 rollout 来自 train split：state 输入 actor/critic，policy 采样 action，
+    # 环境返回 reward 与 next state，GAE/clip objective 再更新网络参数。
+    # observed 与 recovered 两个版本仅切换 calibration signal，环境接口和动作空间相同。
     if agent.reward_mode == "sustainability" and selected_lambda is None:
         raise RuntimeError("Sustainability lambda requires review; refusing sustainability training.")
     set_global_seed(seed)
@@ -677,6 +713,8 @@ def train_one_agent(
         run_state_path=run_state_path,
     )
     started = time.perf_counter()
+    # model.learn() 是本文件真正执行 PPO 参数更新的位置；其余函数主要负责环境构造、
+    # checkpoint、恢复训练和固定 validation 评估。
     if remaining_timesteps > 0:
         model.learn(
             total_timesteps=remaining_timesteps,
@@ -706,6 +744,8 @@ def train_one_agent(
             ]
         ),
     )
+    # 训练结束后冻结 normalization 统计，并只在 validation split 上评估；
+    # test split 在这一阶段保持不可见，防止用最终测试结果挑 checkpoint。
     eval_vec.training = False
     eval_vec.norm_reward = False
     eval_model = PPO.load(agent_dir / "final_model.zip", env=eval_vec)
@@ -787,6 +827,7 @@ def train_one_agent(
 # ---------------------------------------------------------------------------
 
 
+# 合并各 agent 和 seed 的训练、验证和动作记录。
 def consolidate_outputs(training_records: list[dict[str, Any]]) -> None:
     summaries = pd.DataFrame([record["summary"] for record in training_records])
     if not summaries.empty:
@@ -814,6 +855,7 @@ def consolidate_outputs(training_records: list[dict[str, Any]]) -> None:
         reward_diag.reset_index().to_csv(TABLES_DIR / "ppo_reward_value_diagnostics.csv", index=False)
 
 
+# 按指定阶段依次运行环境检查、agent 训练和结果合并。
 def run_stage(
     stage: str,
     total_timesteps: int,
@@ -904,6 +946,7 @@ def run_stage(
     return status
 
 
+# 解析命令行参数和运行规模选项。
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Train PPO agents for the operational perishables pricing environment.")
     parser.add_argument("--stage", choices=["smoke", "pilot", "main", "evaluate"], default="smoke")

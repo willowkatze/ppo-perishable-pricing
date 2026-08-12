@@ -1,13 +1,8 @@
-"""
-Final statistical-integrity audit and equal-weight STANDARD_DQN ensemble.
-
-No training or retraining is performed. The script uses the three already
-selected STANDARD_DQN checkpoints and the locked HIGH_RISK_B validation
-manifest only. It never constructs the test split.
-
-Run from project root:
-    python -u src/dqn_statistical_audit_and_ensemble.py
-"""
+"""文件作用：实验顺序 08A，审计多 seed DQN 并构建等权 Q-value ensemble。
+研究目的：检查结论是否被 pooled rows 或单个 seed 支配，并在 validation 上锁定 ensemble。
+主要输入：三个已选 DQN checkpoint、各自 VecNormalize、锁定 validation manifest。
+主要输出：clustered inference、ensemble validation、action 和稳定性诊断。
+本模块不训练模型，也不读取 test split。"""
 
 from __future__ import annotations
 
@@ -83,6 +78,7 @@ SELECTED = {
 }
 
 
+# 保存固定验证 episode 的标识和场景信息。
 @dataclass(frozen=True)
 class EvalEpisode:
     scenario_id: str
@@ -91,6 +87,7 @@ class EvalEpisode:
     episode_id: str
 
 
+# 绑定一个 DQN 模型及其 VecNormalize。
 @dataclass
 class EnsembleMember:
     seed: int
@@ -101,16 +98,19 @@ class EnsembleMember:
     vecnormalize_path: Path
 
 
+# 创建本模块需要的输出目录。
 def ensure_dirs() -> None:
     for path in [TABLES_DIR, CONFIGS_DIR, FIGURES_DIR, DOCS_DIR]:
         path.mkdir(parents=True, exist_ok=True)
 
 
+# 检查输入文件是否存在，缺失时直接报错。
 def require_file(path: Path) -> None:
     if not path.exists():
         raise FileNotFoundError(f"Required file not found: {path}")
 
 
+# 读取 ensemble 使用的固定 validation manifest。
 def load_manifest() -> list[EvalEpisode]:
     manifest = load_validation_manifest()
     return [
@@ -119,7 +119,11 @@ def load_manifest() -> list[EvalEpisode]:
     ]
 
 
+# 检查现有多 seed 结果的行级汇总方式。
 def audit_pooled_inference() -> pd.DataFrame:
+    # 同一 episode 内多个 timestep、checkpoint 或 seed 不是独立观测。
+    # 该函数识别把 pooled rows 当独立样本可能导致的伪重复问题，
+    # 后续正式推断改用 episode-level aggregation 和 clustered bootstrap。
     pooled_path = TABLES_DIR / "dqn_pooled_validation_results.csv"
     diffs_path = TABLES_DIR / "dqn_seed_by_episode_profit_differences.csv"
     require_file(pooled_path)
@@ -172,7 +176,11 @@ def audit_pooled_inference() -> pd.DataFrame:
     return audit
 
 
+# 先按 episode 聚合，再计算多 seed 配对统计。
 def clustered_inference() -> tuple[pd.DataFrame, pd.DataFrame]:
+    # 先在 episode 内汇总，再以 scenario/episode cluster 为重采样单位，
+    # 使 CI 反映独立决策序列数量，而不是把重复评估行当成额外样本。
+    # 同时报告各 seed 方向是否一致，避免只看跨 seed 平均值。
     diffs = pd.read_csv(TABLES_DIR / "dqn_seed_by_episode_profit_differences.csv")
     diff_col = "dqn_minus_baseline"
     episode_means = (
@@ -240,6 +248,7 @@ def clustered_inference() -> tuple[pd.DataFrame, pd.DataFrame]:
     return out, episode_means
 
 
+# 加载单个 ensemble 成员的归一化状态。
 def load_vecnormalize(path: Path, scenario_id: str, seed: int) -> VecNormalize:
     require_file(path)
     dummy = DummyVecEnv([lambda: Monitor(make_env("validation", scenario_id, seed))])
@@ -249,6 +258,7 @@ def load_vecnormalize(path: Path, scenario_id: str, seed: int) -> VecNormalize:
     return vec
 
 
+# 加载三个 DQN 模型及各自归一化文件。
 def load_members(first_scenario: str) -> list[EnsembleMember]:
     members: list[EnsembleMember] = []
     dims = []
@@ -269,6 +279,7 @@ def load_members(first_scenario: str) -> list[EnsembleMember]:
     return members
 
 
+# 用成员自己的归一化转换状态，并计算六个动作的 Q-value。
 def q_values(member: EnsembleMember, obs: np.ndarray) -> np.ndarray:
     norm_obs = member.vecnormalize.normalize_obs(obs.astype(np.float32)[None, :])
     tensor = torch.as_tensor(norm_obs, dtype=torch.float32, device=member.model.device)
@@ -277,12 +288,17 @@ def q_values(member: EnsembleMember, obs: np.ndarray) -> np.ndarray:
     return q.detach().cpu().numpy()[0].astype(float)
 
 
+# 平均各成员的 Q-value，返回最大值对应的 action。
 def ensemble_action(members: list[EnsembleMember], obs: np.ndarray) -> tuple[int, list[float]]:
+    # 每个成员先用自己的 VecNormalize 转换同一原始 state，再输出六个 Q-value。
+    # 对三个 seed 的 Q-value 等权平均后取 argmax；这不是多数投票，
+    # 因为 action-value 差距也会影响 ensemble 决策。
     qs = np.vstack([q_values(member, obs) for member in members])
     mean_q = qs.mean(axis=0)
     return int(np.argmax(mean_q)), mean_q.tolist()
 
 
+# 在一个固定 episode 上运行等权 ensemble。
 def evaluate_ensemble_episode(episode: EvalEpisode, members: list[EnsembleMember]) -> tuple[dict[str, Any], pd.DataFrame]:
     env = make_env("validation", episode.scenario_id, BOOTSTRAP_SEED)
     obs, _ = reset_env(env, episode.episode_index)
@@ -330,6 +346,7 @@ def evaluate_ensemble_episode(episode: EvalEpisode, members: list[EnsembleMember
     return row, pd.DataFrame(state_rows)
 
 
+# 解析动作序列并计算各 action 的使用占比。
 def action_distribution(sequences: pd.Series) -> dict[str, float]:
     actions: list[int] = []
     for seq in sequences.dropna():
@@ -341,6 +358,7 @@ def action_distribution(sequences: pd.Series) -> dict[str, float]:
     return {f"action_{i}_share": float(counts.get(i, 0.0)) for i in range(6)}
 
 
+# 按 episode 对齐 ensemble 与 always-zero 并计算差值。
 def compare_to_baseline(policy: pd.DataFrame, baseline: pd.DataFrame) -> dict[str, Any]:
     merged = policy.merge(baseline, on="episode_id", suffixes=("_policy", "_baseline"))
     diff = merged["normalized_profit_policy"].astype(float) - merged["normalized_profit_baseline"].astype(float)
@@ -361,7 +379,11 @@ def compare_to_baseline(policy: pd.DataFrame, baseline: pd.DataFrame) -> dict[st
     }
 
 
+# 运行全部验证 episodes 并汇总 ensemble 指标。
 def evaluate_ensemble() -> tuple[pd.DataFrame, pd.DataFrame]:
+    # ensemble 与 locked baselines 使用完全相同的 validation manifest；
+    # 这里只决定 ensemble 是否值得锁定，不能据此声称 held-out test 成功。
+    # test split 由 final_dqn_ensemble_test_evaluation.py 在锁定后单独访问。
     episodes = load_manifest()
     members = load_members(episodes[0].scenario_id)
     rows = []
@@ -408,6 +430,7 @@ def evaluate_ensemble() -> tuple[pd.DataFrame, pd.DataFrame]:
     return out, ensemble
 
 
+# 根据配对表现、数值和核算检查返回状态。
 def decide_status(clustered: pd.DataFrame, ensemble_summary: pd.DataFrame) -> str:
     episode_mean = clustered.loc[clustered["analysis"].eq("EPISODE_MEAN_ACROSS_SEEDS")].iloc[0]
     ens = ensemble_summary.iloc[0]
@@ -429,6 +452,7 @@ def decide_status(clustered: pd.DataFrame, ensemble_summary: pd.DataFrame) -> st
     return "DQN_FAMILY_POSITIVE_BUT_NOT_ROBUST"
 
 
+# 根据 ensemble 汇总表生成比较图。
 def make_figures(episode_means: pd.DataFrame, clustered: pd.DataFrame, ensemble_summary: pd.DataFrame, ensemble_episodes: pd.DataFrame) -> None:
     FIGURES_DIR.mkdir(parents=True, exist_ok=True)
     fig, ax = plt.subplots(figsize=(9, 4.5))
@@ -500,6 +524,7 @@ def make_figures(episode_means: pd.DataFrame, clustered: pd.DataFrame, ensemble_
     plt.close(fig)
 
 
+# 将 ensemble 配置和验证结果写入说明文档。
 def write_decision_doc(status: str, audit: pd.DataFrame, clustered: pd.DataFrame, ensemble: pd.DataFrame) -> None:
     text = f"""# DQN Final Statistical Decision
 

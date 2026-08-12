@@ -1,11 +1,8 @@
-"""Gymnasium-compatible operational dynamic-markdown environment.
-
-The environment combines FreshRetailNet operational states, saved
-discount-response models, explicit perishability scenarios, FEFO transitions,
-and normalized accounting. It is a controlled semi-synthetic decision
-environment; it is not an estimate of direct retailer profit or deployment
-performance.
-"""
+"""文件作用：实验顺序 05，构建易腐品动态 markdown 的 Gymnasium 环境。
+研究目的：把需求恢复、折扣响应和半合成保质期连接为可重复的序贯决策问题。
+主要输入：恢复需求数据、perishability 情景配置、observed/recovered 响应模型。
+主要输出：41 维 state、6 个 action、financial reward、库存与浪费统计。
+该环境用于受控实验，不代表零售商真实利润或可直接部署的经营系统。"""
 
 from __future__ import annotations
 
@@ -27,7 +24,7 @@ from gymnasium import spaces
 # Paths and fixed experiment settings
 # ---------------------------------------------------------------------------
 
-RANDOM_SEED = 42
+RANDOM_SEED = 42 #随机种子可复现
 EPSILON = 1e-9
 MAX_SHELF_LIFE = 21
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
@@ -46,6 +43,8 @@ ARTIFACT_AUDIT_PATH = TABLES_DIR / "pricing_env_artifact_compatibility_audit.csv
 FEATURE_SOURCE_AUDIT_PATH = TABLES_DIR / "pricing_env_feature_source_audit.csv"
 ENV_CONFIG_PATH = CONFIGS_DIR / "pricing_env_operational_config.json"
 
+
+# 离散动作对应 0%、5%、10%、20%、30%、40% markdown。
 ACTION_MARKDOWNS = {
     0: 0.00,
     1: 0.05,
@@ -55,6 +54,10 @@ ACTION_MARKDOWNS = {
     5: 0.40,
 }
 
+# state 同时描述库存年龄结构、需求历史、时间与商品背景。
+# 其中 21 个 remaining-life bucket 让策略能区分“库存很多”和“临期库存很多”；
+# predicted demand 与历史销量特征提供销售机会信息，其余特征控制时间和商品差异。
+# 名称顺序必须与 _get_obs() 生成数组的顺序一致。
 _OBSERVATION_NAMES = (
     "normalized_total_inventory",
     "inventory_coverage",
@@ -86,6 +89,7 @@ _LEGACY_OBSERVATION_DIM = 41
 # ---------------------------------------------------------------------------
 
 
+#封装折扣响应模型、特征顺序和元数据；环境通过同一 bundle 读取模型，避免训练与评估使用不同特征定义。
 @dataclass
 class FittedResponseModel:
     """Compatibility shim for joblib artifacts saved by discount_response.py."""
@@ -103,11 +107,18 @@ class FittedResponseModel:
 # ---------------------------------------------------------------------------
 
 
+# 实现 Gymnasium 易腐品定价环境；它把 state、markdown action、库存流转和 financial reward 连接成 agent
+# 可交互的序贯决策问题。
 class OperationalPerishablePricingEnv(gym.Env):
-    """Operational dynamic markdown environment with FEFO inventory dynamics."""
+    """带 FEFO 库存流转的动态定价环境。
+
+    每次 ``step`` 接收一个折扣 action，返回下一 state、reward、终止标记和
+    accounting 信息；训练算法只通过这一标准 Gymnasium 接口与业务模拟交互。
+    """
 
     metadata = {"render_modes": ["ansi"], "render_fps": 1}
 
+    # 保存环境配置，加载数据和模型，并初始化状态与动作空间。
     def __init__(
         self,
         data_path: str | Path = DEFAULT_DATA_PATH,
@@ -155,6 +166,7 @@ class OperationalPerishablePricingEnv(gym.Env):
         self.episode_counter = 0
         self._reset_state()
 
+    # 检查 split、calibration 和 reward mode 是否属于预先允许的组合。提前拒绝未知模式，避免悄悄改变实验定义。
     def _validate_modes(self) -> None:
         if self.split not in {"train", "validation", "test"}:
             raise ValueError(f"Unsupported split: {self.split}")
@@ -173,6 +185,7 @@ class OperationalPerishablePricingEnv(gym.Env):
         if self.residual_noise_mode not in {"none", "bootstrap"}:
             raise ValueError(f"Unsupported residual_noise_mode: {self.residual_noise_mode}")
 
+    # 加载场景表、折扣响应模型和模型配置。
     def _load_artifacts(self) -> None:
         for path in [
             self.data_path,
@@ -203,6 +216,7 @@ class OperationalPerishablePricingEnv(gym.Env):
         self._write_feature_source_audit()
         self._write_env_config()
 
+    # 训练前提前核对模型特征、数据列和配置是否兼容；
     def _audit_artifacts(self) -> None:
         rows = []
         for name, bundle, path in [
@@ -238,6 +252,7 @@ class OperationalPerishablePricingEnv(gym.Env):
         TABLES_DIR.mkdir(parents=True, exist_ok=True)
         pd.DataFrame(rows).to_csv(ARTIFACT_AUDIT_PATH, index=False)
 
+    # 记录每个 state 特征来自原始数据、恢复模型还是场景参数。
     def _write_feature_source_audit(self) -> None:
         rows = []
         sources = {
@@ -272,6 +287,7 @@ class OperationalPerishablePricingEnv(gym.Env):
             )
         pd.DataFrame(rows).to_csv(FEATURE_SOURCE_AUDIT_PATH, index=False)
 
+    # 将环境、action 和 reward 配置写入元数据文件。
     def _write_env_config(self) -> None:
         CONFIGS_DIR.mkdir(parents=True, exist_ok=True)
         payload = {
@@ -312,6 +328,7 @@ class OperationalPerishablePricingEnv(gym.Env):
         }
         ENV_CONFIG_PATH.write_text(json.dumps(payload, indent=2, default=str), encoding="utf-8")
 
+    # 清空 episode 内部库存、历史需求和累计核算量；防止上一个 episode 的状态泄漏到下一个 episode。
     def _reset_state(self) -> None:
         self.current_series = pd.DataFrame()
         self.current_step = 0
@@ -339,6 +356,7 @@ class OperationalPerishablePricingEnv(gym.Env):
         self.store_id = ""
         self.product_id = ""
 
+    # 按固定 scenario 和起点建立新 episode，并返回首个 observation；固定 manifest 评估依赖这里复现完全相同的初始条件。
     def reset(
         self,
         *,
@@ -350,6 +368,9 @@ class OperationalPerishablePricingEnv(gym.Env):
             self.np_random = np.random.default_rng(seed)
         self._reset_state()
         options = options or {}
+        # episode 必须完整落在指定 split 内，避免训练状态跨入 validation/test。
+        # 评估时可通过 options 固定 store-product-date，使所有 policy 面对同一 episode，
+        # 从而形成 paired comparison（配对比较）。
         self.shelf_life = scenario_shelf_life(self.scenario["shelf_life_class"], self.shelf_life_level)
         split_data = self.data.loc[self.data["time_split"].eq(self.split)].copy()
         split_dates = sorted(split_data["timestamp"].dt.floor("D").unique())
@@ -393,9 +414,12 @@ class OperationalPerishablePricingEnv(gym.Env):
         self.last_info = info
         return obs, info
 
+    # 按 shelf-life profile 把初始库存分配到不同年龄层；这是后续 FEFO、临期比例和过期浪费计算的基础。
     def _initialize_inventory(self, split_data: pd.DataFrame) -> None:
         target = self._target_column()
         hist = split_data.loc[split_data["store_id"].eq(self.store_id) & split_data["product_id"].eq(self.product_id), target]
+        # FreshRetailNet 没有逐批次保质期库存，因此初始总库存和年龄结构来自透明的
+        # semi-synthetic scenario。真实数据提供需求尺度，scenario 提供 coverage 和 age profile。
         expected = float(hist.mean()) if not hist.empty else float(split_data[target].mean())
         coverage = coverage_midpoint(self.scenario["inventory_coverage"])
         total = max(expected * coverage, 0.1)
@@ -407,6 +431,7 @@ class OperationalPerishablePricingEnv(gym.Env):
         self.procurement_cost_ratio = margin_ratio(self.scenario["margin_scenario"])
         self.disposal_cost_ratio = disposal_ratio(self.scenario["disposal_scenario"])
 
+    # 从 episode 起点前的数据建立需求历史；agent 因而只看到决策时点之前的信息，避免未来信息泄漏。
     def _initialize_history(self, split_data: pd.DataFrame) -> None:
         target = self._target_column()
         prior = split_data.loc[
@@ -422,19 +447,26 @@ class OperationalPerishablePricingEnv(gym.Env):
         self.sim_history = values[-14:]
         self.stockout_history = prior["possible_stockout_flag"].tail(1).astype(int).tolist() or [0]
 
+    # 根据 observed 或 recovered calibration 选择需求目标；两种 PPO 的核心差异由这里进入环境。
     def _target_column(self) -> str:
         if self.calibration_mode in {"observed_calibration", "observed_demand_recovered_response"}:
             return "observed_sales_demand"
         return "recovered_demand"
 
+    # 选择与 calibration mode 对应的折扣响应模型；避免 observed 和 recovered 模型交叉使用。
     def _response_bundle(self) -> FittedResponseModel:
         if self.calibration_mode in {"observed_calibration", "recovered_demand_observed_response"}:
             return self.observed_model
         return self.recovered_model
 
+    # 执行一次 pricing decision：action 映射折扣、预测需求、限制销量、FEFO 出库、库存老化并计算 reward；返回 next state 供
+    # agent 继续决策。
     def step(self, action: int) -> tuple[np.ndarray, float, bool, bool, dict[str, Any]]:
         if not self.action_space.contains(action):
             raise ValueError(f"Invalid action {action}; expected Discrete(6).")
+        # 一次 pricing decision 的数据流为：action -> markdown -> predicted demand
+        # -> 实际可售数量 -> FEFO 出库 -> 当日过期 -> accounting reward -> next state。
+        # PPO/DQN 不直接读取未来销量或最终利润，只接收当前 observation 和本步 reward。
         if self.current_step >= self.horizon:
             raise RuntimeError("Cannot step terminated episode; call reset().")
         markdown = ACTION_MARKDOWNS[int(action)]
@@ -445,6 +477,8 @@ class OperationalPerishablePricingEnv(gym.Env):
         if not self.deterministic_demand and self.residual_noise_mode == "bootstrap":
             demand = max(0.0, predicted + float(self.np_random.normal(0.0, max(0.01, predicted * 0.05))))
         sales = min(demand, before)
+        # FEFO（First-Expire-First-Out）先销售剩余寿命最短的库存，
+        # 销售后仍留在 bucket 0 的数量在日末记为 physical waste。
         self._issue_fefo(sales)
         expired = float(self.inventory[0])
         aged = np.zeros_like(self.inventory)
@@ -458,6 +492,9 @@ class OperationalPerishablePricingEnv(gym.Env):
         if np.any(self.inventory < -1e-9):
             raise RuntimeError("Negative inventory detected.")
 
+        # financial reward 使用单位初始库存归一化，减少不同 episode 库存规模造成的梯度差异。
+        # procurement cost 只在 episode 首步计入，disposal cost 随当日过期量计入；
+        # accounting_profit 保存未归一化的累计财务结果。
         revenue = selling_price * sales
         disposal_cost = self.disposal_cost_ratio * expired
         procurement = self.procurement_cost_ratio * self.initial_inventory if self.initial_procurement_cost_pending else 0.0
@@ -482,13 +519,19 @@ class OperationalPerishablePricingEnv(gym.Env):
         self.stockout_history = self.stockout_history[-7:]
         self.previous_markdown = markdown
         self.current_step += 1
+        # 库存清空或达到与 shelf life 对齐的 horizon 时自然结束 episode；
+        # 这里没有外部时间限制，因此 truncated 始终为 False。
         terminated = bool(after <= 1e-8 or self.current_step >= self.horizon)
         truncated = False
         info = self._info(markdown, selling_price, predicted, sales, before, after, expired, raw_financial, terminated)
         self.last_info = info
         return self._get_obs(), float(reward), terminated, truncated, info
 
+    # 按 FEFO 从最临期批次开始扣减销量；这样过期风险和浪费来自真实的库存年龄结构，而不是只用总库存近似。
     def _issue_fefo(self, sales: float) -> None:
+        """从最临期 bucket 开始扣减销量，保持库存年龄流转符合 FEFO。"""
+
+        # bucket 索引越小表示越接近过期，因此正向遍历即可实现 FEFO。
         remaining = float(sales)
         for i in range(self.shelf_life):
             issued = min(float(self.inventory[i]), remaining)
@@ -497,6 +540,7 @@ class OperationalPerishablePricingEnv(gym.Env):
             if remaining <= 1e-9:
                 break
 
+    # 把当前状态和 markdown 输入响应模型得到本期需求；结果仍受可售库存约束，区分 demand 与 realized sales。
     def _predict_demand(self, markdown: float) -> float:
         bundle = self._response_bundle()
         row = self.current_series.iloc[min(self.current_step, len(self.current_series) - 1)]
@@ -511,6 +555,7 @@ class OperationalPerishablePricingEnv(gym.Env):
         pred = float(np.expm1(pred_log))
         return float(np.clip(pred, 0.0, max(bundle.prediction_cap * 1.5, bundle.prediction_cap + 1.0)))
 
+    # 按训练时保存的特征定义构造单行模型输入；固定列名和顺序可防止推断阶段特征错位。
     def _feature_row(self, row: pd.Series, markdown: float, bundle: FittedResponseModel) -> dict[str, Any]:
         date = pd.Timestamp(row["timestamp"])
         activity = int(markdown > 0) if self.promotion_context_mode == "derived_from_action" else int(row["activity_flag"])
@@ -540,7 +585,11 @@ class OperationalPerishablePricingEnv(gym.Env):
             "avg_temperature": float(row.get("avg_temperature", row.get("weather", 0.0))),
         }
 
+    # 把库存年龄层、临期比例、需求历史、时间与商品信息压缩为固定 41 维 state；固定边界便于 PPO/DQN 共用同一环境。
     def _get_obs(self) -> np.ndarray:
+        # 将不同量纲的库存、需求和时间信息整理成固定 41 维 state。
+        # 库存 bucket 除以 initial_inventory，便于同一网络跨商品和库存规模学习；
+        # 最后的 shape 检查可防止特征顺序改动后模型静默读取错误位置。
         total = float(self.inventory.sum())
         padded = np.zeros(MAX_SHELF_LIFE, dtype=float)
         padded[: self.shelf_life] = self.inventory[: self.shelf_life] / max(self.initial_inventory, EPSILON)
@@ -582,12 +631,14 @@ class OperationalPerishablePricingEnv(gym.Env):
         obs = np.nan_to_num(obs, nan=0.0, posinf=0.0, neginf=0.0)
         return np.clip(obs, self.observation_space.low, self.observation_space.high).astype(np.float32)
 
+    # 计算 0% markdown 下的参考需求并处理异常值；该参考量用于构造 coverage 等状态特征，而不是作为 oracle action。
     def _predict_zero_safe(self) -> float:
         """Predict zero-markdown demand, using zero only before episode initialization."""
         if self.current_series.empty or self.horizon == 0:
             return 0.0
         return self._predict_demand(0.0)
 
+    # 把 accounting、浪费和动作诊断写入 info；评估脚本使用这些原始量计算利润、sell-through 和 waste 指标。
     def _info(
         self,
         markdown_rate: float,
@@ -653,6 +704,7 @@ class OperationalPerishablePricingEnv(gym.Env):
             )
         return info
 
+    # 实现 Gymnasium 接口所需的辅助方法；保持环境可被标准 RL 工具安全包装和释放。
     def render(self) -> str | None:
         if self.render_mode != "ansi":
             return None
@@ -671,6 +723,7 @@ class OperationalPerishablePricingEnv(gym.Env):
 # ---------------------------------------------------------------------------
 
 
+# 从 joblib artifact 恢复模型并校验所需字段；集中入口避免不同调用方采用不一致的加载方式。
 def load_response_model(path: Path) -> FittedResponseModel:
     """Load a response model artifact using a compatibility shim if needed."""
     import __main__
@@ -684,6 +737,7 @@ def load_response_model(path: Path) -> FittedResponseModel:
     return obj
 
 
+# 筛选具有完整 horizon 的 episode 起点；避免训练或评估在数据末尾提前截断。
 def eligible_episode_starts(data: pd.DataFrame, horizon: int) -> pd.DataFrame:
     """Return eligible split-contained starts by store-product series."""
     rows = []
@@ -697,6 +751,7 @@ def eligible_episode_starts(data: pd.DataFrame, horizon: int) -> pd.DataFrame:
     return pd.DataFrame(rows)
 
 
+# 根据场景表读取保质期、库存覆盖和成本参数。
 def scenario_shelf_life(shelf_class: str, level: str = "base") -> int:
     values = {
         "short_shelf_life": {"low": 2, "base": 3, "high": 5},
@@ -718,6 +773,7 @@ def disposal_ratio(name: str) -> float:
     return {"zero_disposal_cost": 0.00, "moderate_disposal_cost": 0.05, "high_disposal_cost": 0.10}[str(name)]
 
 
+#把库存年龄 profile 转为各年龄层权重；显式规则使 semi-synthetic 库存假设可检查。
 def age_weights(profile: str, shelf_life: int) -> np.ndarray:
     if profile == "fresh_heavy":
         weights = np.arange(1, shelf_life + 1, dtype=float)
@@ -737,11 +793,13 @@ def stable_norm(value: str) -> float:
 # ---------------------------------------------------------------------------
 
 
+# 固定 41 维 observation 的语义顺序；训练、checkpoint 和评估必须共享这一顺序。
 def observation_names() -> list[str]:
     """Return the locked observation order used by saved normalization and model artifacts."""
     return list(_OBSERVATION_NAMES)
 
 
+# 定义每个 state 维度的合法范围；Gymnasium 用它检查 observation，并帮助发现异常状态。
 def observation_bounds() -> tuple[np.ndarray, np.ndarray]:
     """Build the legacy bounds by feature name without changing their values."""
     names = observation_names()
@@ -779,6 +837,7 @@ def observation_bounds() -> tuple[np.ndarray, np.ndarray]:
     return low, high
 
 
+# 返回研究设计和数据的已知限制；报告负结果时同时说明外推边界。
 def required_limitations() -> list[str]:
     return [
         "Shelf life and inventory age are simulated.",

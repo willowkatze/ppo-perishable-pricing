@@ -1,9 +1,8 @@
-"""FreshRetailNet-50K inspection and subset preparation.
-
-This module discovers locally downloaded FreshRetailNet files, inspects schema
-without assuming exact file or column names, validates time-series suitability,
-and creates a reproducible student-laptop subset for later RL work.
-"""
+"""文件作用：实验顺序 01，检查 FreshRetailNet 原始文件并生成 modeling subset。
+研究目的：在保留 store-product 时间序列和缺货特征的前提下降低本地计算规模。
+主要输入：本地 FreshRetailNet train/eval parquet 或其他受支持的表格文件。
+主要输出：标准化 modeling subset、时间 split、schema 和代表性审计表。
+该模块只准备数据，不训练 demand model 或 RL agent。"""
 
 from __future__ import annotations
 
@@ -68,6 +67,7 @@ DISCOUNT_SEMANTICS_AUDIT_PATH = TABLES_DIR / "freshretail_discount_semantics_aud
 CRITICAL_CONCEPTS = ["timestamp", "store_id", "sku_id", "sales_qty", "inventory"]
 
 
+# 记录每个原始文件的路径、格式和大小，供后续筛选输入文件。
 @dataclass(frozen=True)
 class FileInfo:
     """Inventory record for one input file."""
@@ -78,6 +78,7 @@ class FileInfo:
     size_bytes: int
 
 
+# 保存标准字段与原始列名的候选映射和匹配依据。
 @dataclass(frozen=True)
 class ColumnCandidate:
     """Detected candidate mapping for one semantic concept."""
@@ -130,6 +131,7 @@ CONCEPT_KEYWORDS: dict[str, list[str]] = {
 }
 
 
+# 创建数据、表格和图片的输出目录。
 def ensure_dirs() -> None:
     """Create required output directories."""
     PROCESSED_DIR.mkdir(parents=True, exist_ok=True)
@@ -138,7 +140,10 @@ def ensure_dirs() -> None:
     MODELING_FIGURES_DIR.mkdir(parents=True, exist_ok=True)
 
 
+# 递归查找支持的数据文件，并保存文件清单。
 def discover_files(raw_dir: Path = RAW_DIR) -> list[FileInfo]:
+    # 不假定下载文件的具体名称，先递归建立文件清单；随后 schema inspection
+    # 决定哪些列可映射为销量、库存、商品、门店和时间，避免凭文件名硬编码数据含义。
     """Recursively discover supported local data files."""
     if not raw_dir.exists():
         raise FileNotFoundError(
@@ -184,6 +189,7 @@ def discover_files(raw_dir: Path = RAW_DIR) -> list[FileInfo]:
     return files
 
 
+# 将压缩文件名转换为对应的逻辑扩展名。
 def normalized_suffix(path: Path) -> str:
     """Return supported logical suffix, handling csv.gz files."""
     lower = path.name.lower()
@@ -196,7 +202,11 @@ def normalized_suffix(path: Path) -> str:
     return path.suffix.lower()
 
 
+#  抽样比较每个文件的列、类型和候选语义；在加载数百万行前先确认 train/eval schema 是否兼容。
 def inspect_schemas(files: list[FileInfo]) -> tuple[pd.DataFrame, pd.DataFrame, dict[str, str]]:
+    # 只读取小样本完成候选列映射，降低对约 485 万行数据的内存压力。
+    # mapping 表保留匹配分数和歧义状态，区分原始字段与标准字段。
+
     """Inspect small samples and infer transparent candidate mappings."""
     schema_rows: list[dict[str, Any]] = []
     mapping_rows: list[dict[str, Any]] = []
@@ -299,6 +309,7 @@ def compact_sample_values(series: pd.Series, limit: int = 5) -> str:
     return json.dumps(values, ensure_ascii=False)
 
 
+# 根据名称和样本值识别销量、库存、价格等业务列；把自动候选保留下来供人工核对。
 def detect_column_candidates(sample: pd.DataFrame) -> dict[str, list[ColumnCandidate]]:
     """Detect possible concept-column mappings using transparent matching."""
     candidates: dict[str, list[ColumnCandidate]] = {}
@@ -326,6 +337,7 @@ def detect_column_candidates(sample: pd.DataFrame) -> dict[str, list[ColumnCandi
     return candidates
 
 
+# 为列名关键词和数值特征打分；统一评分规则可减少手工映射的主观性。
 def score_column(column: str, series: pd.Series, concept: str, keywords: list[str]) -> tuple[int, str]:
     """Score a column as a possible semantic concept."""
     lower = normalize_name(column)
@@ -358,6 +370,7 @@ def score_column(column: str, series: pd.Series, concept: str, keywords: list[st
     return score, ";".join(reasons) if reasons else "no_match"
 
 
+# 只对具有日期证据的列尝试 datetime；避免把 day-of-week 或 duration 错转成 1970 时间戳。
 def should_try_datetime_parse(series: pd.Series, normalized_column: str) -> bool:
     """Avoid treating numeric IDs, flags, prices, and discounts as dates."""
     if pd.api.types.is_datetime64_any_dtype(series):
@@ -373,11 +386,13 @@ def normalize_name(name: str) -> str:
     return "".join(ch.lower() if ch.isalnum() else "_" for ch in str(name)).strip("_")
 
 
+# 检查时间、销量、库存和标识列是否已映射；关键语义不明确时停止，而不是生成不可解释的数据集。
 def require_critical_mappings(mapping: dict[str, str]) -> list[str]:
     """Return missing critical semantic mappings."""
     return [concept for concept in CRITICAL_CONCEPTS if concept not in mapping or not mapping[concept]]
 
 
+#只加载后续分析需要的列；减少大规模 parquet/CSV 的内存占用。
 def load_selected_columns(files: list[FileInfo], mapping: dict[str, str]) -> pd.DataFrame:
     """Load only mapped columns needed for diagnostics and subsetting."""
     selected_columns = sorted(set(mapping.values()))
@@ -441,6 +456,7 @@ def read_parquet_selected(path: Path, columns: list[str]) -> pd.DataFrame:
         return pd.read_parquet(path, columns=[column for column in columns if column])
 
 
+# 把真实列统一为项目内部 schema 并转换明确的数据类型；所有下游模块因此共享相同字段语义。
 def standardize_columns(data: pd.DataFrame, mapping: dict[str, str]) -> pd.DataFrame:
     """Create standardized analysis columns from confirmed mappings."""
     output = pd.DataFrame(index=data.index)
@@ -488,6 +504,7 @@ def standardize_columns(data: pd.DataFrame, mapping: dict[str, str]) -> pd.DataF
     return output
 
 
+# 从已确认的时间字段生成统一 timestamp；时间切分和序列连续性检查依赖这一列。
 def infer_timestamp(output: pd.DataFrame) -> pd.Series:
     """Infer timestamp from timestamp/date/hour columns."""
     if "timestamp" in output:
@@ -514,6 +531,7 @@ def parse_bool_like(series: pd.Series) -> pd.Series:
     return result.astype(bool)
 
 
+# 检查每条 store-product 序列的长度、频率和间隔；RL episode 需要连续且顺序正确的时间数据。
 def analyze_timeseries(data: pd.DataFrame) -> pd.DataFrame:
     """Analyze time-series structure and quality."""
     duplicate_count = int(data.duplicated(["store_id", "sku_id", "timestamp"]).sum())
@@ -543,6 +561,7 @@ def analyze_timeseries(data: pd.DataFrame) -> pd.DataFrame:
     return output
 
 
+# 计算相邻记录不符合预期时间间隔的比例。
 def irregular_interval_rate(interval_hours: pd.Series) -> float:
     """Estimate irregular interval share."""
     clean = interval_hours.dropna()
@@ -554,6 +573,7 @@ def irregular_interval_rate(interval_hours: pd.Series) -> float:
     return float((clean.round(4) != mode.iloc[0]).mean())
 
 
+# 比较库存与当期销量的关系，推断库存字段的记录时点。
 def infer_inventory_timing(data: pd.DataFrame) -> str:
     """Try to infer inventory timing without fabricating certainty."""
     grouped = data.groupby(["store_id", "sku_id"], dropna=False)
@@ -567,6 +587,7 @@ def infer_inventory_timing(data: pd.DataFrame) -> str:
     return "insufficient_metadata_to_determine_inventory_timing"
 
 
+# 量化缺货频率、持续时间和销量截断证据；为后续 latent demand recovery 定义问题规模。
 def analyze_stockouts(data: pd.DataFrame) -> pd.DataFrame:
     """Create stockout diagnosis summary."""
     ordered = data.sort_values(["store_id", "sku_id", "timestamp"]).copy()
@@ -609,6 +630,7 @@ def stockout_durations(data: pd.DataFrame) -> list[int]:
     return durations
 
 
+# 根据库存与销量关系判断 stockout censoring 是否存在；仅在有证据时启动需求恢复。
 def infer_censoring(data: pd.DataFrame) -> str:
     """Infer whether observed sales appear censored during stockouts."""
     if data["stockout"].sum() == 0:
@@ -619,6 +641,7 @@ def infer_censoring(data: pd.DataFrame) -> str:
     return "not_clear_from_available_fields"
 
 
+# 审计 markdown 和 promotion 的取值及覆盖；判断数据能否支持多档价格动作。
 def analyze_promotions(data: pd.DataFrame) -> pd.DataFrame:
     """Analyze promotion and discount support."""
     discount = data["discount"]
@@ -675,7 +698,11 @@ def practical_markdown_bins(markdown: pd.Series) -> list[float]:
     return sorted(set(base))
 
 
+# 在保持商品、门店、缺货和促销结构的前提下选择可本地计算的序列；减少规模但不随机打散时间结构。
 def select_modeling_subset(data: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame]:
+    # 抽样单位是完整 store-SKU series，而不是随机抽单行；这保留 lag、stockout duration
+    # 和时间顺序。分层变量覆盖 stockout、promotion、sales 与 markdown，减少只选到
+    # 高销量或无缺货商品造成的 subset bias。
     """Select complete store-SKU sequences for modeling-oriented analysis."""
     data = data.sort_values(["store_id", "sku_id", "timestamp"]).copy()
     expected_length = int(data.groupby(["store_id", "sku_id"], dropna=False).size().mode().iloc[0])
@@ -704,6 +731,7 @@ def select_modeling_subset(data: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFra
     return subset, selected_series
 
 
+# 将逐小时记录汇总为 store-product 序列特征；stratified sampling 以序列而不是单行作为选择单位。
 def build_series_summary(data: pd.DataFrame, expected_length: int) -> pd.DataFrame:
     """Build store-SKU level diagnostics used for stratified sampling."""
     summary = (
@@ -763,6 +791,7 @@ def quantile_group(values: pd.Series, low: str, medium: str, high: str) -> pd.Se
         return pd.cut(clean, bins=3, labels=[low, medium, high], include_lowest=True).astype(str)
 
 
+# 按缺货率、促销率和销量层级分层抽取序列；避免子集只保留最常见的低风险商品。
 def stratified_series_sample(series_summary: pd.DataFrame, target: int) -> pd.DataFrame:
     """Sample series across stockout, promotion, sales, and markdown strata."""
     strata_cols = ["stockout_group", "promotion_group", "sales_group", "markdown_group"]
@@ -793,6 +822,7 @@ def first_mode(series: pd.Series) -> Any:
     return mode.iloc[0]
 
 
+# 为每条序列保留满足长度要求的连续窗口；防止 episode 中出现不可解释的时间跳跃。
 def trim_to_continuous_window(data: pd.DataFrame, min_days: int) -> pd.DataFrame:
     """Trim to a continuous time window if possible."""
     if data.empty:
@@ -819,7 +849,11 @@ def preserve_pilot_subset() -> None:
         print(f"Preserved inspection-only pilot subset: {PILOT_SUBSET_PATH}")
 
 
+# 按时间先后分配 train/validation/test；未来记录不会进入需求恢复或 policy 训练。
 def add_time_split(subset: pd.DataFrame) -> pd.DataFrame:
+    # 按全局日期顺序切分 60%/20%/20%，而不是随机拆行。
+    # demand recovery、RL training 和最终 test 因此使用不同时间段，
+    # 防止同一商品的未来记录泄漏到过去的训练特征中。
     """Add global chronological train/validation/test split labels."""
     output = subset.copy()
     dates = pd.Series(sorted(output["timestamp"].dt.floor("D").dropna().unique()))
@@ -839,6 +873,7 @@ def add_time_split(subset: pd.DataFrame) -> pd.DataFrame:
     return output
 
 
+#保存或列出FreshRetailNet 数据准备产物及其路径；后续阶段可以追溯准确输入版本。
 def save_modeling_subset(subset: pd.DataFrame) -> Path:
     """Save modeling subset as Parquet."""
     subset.to_parquet(MODELING_SUBSET_PATH, index=False)
@@ -886,6 +921,7 @@ def summary_rows(data: pd.DataFrame, scope: str) -> list[dict[str, Any]]:
     ]
 
 
+# 检查折扣是比例、百分数还是价格差；动作含义错误会同时污染 response model 和环境。
 def audit_discount_semantics(data: pd.DataFrame) -> pd.DataFrame:
     """Audit whether discount behaves like a price multiplier."""
     discount = pd.to_numeric(data["discount"], errors="coerce")
@@ -926,6 +962,7 @@ def audit_discount_semantics(data: pd.DataFrame) -> pd.DataFrame:
     return audit
 
 
+# 比较 full data 与 modeling subset 的关键分布；明确本地子集在哪些维度接近或偏离原数据。
 def compare_representativeness(full: pd.DataFrame, subset: pd.DataFrame) -> pd.DataFrame:
     """Compare full-data and modeling-subset distributions."""
     metrics = [
@@ -1191,6 +1228,7 @@ def plot_example_series(
     plt.close()
 
 
+# 根据 schema、连续性和代表性检查生成 readiness 状态；未通过的数据不应进入后续模型。
 def final_status(mapping: dict[str, str], subset: pd.DataFrame, representativeness: pd.DataFrame) -> str:
     """Determine final FreshRetailNet modeling-subset status."""
     missing = require_critical_mappings(mapping)
@@ -1267,7 +1305,11 @@ def print_final_report(
     print(status)
 
 
+# 按固定顺序串联FreshRetailNet 数据准备流程并输出状态；单一入口便于复现和定位失败步骤。
 def main() -> None:
+    # pipeline：发现文件 -> schema/mapping -> 读取标准列 -> 时序与缺货审计
+    # -> series-level 分层抽样 -> chronological split -> 代表性检查。
+    # 输出 parquet 是后续 latent_demand_recovery 的直接输入。
     """Run FreshRetailNet processing workflow."""
     ensure_dirs()
     files = discover_files()

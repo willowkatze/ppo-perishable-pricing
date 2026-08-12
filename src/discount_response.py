@@ -1,10 +1,8 @@
-"""Markdown-response calibration using observed and recovered demand targets.
-
-This module estimates observational, model-implied markdown-demand response
-relationships for the FreshRetailNet modeling subset. It does not make causal
-claims and does not implement Gymnasium, PPO, perishability, or sustainability
-metrics.
-"""
+"""文件作用：实验顺序 03，校准 markdown 与 observed/recovered demand 的响应关系。
+研究目的：让 pricing environment 能根据 action 估计不同折扣下的需求变化。
+主要输入：带 observed sales 和 recovered demand 的 modeling subset。
+主要输出：两套 response model、markdown support、混杂审计和响应曲线。
+该关系是 observational/model-implied，不应解释为因果价格弹性。"""
 
 from __future__ import annotations
 
@@ -65,6 +63,7 @@ TARGETS = {
 }
 
 
+# 把响应模型、encoder、特征顺序和预测范围保存在同一结构中。
 @dataclass
 class FittedResponseModel:
     """Fitted response model bundle."""
@@ -77,6 +76,7 @@ class FittedResponseModel:
     prediction_cap: float
 
 
+# 创建本模块需要的输出目录。
 def ensure_dirs() -> None:
     """Create output directories."""
     TABLES_DIR.mkdir(parents=True, exist_ok=True)
@@ -84,6 +84,7 @@ def ensure_dirs() -> None:
     FIGURES_DIR.mkdir(parents=True, exist_ok=True)
 
 
+# 读取恢复后的需求数据，并检查响应模型需要的字段和 split。
 def load_and_validate() -> pd.DataFrame:
     """Load recovered-demand data and validate required integrity."""
     if not INPUT_PATH.exists():
@@ -161,6 +162,7 @@ def load_and_validate() -> pd.DataFrame:
     return data.sort_values(["store_id", "sku_id", "timestamp"]).reset_index(drop=True)
 
 
+# 把常见布尔值写法统一转换为布尔序列。
 def as_bool(series: pd.Series) -> pd.Series:
     """Convert mixed bool-like values to bool."""
     if pd.api.types.is_bool_dtype(series):
@@ -175,6 +177,7 @@ def as_bool(series: pd.Series) -> pd.Series:
     return parsed.astype(bool)
 
 
+# 根据数据中的折扣分布生成分箱边界。
 def markdown_bins(data: pd.DataFrame) -> list[float]:
     """Create practical markdown bins while avoiding unsupported upper bins."""
     clean = data["markdown_rate"].dropna().clip(0, 1)
@@ -191,6 +194,7 @@ def markdown_bins(data: pd.DataFrame) -> list[float]:
     return sorted(set(bins))
 
 
+# 按既定边界为每条记录添加折扣分组。
 def add_markdown_bin(data: pd.DataFrame, bins: list[float]) -> pd.DataFrame:
     """Attach markdown support bin labels."""
     output = data.copy()
@@ -204,7 +208,11 @@ def add_markdown_bin(data: pd.DataFrame, bins: list[float]) -> pd.DataFrame:
     return output
 
 
+# 统计每个折扣档位及业务分组中的样本量。
 def audit_markdown_support(data: pd.DataFrame) -> pd.DataFrame:
+    # 先确认历史数据在哪些 markdown 区间有足够样本。
+    # 环境虽然提供固定 action grid，但弱支持区间的预测属于更强外推，
+    # 因此 support flag 必须随模型保存并进入后续 policy 诊断。
     """Save markdown support summary by bin and split."""
     bins = markdown_bins(data)
     data = add_markdown_bin(data, bins)
@@ -233,6 +241,7 @@ def audit_markdown_support(data: pd.DataFrame) -> pd.DataFrame:
     return output
 
 
+# 按折扣、促销和缺货状态汇总 observed/recovered demand。
 def descriptive_analysis(data: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame]:
     """Save descriptive demand-vs-markdown summaries and correlations."""
     rows = []
@@ -273,6 +282,7 @@ def descriptive_analysis(data: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame
     return summary, correlations, by_product, by_store
 
 
+# 计算一个分组内折扣与目标需求的相关系数。
 def correlation_rows(data: pd.DataFrame, target_name: str, target_col: str, scope: str, value: str) -> list[dict[str, Any]]:
     """Calculate Pearson and Spearman correlations for one scope."""
     if len(data) < 20 or data["markdown_rate"].nunique() < 2:
@@ -294,6 +304,7 @@ def correlation_rows(data: pd.DataFrame, target_name: str, target_col: str, scop
     ]
 
 
+# 只对样本量足够的分组计算相关系数。
 def sufficient_group_correlations(data: pd.DataFrame, group_col: str) -> pd.DataFrame:
     """Calculate correlations for products/stores with sufficient support."""
     rows = []
@@ -305,8 +316,12 @@ def sufficient_group_correlations(data: pd.DataFrame, group_col: str) -> pd.Data
     return pd.DataFrame(rows)
 
 
+# 比较折扣与商品、门店、时间和库存风险的共同变化。
 def confounding_audit(data: pd.DataFrame) -> pd.DataFrame:
     """Audit associations between markdown and potential confounders."""
+    # 历史折扣可能与库存、促销、星期和商品类别同时变化。
+    # 将这些共同变化写入诊断表，避免把模型响应直接当作因果效应。
+
     rows = []
     numeric_cols = {
         "activity_flag": data["activity_flag"].astype(int),
@@ -348,6 +363,7 @@ def confounding_audit(data: pd.DataFrame) -> pd.DataFrame:
     return output
 
 
+# 生成时间、商品、库存、历史需求和折扣交互特征。
 def engineer_features(data: pd.DataFrame) -> pd.DataFrame:
     """Create leakage-safe features using current and prior information only."""
     output = data.sort_values(["store_id", "sku_id", "timestamp"]).copy()
@@ -410,6 +426,7 @@ def feature_columns() -> list[str]:
     ]
 
 
+# 用训练集建立 store 和 product 编码。
 def fit_encoders(train: pd.DataFrame) -> dict[str, dict[str, int]]:
     """Fit stable ordinal encoders on training data only."""
     encoders = {}
@@ -419,6 +436,7 @@ def fit_encoders(train: pd.DataFrame) -> dict[str, dict[str, int]]:
     return encoders
 
 
+# 把训练集编码应用到其他 split。
 def apply_encoders(data: pd.DataFrame, encoders: dict[str, dict[str, int]]) -> pd.DataFrame:
     """Apply train-fitted encoders."""
     output = data.copy()
@@ -427,6 +445,7 @@ def apply_encoders(data: pd.DataFrame, encoders: dict[str, dict[str, int]]) -> p
     return output
 
 
+# 按模型特征顺序生成数值输入矩阵。
 def prepare_x(data: pd.DataFrame, columns: list[str]) -> pd.DataFrame:
     """Prepare numeric model matrix."""
     x = data.reindex(columns=columns).copy()
@@ -435,8 +454,12 @@ def prepare_x(data: pd.DataFrame, columns: list[str]) -> pd.DataFrame:
     return x
 
 
+# 分别拟合 observed demand 和 recovered demand 的响应模型。
 def fit_response_models(data: pd.DataFrame) -> tuple[dict[str, FittedResponseModel], pd.DataFrame, pd.DataFrame]:
     """Fit parallel response models and save metrics."""
+    # observed 与 recovered target 分别拟合，其他 feature engineering 和 split 保持一致。
+    # 训练只用 train，模型类型依据 validation error 选择；最终保存的 bundle 包含
+    # feature 顺序、encoder 和预测上限，确保环境推理与训练预处理一致。
     train = data.loc[data["time_split"].eq("train")].copy()
     encoders = fit_encoders(train)
     data = apply_encoders(data, encoders)
@@ -492,6 +515,7 @@ def fit_response_models(data: pd.DataFrame) -> tuple[dict[str, FittedResponseMod
     return fitted, metrics, segment_metrics
 
 
+# 根据验证误差选择响应模型类型。
 def select_model_type(metric_rows: list[dict[str, Any]]) -> str:
     """Select response model using validation performance only."""
     metrics = pd.DataFrame(metric_rows)
@@ -500,6 +524,7 @@ def select_model_type(metric_rows: list[dict[str, Any]]) -> str:
     return str(validation.iloc[0]["model_type"])
 
 
+# 将对数预测转换回需求数量并限制到配置范围。
 def predict_original_scale(model: Any, model_type: str, frame: pd.DataFrame, columns: list[str], cap: float) -> np.ndarray:
     """Predict original-scale demand from log-scale model."""
     x = prepare_x(frame, columns)
@@ -508,6 +533,7 @@ def predict_original_scale(model: Any, model_type: str, frame: pd.DataFrame, col
     return np.clip(pred, 0.0, max(cap * 1.5, cap + 1.0))
 
 
+# 计算一个模型在指定数据上的误差指标。
 def model_metric_row(target: str, model_type: str, split: str, actual: np.ndarray, pred: np.ndarray, log_actual: np.ndarray, log_pred: np.ndarray) -> dict[str, Any]:
     """Create one model metric row."""
     error = pred - actual
@@ -525,6 +551,7 @@ def model_metric_row(target: str, model_type: str, split: str, actual: np.ndarra
     }
 
 
+# 按业务分组生成模型误差记录。
 def segment_metric_rows(target: str, model_type: str, split: str, frame: pd.DataFrame, actual: np.ndarray, pred: np.ndarray, log_actual: np.ndarray, log_pred: np.ndarray) -> list[dict[str, Any]]:
     """Create segment-level metric rows."""
     temp = frame.copy()
@@ -559,6 +586,7 @@ def segment_metric_rows(target: str, model_type: str, split: str, frame: pd.Data
     return rows
 
 
+# 从验证集选择覆盖主要分组的代表状态。
 def representative_states(data: pd.DataFrame, n: int = 120) -> pd.DataFrame:
     """Select representative real test rows for response curves."""
     test = data.loc[data["time_split"].eq("test")].copy()
@@ -579,6 +607,7 @@ def representative_states(data: pd.DataFrame, n: int = 120) -> pd.DataFrame:
     return states.reset_index(drop=True)
 
 
+# 返回响应曲线需要评估的折扣档位。
 def markdown_sweep_levels(data: pd.DataFrame) -> list[float]:
     """Return data-supported markdown sweep levels."""
     max_markdown = float(data["markdown_rate"].max())
@@ -586,8 +615,12 @@ def markdown_sweep_levels(data: pd.DataFrame) -> list[float]:
     return [level for level in candidates if level <= max_markdown + EPSILON]
 
 
+# 固定状态特征，逐档改变折扣并生成需求预测。
 def response_curves(data: pd.DataFrame, fitted: dict[str, FittedResponseModel]) -> tuple[pd.DataFrame, pd.DataFrame]:
     """Generate model-implied markdown response curves."""
+    # 在代表性 state 上只改变 markdown level，其余特征保持不变，得到 model-implied
+    # counterfactual sweep。它用于环境的需求响应和 action ranking，
+    # 不是对真实世界未观察折扣结果的因果识别。
     states = representative_states(data)
     levels = markdown_sweep_levels(data)
     support = support_for_levels(data, levels)
@@ -631,6 +664,7 @@ def response_curves(data: pd.DataFrame, fitted: dict[str, FittedResponseModel]) 
     return curves, support_audit
 
 
+# 为每个状态和折扣组合标记样本支持强度。
 def support_for_levels(data: pd.DataFrame, levels: list[float]) -> dict[float, dict[str, Any]]:
     """Audit observed support around each markdown sweep level."""
     support = {}
@@ -652,6 +686,7 @@ def support_for_levels(data: pd.DataFrame, levels: list[float]) -> dict[float, d
     return support
 
 
+# 对齐 observed 和 recovered 模型在相同状态动作下的预测。
 def compare_targets(curves: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame]:
     """Compare observed-target and recovered-target response curves."""
     wide = curves.pivot_table(
@@ -685,6 +720,7 @@ def compare_targets(curves: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame]:
     return out, by_segment
 
 
+# 计算相邻折扣档位之间的预测需求变化。
 def implied_sensitivity(comparison: pd.DataFrame) -> pd.DataFrame:
     """Calculate finite-difference response per 10 percentage-point markdown."""
     rows = []
@@ -739,6 +775,7 @@ def sensitivity_row(prefix: dict[str, Any], group: pd.DataFrame) -> dict[str, An
     return row
 
 
+# 汇总两套需求目标在响应曲线上的差异。
 def bias_transmission_summary(comparison: pd.DataFrame) -> pd.DataFrame:
     """Classify whether recovery changes markdown response materially."""
     zero = comparison.loc[comparison["markdown_rate"].eq(0)]
@@ -785,6 +822,7 @@ def bias_transmission_summary(comparison: pd.DataFrame) -> pd.DataFrame:
     return output
 
 
+# 按每个状态下的预测需求对折扣动作排序。
 def action_ranking(comparison: pd.DataFrame) -> pd.DataFrame:
     """Compare illustrative revenue rankings under normalized price 1.0."""
     rows = []
@@ -811,6 +849,7 @@ def action_ranking(comparison: pd.DataFrame) -> pd.DataFrame:
     return output
 
 
+# 在不同数据子集上重复拟合并比较响应结果。
 def robustness_checks(data: pd.DataFrame, metrics: pd.DataFrame, comparison: pd.DataFrame) -> pd.DataFrame:
     """Run concise robustness diagnostics."""
     rows = []
@@ -855,6 +894,7 @@ def robustness_checks(data: pd.DataFrame, metrics: pd.DataFrame, comparison: pd.
     return output
 
 
+# 保存两套模型、特征定义、encoder 和预测范围。
 def save_models_and_config(fitted: dict[str, FittedResponseModel], data: pd.DataFrame, support_audit: pd.DataFrame) -> None:
     """Save selected observed/recovered models and metadata config."""
     joblib.dump(fitted["observed"], OBSERVED_MODEL_PATH)
@@ -880,6 +920,7 @@ def save_models_and_config(fitted: dict[str, FittedResponseModel], data: pd.Data
     CONFIG_PATH.write_text(json.dumps(config, indent=2, default=str), encoding="utf-8")
 
 
+# 汇总 train、validation 和 test 的日期边界。
 def split_boundaries(data: pd.DataFrame) -> dict[str, dict[str, str]]:
     """Return chronological split boundaries."""
     return {
@@ -892,6 +933,7 @@ def split_boundaries(data: pd.DataFrame) -> dict[str, dict[str, str]]:
     }
 
 
+# 返回该模块对应的数据和模型限制说明。
 def limitations() -> list[str]:
     """Required limitations."""
     return [
@@ -905,6 +947,7 @@ def limitations() -> list[str]:
     ]
 
 
+# 根据当前参数构建 figures。
 def create_figures(
     data: pd.DataFrame,
     descriptive: pd.DataFrame,
@@ -927,6 +970,7 @@ def create_figures(
     plot_robustness(robustness)
 
 
+# 根据现有表格绘制 demand by markdown 图。
 def plot_demand_by_markdown(descriptive: pd.DataFrame) -> None:
     fig, ax = plt.subplots(figsize=(10, 5))
     for target, group in descriptive.groupby("target"):
@@ -939,6 +983,7 @@ def plot_demand_by_markdown(descriptive: pd.DataFrame) -> None:
     savefig("demand_by_markdown_bin.png")
 
 
+# 根据现有表格绘制 markdown support 图。
 def plot_markdown_support(data: pd.DataFrame) -> None:
     fig, ax = plt.subplots(figsize=(9, 5))
     ax.hist(data["markdown_rate"], bins=40)
@@ -948,6 +993,7 @@ def plot_markdown_support(data: pd.DataFrame) -> None:
     savefig("markdown_distribution_support.png")
 
 
+# 根据现有表格绘制 response curves 图。
 def plot_response_curves(curves: pd.DataFrame) -> None:
     summary = curves.groupby(["target", "markdown_rate"])["predicted_demand"].mean().reset_index()
     fig, ax = plt.subplots(figsize=(9, 5))
@@ -960,6 +1006,7 @@ def plot_response_curves(curves: pd.DataFrame) -> None:
     savefig("model_implied_markdown_response_curves.png")
 
 
+# 根据现有表格绘制 observed vs recovered predictions 图。
 def plot_observed_vs_recovered_predictions(comparison: pd.DataFrame) -> None:
     fig, ax = plt.subplots(figsize=(6, 6))
     ax.scatter(comparison["predicted_demand_observed"], comparison["predicted_demand_recovered"], s=10, alpha=0.35)
@@ -971,6 +1018,7 @@ def plot_observed_vs_recovered_predictions(comparison: pd.DataFrame) -> None:
     savefig("observed_vs_recovered_predicted_demand.png")
 
 
+# 根据现有表格绘制 uplift by markdown 图。
 def plot_uplift_by_markdown(comparison: pd.DataFrame) -> None:
     summary = comparison.groupby("markdown_rate").agg(
         observed_uplift=("absolute_uplift_vs_zero_observed", "mean"),
@@ -986,6 +1034,7 @@ def plot_uplift_by_markdown(comparison: pd.DataFrame) -> None:
     savefig("implied_demand_uplift_by_markdown.png")
 
 
+# 根据现有表格绘制 difference by segment 图。
 def plot_difference_by_segment(comparison: pd.DataFrame, segment: str, filename: str) -> None:
     summary = comparison.groupby(segment)["difference_in_implied_uplift"].mean().sort_index()
     fig, ax = plt.subplots(figsize=(8, 5))
@@ -996,6 +1045,7 @@ def plot_difference_by_segment(comparison: pd.DataFrame, segment: str, filename:
     savefig(filename)
 
 
+# 根据现有表格绘制 action ranking 图。
 def plot_action_ranking(action: pd.DataFrame) -> None:
     counts = action.groupby(["observed_revenue_maximizing_markdown", "recovered_revenue_maximizing_markdown"]).size().reset_index(name="count")
     fig, ax = plt.subplots(figsize=(8, 5))
@@ -1006,6 +1056,7 @@ def plot_action_ranking(action: pd.DataFrame) -> None:
     savefig("action_ranking_comparison.png")
 
 
+# 根据现有表格绘制 model performance 图。
 def plot_model_performance(metrics: pd.DataFrame) -> None:
     validation = metrics.loc[metrics["time_split"].eq("validation")]
     labels = validation["target"] + "_" + validation["model_type"]
@@ -1017,6 +1068,7 @@ def plot_model_performance(metrics: pd.DataFrame) -> None:
     savefig("model_performance_by_target.png")
 
 
+# 根据现有表格绘制 robustness 图。
 def plot_robustness(robustness: pd.DataFrame) -> None:
     fig, ax = plt.subplots(figsize=(10, 5))
     values = robustness["mean_recovered_minus_observed"].fillna(0)
@@ -1027,6 +1079,7 @@ def plot_robustness(robustness: pd.DataFrame) -> None:
     savefig("robustness_comparison.png")
 
 
+# 调整布局并把当前图保存到主图目录。
 def savefig(filename: str) -> None:
     """Save current figure."""
     plt.tight_layout()
@@ -1034,6 +1087,7 @@ def savefig(filename: str) -> None:
     plt.close()
 
 
+# 根据模型误差、支持度和输入检查生成状态。
 def final_status(
     fitted: dict[str, FittedResponseModel],
     metrics: pd.DataFrame,
@@ -1062,6 +1116,7 @@ def final_status(
     return "DISCOUNT_RESPONSE_CALIBRATION_REQUIRES_REVISION"
 
 
+# 打印模型选择、支持范围和输出文件。
 def print_report(
     status: str,
     fitted: dict[str, FittedResponseModel],
@@ -1097,6 +1152,9 @@ def print_report(
 
 def run() -> str:
     """Run full discount-response calibration workflow."""
+    # pipeline：输入验证 -> support/confounding audit -> 两套 target 建模
+    # -> markdown sweep -> observed/recovered 比较 -> 保存模型和配置。
+    # 输出 joblib 随后由 OperationalPerishablePricingEnv 加载。
     ensure_dirs()
     data = load_and_validate()
     data = engineer_features(data)
